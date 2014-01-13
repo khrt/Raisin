@@ -75,15 +75,12 @@ sub find {
     my $cache_key = lc "$method:$path";
     my $routes
         = exists $self->cache->{$cache_key}
-        ? $self->cach->{$cache_key}
+        ? $self->cache->{$cache_key}
         : $self->routes;
 
     my @found
-#        = sort { $b->bridge <=> $a->bridge || $a->pattern cmp $b->pattern }
+    #   = sort { $b->bridge <=> $a->bridge || $a->pattern cmp $b->pattern }
         = grep { $_->match($method, $path) } @$routes;
-#    my @processed =
-#      sort { $b->bridge <=> $a->bridge || $a->pattern cmp $b->pattern }
-#      grep { $_->match( $path, $method ) } @$routes;
 
     $self->cache->{$cache_key} = \@found;
     \@found;

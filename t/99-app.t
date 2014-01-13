@@ -20,9 +20,8 @@ close $fh;
 
 $app = eval $content;
 
-
 my $t = Plack::Test->create($app);
 
-my $res = $t->request(GET "/user/2");
-diag $res->content;
+my $res = $t->request(GET "/user");
+diag explain $res;
 

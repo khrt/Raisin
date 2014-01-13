@@ -13,7 +13,7 @@ sub new {
 }
 
 sub declared_params {
-    my ($self, $declared) = @_;
+    my ($self, $tokens, $route_params) = @_;
     # + route params
 }
 

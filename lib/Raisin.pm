@@ -55,47 +55,44 @@ use Data::Dumper;
     ###
 
     # Find route
-    my $route = $self->routes->find($req->method, $req->path);
-my $code = $route->[0]->code;
-warn Dumper $code->();
-die 123;
+    my $routes = $self->routes->find($req->method, $req->path);
 
-    if (!@$route) {
+    if (!@$routes) {
         $res->render_404;
         return $res->finalize;
     }
 
     eval {
+        foreach my $route (@$routes) {
+            my $code = $route->code; # endpoint
 
-        my $code = $route->code; # endpoint
+            if (!$code || (ref($code) && ref($code) ne 'CODE')) {
+                die 'Invalid endpoint for ' . $req->path;
+            }
 
-        if (!$code || (ref($code) && ref($code) ne 'CODE')) {
-            die 'Invalid endpoint for ' . $req->path;
-        }
+            # Log
 
-        # Log
+            # Get declared params
+            my $tokens;# = $route->request_tokens('keys');
+            my $params;# = $req->declared_params($tokens, $route->params);
 
-        # Get declared params
-        my $declared_params = [];
-        my $params = $req->declared_params($declared_params);
+            # Exec `before`
+            #
+            # Exec `before validation`
+            #
 
-        # Exec `before`
-        #
-        # Exec `before validation`
-        #
+            # Validate params
+            # XXX
 
-        # Validate params
-        # XXX
+            # Exec `after validation`
+            #
+            # Exec `after`
+            #
 
-        # Exec `after validation`
-        #
-        # Exec `after`
-        #
+            # Eval code
+            my $data = $code->();#$req->declared_params);
 
-        # Eval code
-        my $data = $code->($req->declared_params);
-
-        # Bridge?
+            # Bridge?
 #        if ($route->bridge) {
 #            if (!$data) {
 #                $res->render_401 if not $res->rendered;
@@ -104,26 +101,25 @@ die 123;
 #            next;
 #        }
 
-        if (defined $data) {
-            # Handle delayed response
-            return $data if ref($data) eq 'CODE';
-
-            $self->render($data) if not $res->rendered;
+            if (defined $data) {
+                # Handle delayed response
+                return $data if ref($data) eq 'CODE';
+                $res->render($data) if not $res->rendered;
+            }
         }
 
-        #if (!$self->res->rendered)
         if (!$res->rendered) {
-            die 'Nothing had rendered!';
+            die 'Nothing rendered!';
         }
 
-        $res->finalize;
     };
 
     if (my $e = $@) {
         #$e = longmess($e);
-        $res->res->render_500($e);
-        $res->finalize;
+        $res->render_500($e);
     }
+
+    $res->finalize;
 }
 
 sub run {

@@ -41,13 +41,8 @@ namespace user => sub {
         optional => ['count', $Raisin::Types::Integer, 0, qr/^\d+$/],
     },
     sub {
-        res->status(200);
-        res->json(0);
-
-        map {
-            my $id = $_;
-            [ map { { $_ => $USERS{$id}{$_} } } keys $USERS{$id} ]
-        } keys %USERS;
+        res->json;
+        [map { $USERS{$_} } keys %USERS]
     };
 
     # create new user
@@ -63,7 +58,6 @@ namespace user => sub {
 
         $USERS{$id} = $params;
 
-        res->status(200);
         res->json;
         { success => 1 }
     };
@@ -73,7 +67,6 @@ namespace user => sub {
     sub {
         # get user
         get sub {
-            res->status(200);
             res->json;
             { data => $USERS{+params('id')} || 'Nothing found!' }
         };
@@ -88,7 +81,6 @@ namespace user => sub {
 
             $USERS{ $params->{id} } = { map { $_ => $params->{$_} } qw(password email) };
 
-            res->status(200);
             res->json;
             { success => 1 }
         };
@@ -99,7 +91,6 @@ namespace user => sub {
             get sub {
                 my $params = shift;
 
-                res->status(200);
                 res->json;
                 { data => $USERS{ $params->{id} }{bumped} }
             };
@@ -110,7 +101,6 @@ namespace user => sub {
 
                 $USERS{ $params->{id} }{bumped}++;
 
-                res->status(200);
                 res->json;
                 { success => 1 }
             };
@@ -120,8 +110,7 @@ namespace user => sub {
 
 namespace failed => sub {
     get sub {
-        res->status(500);
-        res->json;
+        res->status(409);
         { data => 'BROKEN!' }
     };
 };
