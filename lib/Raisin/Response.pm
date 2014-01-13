@@ -8,10 +8,8 @@ use base 'Plack::Response';
 sub new {
     my ($class, $app) = @_;
     my $self = $class->SUPER::new();
-
     $self->{app} = $app;
-
-    return $self;
+    $self;
 }
 
 sub app { $_[0]->{app} }

@@ -82,7 +82,7 @@ sub namespace {
 
 sub route_param {
     my ($param, $type, $block) = @_;
-    namespace("<$param>", $block);
+    namespace(":$param", $block);
 }
 
 #

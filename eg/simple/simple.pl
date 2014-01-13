@@ -75,7 +75,7 @@ namespace user => sub {
         get sub {
             res->status(200);
             res->json;
-            { data => $USERS{+params('id')} }
+            { data => $USERS{+params('id')} || 'Nothing found!' }
         };
 
         # edit user

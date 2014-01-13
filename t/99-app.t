@@ -23,6 +23,6 @@ $app = eval $content;
 
 my $t = Plack::Test->create($app);
 
-my $res = $t->request(GET "/user");
+my $res = $t->request(GET "/user/2");
 diag $res->content;
 

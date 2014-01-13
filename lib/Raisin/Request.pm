@@ -9,7 +9,7 @@ sub new {
     my ($class, $app, $env) = @_;
     my $self = $class->SUPER::new($env);
     $self->{app} = $app;
-    return $self;
+    $self;
 }
 
 sub declared_params {
