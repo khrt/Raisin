@@ -1,4 +1,4 @@
-package Raisin::DSL; # TODO -> Raisin::API
+package Raisin::DSL;
 
 use strict;
 use warnings;
@@ -18,6 +18,7 @@ our @EXPORT = qw(
 
 my $app;
 my @NS = ('');
+my %SETTINGS = ();
 
 sub import {
     my $class = shift;
@@ -30,7 +31,6 @@ sub import {
     feature->import(':5.12');
 
     $app = Raisin->new;
-#    $app->routes->base('main');
 }
 
 #
@@ -64,16 +64,20 @@ sub helpers {
 # Namespace DSL
 #
 sub namespace {
-    my ($name, $block) = @_;
+    my ($name, $block, %args) = @_; # TODO types
 
     if ($name) {
         my @prev_ns = @NS;
+        my %prev_settings = %SETTINGS;
+
+        @SETTINGS{ keys %args } = values %args;
         push(@NS, $name);
 
         eval { $block->() };
         die $@ if $@;
 
         @NS = @prev_ns;
+        %SETTINGS = %prev_settings;
     }
 
     (join '/', @NS) || '/'
@@ -82,19 +86,19 @@ sub namespace {
 
 sub route_param {
     my ($param, $type, $block) = @_;
-    namespace(":$param", $block);
+    namespace(":$param", $block, route_params => { required => [$param, $type] }); # TODO bridge?
 }
 
 #
 # Action DSL
 #
-sub delete  { $app->add_route('DELETE',  namespace, @_) }
-sub get     { $app->add_route('GET',     namespace, @_) }
-sub head    { $app->add_route('HEAD',    namespace, @_) }
-sub options { $app->add_route('OPTIONS', namespace, @_) }
-sub patch   { $app->add_route('PATCH',   namespace, @_) }
-sub post    { $app->add_route('POST',    namespace, @_) }
-sub put     { $app->add_route('PUT',     namespace, @_) }
+sub delete  { $app->add_route('DELETE',  namespace(), %SETTINGS, @_) }
+sub get     { $app->add_route('GET',     namespace(), %SETTINGS, @_) }
+sub head    { $app->add_route('HEAD',    namespace(), %SETTINGS, @_) }
+sub options { $app->add_route('OPTIONS', namespace(), %SETTINGS, @_) }
+sub patch   { $app->add_route('PATCH',   namespace(), %SETTINGS, @_) }
+sub post    { $app->add_route('POST',    namespace(), %SETTINGS, @_) }
+sub put     { $app->add_route('PUT',     namespace(), %SETTINGS, @_) }
 
 #
 # Request and Response shortcuts
