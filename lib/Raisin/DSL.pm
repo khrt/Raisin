@@ -17,8 +17,7 @@ our @EXPORT = qw(
 );
 
 my $app;
-my @NS = ('');
-my %SETTINGS = ();
+my %SETTINGS = (_NS => ['']);
 
 sub import {
     my $class = shift;
@@ -64,29 +63,27 @@ sub helpers {
 # Namespace DSL
 #
 sub namespace {
-    my ($name, $block, %args) = @_; # TODO types
+    my ($name, $block, %args) = @_;
 
     if ($name) {
-        my @prev_ns = @NS;
         my %prev_settings = %SETTINGS;
 
+        push(@{ $SETTINGS{_NS} }, $name);
         @SETTINGS{ keys %args } = values %args;
-        push(@NS, $name);
 
-        eval { $block->() };
-        die $@ if $@;
+        # Going deeper
+        $block->();
 
-        @NS = @prev_ns;
         %SETTINGS = %prev_settings;
     }
 
-    (join '/', @NS) || '/'
+    (join '/', @{ $SETTINGS{_NS} }) || '/'
 }
 
 
 sub route_param {
-    my ($param, $type, $block) = @_;
-    namespace(":$param", $block, route_params => { required => [$param, $type] }); # TODO bridge?
+    my ($param, $type, $block) = @_; # TODO Types: + DEFAUT, REGEX
+    namespace(":$param", $block, route_params => [required => [$param, $type]]);
 }
 
 #
