@@ -33,7 +33,8 @@ sub add_route {
 
 # Hooks
 sub hook {
-
+    my ($self, $hook) = @_;
+    sub { say "Executing `$hook`..." }
 }
 
 # Application
@@ -41,29 +42,25 @@ sub psgi {
     my ($self, $env) = @_;
 
     # Diffrent for each response
-    my $req = $self->req(Raisin::Request->new($self, $env)); # TODO Raisin::Request?
+    my $req = $self->req(Raisin::Request->new($env));
     my $res = $self->res(Raisin::Response->new($self));
-
-    ###
-use Data::Dumper;
-#warn Dumper $self->routes;
-#my $code = $self->{fake_routes}{$req->method . $req->path}[-1];
-#eval { say Dumper $code->() };
-#warn $res->status;
-#warn $res->json;
-#die $@;
-    ###
 
     # Find route
     my $routes = $self->routes->find($req->method, $req->path);
+use Data::Dumper;
+#say '*' . ' ROUTES' x 3;
+#say Dumper $routes;
+#say '*' . ' <--' x 3;
 
     if (!@$routes) {
         $res->render_404;
         return $res->finalize;
     }
+#say '* ROUTES OK';
 
     eval {
         foreach my $route (@$routes) {
+say '* ' . $route->path;
             my $code = $route->code; # endpoint
 
             if (!$code || (ref($code) && ref($code) ne 'CODE')) {
@@ -72,25 +69,59 @@ use Data::Dumper;
 
             # Log
 
+            # Get params
+            my $params = $req->parameters->mixed;
+#say '-' . ' PARAMS -' x 3;
+#warn Dumper $params;
+
+            my $route_params = $route->params;
+#say '-' . ' PATH PARAMS -' x 3;
+#warn Dumper $route_params;
+#say '*' . ' <--' x 3;
+
             # Get declared params
-            my $tokens;# = $route->request_tokens('keys');
-            my $params;# = $req->declared_params($tokens, $route->params);
+            my $declared = $route->declared;
 
             # Exec `before`
-            #
+            $self->hook('before')->();
+
             # Exec `before validation`
-            #
+            $self->hook('before_validation')->();
 
             # Validate params
-            # XXX
+            my %declared_params;
+            foreach my $p (@$declared) {
+                my $name = $p->name;
+                # NOTE Route params has more precedence than query params
+                my $value
+                    = $route_params->{$name} || $params->{$name} || $p->default;
+
+                # What TODO if parameters is invalid?
+                if (not $p->validate($value)) {
+say 'INVALID!!! ' x 5;
+                    $res->render_500;
+                    last;
+                }
+
+                $declared_params{ $p->name } = $value;
+            }
+say '-' . ' DECLARED PARAMS -' x 3;
+#say Dumper $declared;
+say Dumper \%declared_params;
+say ' =' x 3;
+
+
 
             # Exec `after validation`
-            #
-            # Exec `after`
-            #
+            $self->hook('after_validation')->();
 
             # Eval code
-            my $data = $code->();#$req->declared_params);
+            my $data = $code->(\%declared_params);
+#say '*' . ' DATA -' x 3;
+#say Dumper $data;
+
+            # Exec `after`
+            $self->hook('after')->();
 
             # Bridge?
 #        if ($route->bridge) {
@@ -103,7 +134,7 @@ use Data::Dumper;
 
             if (defined $data) {
                 # Handle delayed response
-                return $data if ref($data) eq 'CODE';
+                return $data if ref($data) eq 'CODE'; # TODO check delayed responses
                 $res->render($data) if not $res->rendered;
             }
         }
@@ -114,11 +145,15 @@ use Data::Dumper;
 
     };
 
+#say '* EVAL END';
+
     if (my $e = $@) {
         #$e = longmess($e);
         $res->render_500($e);
     }
 
+#say '* BEFORE FINALIZE';
+#say Dumper $res->finalize;
     $res->finalize;
 }
 

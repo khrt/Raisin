@@ -3,7 +3,10 @@ package Raisin::Routes;
 use strict;
 use warnings;
 
+use feature ':5.12';
+
 use Carp;
+use Raisin::Param;
 use Raisin::Routes::Endpoint;
 
 sub new {
@@ -36,9 +39,14 @@ sub add {
         return;
     }
 
-    my %params;
+    my @params;
     if (@args && (my %args = @args)) {
-        %params = %{ $args{params} };
+        foreach my $key (qw(params route_params)) {
+            for (my $i = 0; $i < scalar @{ $args{$key} || [] }; $i += 2) {
+                my ($type, $options) = ($args{$key}[$i], $args{$key}[$i + 1]);
+                push @params, Raisin::Param->new($type, $options);
+            }
+        }
     }
 
     if (ref($path) && ref($path) ne 'Regexp') {
@@ -52,10 +60,10 @@ sub add {
 
     my $ep
         = Raisin::Routes::Endpoint->new(
+            code => $code,
+            declared => \@params,
             method => $method,
             path => $path,
-            params => \%params,
-            code => $code,
         );
     push @{ $self->{routes} }, $ep;
 

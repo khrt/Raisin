@@ -29,7 +29,7 @@ sub render {
     $self->status(200) if not $self->status;
     $self->content_type('text/plain') if not $self->content_type;
 
-    # TODO
+    # TODO Middleware?
     if ($self->content_type eq 'application/json') {
         use JSON::XS 'encode_json';
         $body = encode_json $body;

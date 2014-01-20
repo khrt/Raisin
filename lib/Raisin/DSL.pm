@@ -17,7 +17,9 @@ our @EXPORT = qw(
 );
 
 my $app;
-my %SETTINGS = (_NS => ['']);
+#my %SETTINGS = (_NS => ['']);
+my %SETTINGS = ();
+my @NS = ('');
 
 sub import {
     my $class = shift;
@@ -67,23 +69,40 @@ sub namespace {
 
     if ($name) {
         my %prev_settings = %SETTINGS;
+        my @prev_ns = @NS;
 
         push(@{ $SETTINGS{_NS} }, $name);
+        push @NS, $name;
         @SETTINGS{ keys %args } = values %args;
 
         # Going deeper
         $block->();
 
+        @NS = @prev_ns;
+        %SETTINGS = ();
         %SETTINGS = %prev_settings;
     }
 
-    (join '/', @{ $SETTINGS{_NS} }) || '/'
+    #(join '/', @{ $SETTINGS{_NS} }) || '/'
+    (join '/', @NS) || '/'
 }
 
 
 sub route_param {
-    my ($param, $type, $block) = @_; # TODO Types: + DEFAUT, REGEX
-    namespace(":$param", $block, route_params => [required => [$param, $type]]);
+    my ($param, $type, $block) = @_;
+    # TODO Types: regex
+    # TODO Types: default value
+    # GOOD
+    #namespace(":$param", $block, route_params => [required => [$param, $type]]);
+
+    # BAD
+    my $type_re = $type->regex;
+    $type_re =~ s/\(\?\^:\^(.+?)\$\)/$1/g;
+    namespace(
+        qr#(?<$param>$type_re)#,
+        $block,
+        route_params => [required => [$param, $type]]
+    );
 }
 
 #

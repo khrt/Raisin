@@ -6,9 +6,8 @@ use warnings;
 use base 'Plack::Request';
 
 sub new {
-    my ($class, $app, $env) = @_;
+    my ($class, $env) = @_;
     my $self = $class->SUPER::new($env);
-    $self->{app} = $app;
     $self;
 }
 
@@ -17,7 +16,8 @@ sub declared_params {
     # + route params
 }
 
-sub route_params {
+sub merge_route_params {
+    my ($self, $route_params) = @_;
 
 }
 

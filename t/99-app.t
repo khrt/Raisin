@@ -22,6 +22,11 @@ $app = eval $content;
 
 my $t = Plack::Test->create($app);
 
-my $res = $t->request(GET "/user");
-diag explain $res;
+my $res = $t->request(GET "/user/2?view=all&view=none");
+diag $res->content;
 
+#$res = $t->request(PUT "/user/2/bump");
+#diag explain $res;
+
+#$res = $t->request(GET "/user/2");
+#diag explain $res;

@@ -3,6 +3,8 @@ package Raisin::Routes::Endpoint;
 use strict;
 use warnings;
 
+use feature ':5.12';
+
 sub new {
     my ($class, %args) = @_;
     my $self = bless {}, $class;
@@ -13,26 +15,19 @@ sub new {
 
     $self->{check} = {};
     $self->{regex} = $self->_build;
+use Data::Dumper;
+warn Dumper $self;
 
     $self;
 }
 
-sub check  { shift->{check}  }
-sub code   { shift->{code}   }
-sub method { shift->{method} }
-sub path   { shift->{path}   }
-sub regex  { shift->{regex}  }
-
-# TODO RENAME
-sub request_tokens {
-    my ($self, $keys) = @_;
-    if ($keys) {
-        map { $_->[0] } @{ $self->{params} };
-    }
-    else {
-        $self->{params};
-    }
-}
+sub check     { shift->{check} }
+sub code      { shift->{code} }
+sub declared  { shift->{declared} } # Declared params
+sub method    { shift->{method} }
+sub path      { shift->{path} }
+sub regex     { shift->{regex} }
+sub tokens_re { shift->{tokens_re} }
 
 sub _build {
     my ($self, %args) = @_;
@@ -81,8 +76,8 @@ sub match {
 
 sub params {
     my ($self, $params) = @_;
-    $self->{route_params} = $params if $params;
-    $self->{route_params};
+    $self->{params} = $params if $params;
+    $self->{params};
 }
 
 1;
@@ -97,6 +92,6 @@ Raisin::Routes::Endpoint
 
 =head1 ACKNOWLEDGEMENTS
 
-This module copied from L<Kelp::Routes::Pattern>.
+This module heavily borrowed from L<Kelp::Routes::Pattern>.
 
 =cut
