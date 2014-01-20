@@ -41,10 +41,10 @@ sub add {
 
     my @params;
     if (@args && (my %args = @args)) {
-        foreach my $key (qw(params route_params)) {
+        foreach my $key (qw(params named)) {
             for (my $i = 0; $i < scalar @{ $args{$key} || [] }; $i += 2) {
                 my ($type, $options) = ($args{$key}[$i], $args{$key}[$i + 1]);
-                push @params, Raisin::Param->new($type, $options);
+                push @params, Raisin::Param->new($key, $type, $options);
             }
         }
     }
@@ -61,7 +61,7 @@ sub add {
     my $ep
         = Raisin::Routes::Endpoint->new(
             code => $code,
-            declared => \@params,
+            params => \@params,
             method => $method,
             path => $path,
         );

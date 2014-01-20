@@ -11,14 +11,5 @@ sub new {
     $self;
 }
 
-sub declared_params {
-    my ($self, $tokens, $route_params) = @_;
-    # + route params
-}
-
-sub merge_route_params {
-    my ($self, $route_params) = @_;
-
-}
 
 1;

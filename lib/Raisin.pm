@@ -69,47 +69,39 @@ say '* ' . $route->path;
 
             # Log
 
-            # Get params
-            my $params = $req->parameters->mixed;
-#say '-' . ' PARAMS -' x 3;
-#warn Dumper $params;
-
-            my $route_params = $route->params;
-#say '-' . ' PATH PARAMS -' x 3;
-#warn Dumper $route_params;
-#say '*' . ' <--' x 3;
-
-            # Get declared params
-            my $declared = $route->declared;
-
             # Exec `before`
             $self->hook('before')->();
 
             # Exec `before validation`
             $self->hook('before_validation')->();
 
-            # Validate params
+            # Load params
+            my $params = $req->parameters->mixed;
+            my $named = $route->named;
+#say '-' . ' PATH PARAMS -' x 3;
+#warn Dumper $named;
+#say '*' . ' <--' x 3;
+
+            # Process params
             my %declared_params;
-            foreach my $p (@$declared) {
+            foreach my $p (@{ $route->params }) {
                 my $name = $p->name;
                 # NOTE Route params has more precedence than query params
-                my $value
-                    = $route_params->{$name} || $params->{$name} || $p->default;
+                my $value = $named->{$name} || $params->{$name} || $p->default;
 
                 # What TODO if parameters is invalid?
                 if (not $p->validate($value)) {
-say 'INVALID!!! ' x 5;
-                    $res->render_500;
+                    $res->render_500('Invalid params!');
                     last;
                 }
 
-                $declared_params{ $p->name } = $value;
+                $declared_params{$name} = $value;
             }
+
+            last if $res->rendered;
 say '-' . ' DECLARED PARAMS -' x 3;
-#say Dumper $declared;
 say Dumper \%declared_params;
 say ' =' x 3;
-
 
 
             # Exec `after validation`

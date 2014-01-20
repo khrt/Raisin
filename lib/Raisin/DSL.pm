@@ -69,40 +69,25 @@ sub namespace {
 
     if ($name) {
         my %prev_settings = %SETTINGS;
-        my @prev_ns = @NS;
 
-        push(@{ $SETTINGS{_NS} }, $name);
         push @NS, $name;
         @SETTINGS{ keys %args } = values %args;
 
         # Going deeper
         $block->();
 
-        @NS = @prev_ns;
+        pop @NS;
         %SETTINGS = ();
         %SETTINGS = %prev_settings;
     }
 
-    #(join '/', @{ $SETTINGS{_NS} }) || '/'
     (join '/', @NS) || '/'
 }
 
 
 sub route_param {
     my ($param, $type, $block) = @_;
-    # TODO Types: regex
-    # TODO Types: default value
-    # GOOD
-    #namespace(":$param", $block, route_params => [required => [$param, $type]]);
-
-    # BAD
-    my $type_re = $type->regex;
-    $type_re =~ s/\(\?\^:\^(.+?)\$\)/$1/g;
-    namespace(
-        qr#(?<$param>$type_re)#,
-        $block,
-        route_params => [required => [$param, $type]]
-    );
+    namespace(":$param", $block, named => [required => [$param, $type]]);
 }
 
 #

@@ -15,19 +15,19 @@ sub new {
 }
 
 sub _build {
-    my ($self, $required, $options) = @_;
+    my ($self, $kind, $required, $options) = @_;
 
     $self->{required} = $required eq 'required' ? 1 : 0;
+    $self->{named} = $kind eq 'named' ? 1 : 0;
     @$self{qw(name type default regex)} = @$options;
-
-
 }
 
-sub default  { shift->{default} }
-sub name     { shift->{name} }
-sub regex    { shift->{regex} }
+sub default { $_[0]->{default} || $_[0]->type->default }
+sub name { shift->{name} }
+sub regex { $_[0]->{regex} || $_[0]->type->regex }
 sub required { shift->{required} }
-sub type     { shift->{type} }
+sub named { shift->{named} }
+sub type { shift->{type} }
 
 sub value {
     my ($self, $value) = @_;
@@ -67,8 +67,8 @@ sub validate {
             carp 'check() failed';
             return;
         }
-        elsif ($self->regex && ($v !~ /${ $self->regex }/)) {
-            warn "$v == ${ $self->regex }";
+        elsif ($self->{regex} && ($v !~ /$self->{regex}/)) {
+            warn "$v !~ $self->{regex}";
             carp 'regex failed';
             return;
         }
