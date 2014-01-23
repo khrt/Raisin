@@ -5,6 +5,8 @@ use warnings;
 use feature ':5.12';
 
 use Carp;
+#use Plack::Builder;
+use Plack::Util;
 
 use Raisin::Request;
 use Raisin::Response;
@@ -18,6 +20,7 @@ sub new {
     my $self = bless {}, ref $class || $class;
 
     $self->{routes} = Raisin::Routes->new;
+    $self->{mounted} = [];
 
     $self;
 }
@@ -33,11 +36,44 @@ sub add_route {
 
 # Hooks
 sub hook {
-    my ($self, $hook) = @_;
-    sub { say "Executing `$hook`..." }
+    my ($self, $name) = @_;
+    $self->{hooks}{$name} || sub {};
+}
+
+sub add_hook {
+    my ($self, $name, $code) = @_;
+    $self->{hooks}{$name} = $code;
 }
 
 # Application
+sub mount_package {
+    my ($self, $package, $path) = @_;
+
+    $package = Plack::Util::load_class($package);
+    $package->new;
+    $path;
+}
+
+sub run {
+    my $self = shift;
+    my $app = sub { $self->psgi(@_) };
+
+    # Add middleware
+#    if (defined(my $middleware = $self->config('middleware'))) {
+#        for my $class (@$middleware) {
+#
+#            # Make sure the middleware was not already loaded
+#            next if $self->{_loaded_middleware}->{$class}++;
+#
+#            my $mw = Plack::Util::load_class($class, 'Plack::Middleware');
+#            my $args = $self->config("middleware_init.$class") // {};
+#            $app = $mw->wrap($app, %$args);
+#        }
+#    }
+
+    return $app;
+}
+
 sub psgi {
     my ($self, $env) = @_;
 
@@ -45,9 +81,22 @@ sub psgi {
     my $req = $self->req(Raisin::Request->new($env));
     my $res = $self->res(Raisin::Response->new($self));
 
+    # Check incoming content type
+    if (my $format = $self->api_format) {
+#        if ($req->content_type =~ /$format/) {
+#            $res->render_error(409, 'Invalid format!');
+#            return $self->res->finalize;
+#        }
+    }
+
+    # Set content type
+    $res->content_type($self->api_format);
+
+    # Exec `before`
+    $self->hook('before')->($self);
+
     # Find route
     my $routes = $self->routes->find($req->method, $req->path);
-use Data::Dumper;
 #say '*' . ' ROUTES' x 3;
 #say Dumper $routes;
 #say '*' . ' <--' x 3;
@@ -68,12 +117,10 @@ say '* ' . $route->path;
             }
 
             # Log
-
-            # Exec `before`
-            $self->hook('before')->();
+            # TODO
 
             # Exec `before validation`
-            $self->hook('before_validation')->();
+            $self->hook('before_validation')->($self);
 
             # Load params
             my $params = $req->parameters->mixed;
@@ -82,38 +129,32 @@ say '* ' . $route->path;
 #warn Dumper $named;
 #say '*' . ' <--' x 3;
 
-            # Process params
-            my %declared_params;
-            foreach my $p (@{ $route->params }) {
-                my $name = $p->name;
-                # NOTE Route params has more precedence than query params
-                my $value = $named->{$name} || $params->{$name} || $p->default;
+            # Validation # TODO BROKEN
+            $req->set_declared_params($route->params);
+            $req->set_named_params($route->named);
 
-                # What TODO if parameters is invalid?
-                if (not $p->validate($value)) {
-                    $res->render_500('Invalid params!');
-                    last;
-                }
-
-                $declared_params{$name} = $value;
+            # What TODO if parameters is invalid?
+            if (not $req->validate_params) {
+                warn '* ' . 'INVALID PARAMS! ' x 5;
+                $res->render_error(400, 'Invalid params!');
+                last;
             }
 
-            last if $res->rendered;
-say '-' . ' DECLARED PARAMS -' x 3;
-say Dumper \%declared_params;
-say ' =' x 3;
-
+            my $declared_params = $req->declared_params;
+#say '-' . ' DECLARED PARAMS -' x 3;
+#say Dumper \%declared_params;
+#say ' =' x 3;
 
             # Exec `after validation`
-            $self->hook('after_validation')->();
+            $self->hook('after_validation')->($self);
 
             # Eval code
-            my $data = $code->(\%declared_params);
+            my $data = $code->($declared_params);
 #say '*' . ' DATA -' x 3;
 #say Dumper $data;
 
             # Exec `after`
-            $self->hook('after')->();
+            $self->hook('after')->($self);
 
             # Bridge?
 #        if ($route->bridge) {
@@ -138,35 +179,50 @@ say ' =' x 3;
     };
 
 #say '* EVAL END';
-
     if (my $e = $@) {
         #$e = longmess($e);
         $res->render_500($e);
     }
 
-#say '* BEFORE FINALIZE';
-#say Dumper $res->finalize;
-    $res->finalize;
+#say '* FINALIZE';
+    $self->finalize;
 }
 
-sub run {
+# Finalize response
+sub before_finalize {
     my $self = shift;
-    my $app = sub { $self->psgi(@_) };
+    $self->res->header('X-Framework' => "Raisin $VERSION");
+}
 
-    # Middleware?
-    #
-    #
-
-    return $app;
+sub finalize {
+    my $self = shift;
+    $self->before_finalize;
+    $self->res->finalize;
 }
 
 # Application defaults
-sub format {
-    # set default format: json/plain
-}
+sub api_format {
+    my ($self, $name, $type) = @_;
 
-sub version {
-    # set version header
+    $self->{'api.format'} = do {
+        if ($name && $type) {
+            $type;
+        }
+        elsif ($name) {
+            # TODO
+            my $ctypes = {
+                'json' => 'application/json',
+                'text' => 'text/plain',
+                'xml'  => 'application/xml',
+                'yaml' => 'application/yaml',
+            };
+
+            $ctypes->{$name};
+        }
+        else {
+            $self->{'api.format'} || 'text/plain';
+        }
+    };
 }
 
 # Request and Response and shortcuts

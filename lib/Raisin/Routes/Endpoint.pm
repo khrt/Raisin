@@ -9,20 +9,16 @@ sub new {
     my ($class, %args) = @_;
     my $self = bless {}, $class;
 
-use Data::Dumper;
     @$self{keys %args} = values %args;
 
-#say $self->path;
-    # Check index
+    # Populate params index
     $self->{check} = {};
     for (@{ $self->params }) {
         if ($_->named && (my $re = $_->regex)) {
             $re =~ s/[\$^]//g;
             $self->{check}{ $_->name } = $re;
         }
-#        $self->{defaults}{ $_->name } = $_->value;
     }
-#warn Dumper $self;
 
     $self->{regex} = $self->_build_regex;
     $self;
@@ -30,7 +26,6 @@ use Data::Dumper;
 
 sub check { shift->{check} }
 sub code { shift->{code} }
-#sub defaults { shift->{defaults} }
 sub method { shift->{method} }
 sub params { shift->{params} }
 sub path { shift->{path} }
@@ -77,21 +72,7 @@ sub match {
     return if not (my @matched = $path =~ $self->regex);
 
     my %named = map { $_ => $+{$_} } keys %+;
-#    for (keys %named) {
-#        if (my $value = $self->defaults->{$_}) {
-#            $named{$_} = $value if not exists $named{$_};
-#        }
-#    }
     $self->named(\%named);
-
-#    # Initialize the param array, containing the values of the
-#    # named placeholders in the order they appear in the regex.
-#    if ( my @tokens = @{ $self->{_tokens} } ) {
-#        $self->param( [ map { $named{$_} } @tokens ] );
-#    }
-#    else {
-#        $self->param( \@matched );
-#    }
 
     1;
 }

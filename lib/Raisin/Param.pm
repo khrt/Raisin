@@ -40,23 +40,23 @@ sub validate {
 
     # TODO Don't working
     if (!$value && $self->value) {
-        carp 'use default value';
+        carp "$self->{name} use default value";
         return 1;
     }
 
     if (!$value && !$self->required) {
-        carp 'optional: skip it';
+#        carp "$self->{name} optional: skip it";
         return 1;
     }
 
 
     if ($self->required && !$value) {
-        carp 'required but empty!';
+        carp "$self->{name} required but empty!";
         return;
     }
 
     if ($value && ref $value && ref $value ne 'ARRAY') {
-        carp '$value should be SCALAR or ARRAYREF';
+        carp "$self->{name} \$value should be SCALAR or ARRAYREF";
         return;
     }
 
@@ -64,12 +64,11 @@ sub validate {
 
     for my $v (@$value) {
         if (!$self->type->check($v)) {
-            carp 'check() failed';
+            carp "$self->{name} check() failed";
             return;
         }
         elsif ($self->{regex} && ($v !~ /$self->{regex}/)) {
-            warn "$v !~ $self->{regex}";
-            carp 'regex failed';
+            carp "$self->{name} regex failed [$v !~ $self->{regex}]";
             return;
         }
 

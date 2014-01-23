@@ -19,7 +19,7 @@ our $Scalar
 
 our $String
     = Raisin::Types::Base->new(
-        default => '',
+        #default => '',
         check => sub {
             my ($self, $v) = @_;
             $v =~ /${ $self->regex }/;

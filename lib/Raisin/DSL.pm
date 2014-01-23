@@ -14,6 +14,7 @@ our @EXPORT = qw(
     namespace route_param
     req res params session
     delete get head options patch post put
+    api_format
 );
 
 my $app;
@@ -37,29 +38,23 @@ sub import {
 #
 # Execution
 #
-sub to_app { $app->psgi }
-sub run    { $app->run(@_) }
+sub to_app { $app->psgi } # XXX run?
+sub new    { $app->run } # XXX to_app?
+sub run    { $app->run }
 
 #
-# Hook
+# Compile
 #
-sub hook {
-    my ($hook, $block) = @_;
-
-    # Available hooks:
-    #   * before
-    #   * before_validation
-    #   * after_validation
-    #   * after
-
-}
+sub mount { $app->mount_package(@_) }
 
 #
-# Helpers
+# Hooks
 #
-sub helpers {
+sub before { $app->add_hook('before', shift) }
+sub before_validation { $app->add_hook('before_validation', shift) }
 
-}
+sub after_validation { $app->add_hook('after_validation', shift) }
+sub after { $app->add_hook('after', shift) }
 
 #
 # Namespace DSL
@@ -95,18 +90,28 @@ sub route_param {
 #
 sub delete  { $app->add_route('DELETE',  namespace(), %SETTINGS, @_) }
 sub get     { $app->add_route('GET',     namespace(), %SETTINGS, @_) }
-sub head    { $app->add_route('HEAD',    namespace(), %SETTINGS, @_) }
-sub options { $app->add_route('OPTIONS', namespace(), %SETTINGS, @_) }
-sub patch   { $app->add_route('PATCH',   namespace(), %SETTINGS, @_) }
+#sub head    { $app->add_route('HEAD',    namespace(), %SETTINGS, @_) }
+#sub options { $app->add_route('OPTIONS', namespace(), %SETTINGS, @_) }
+#sub patch   { $app->add_route('PATCH',   namespace(), %SETTINGS, @_) }
 sub post    { $app->add_route('POST',    namespace(), %SETTINGS, @_) }
 sub put     { $app->add_route('PUT',     namespace(), %SETTINGS, @_) }
 
 #
 # Request and Response shortcuts
 #
-sub req { $app->req };
-sub res { $app->res };
-sub params { $app->params(@_) };
-sub session { $app->session(@_) };
+sub req { $app->req }
+sub res { $app->res }
+sub params { $app->params(@_) }
+sub session { $app->session(@_) }
+
+#
+#
+#
+sub api_format { $app->api_format(@_) }
+
+sub error {
+    # NOTE render error 500?
+    $app->res->render_error(@_);
+}
 
 1;

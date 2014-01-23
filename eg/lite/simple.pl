@@ -7,7 +7,7 @@ use Data::Dumper;
 use FindBin;
 use List::Util qw(max);
 
-use lib "$FindBin::Bin/../../lib";
+use lib "$FindBin::Bin/../../lib"; # ->Raisin/lib
 
 use Raisin::DSL;
 use Raisin::Types;
@@ -33,66 +33,71 @@ my %USERS = (
     },
 );
 
+api_format 'yaml';
+
 # /user
 namespace user => sub {
     # list all users
     get params => [
-        #required/optional => [name, type, default, values]
-        optional => ['start', $Raisin::Types::Integer, 0, qr/^\d+$/],
-        optional => ['count', $Raisin::Types::Integer, 0, qr/^\d+$/],
+        #required/optional => [name, type, default, regex]
+        optional => ['start', $Raisin::Types::Integer, 0],
+        optional => ['count', $Raisin::Types::Integer, 10],
     ],
     sub {
-        res->json;
-        [map { $USERS{$_} } keys %USERS]
+        my $params = shift;
+warn Dumper $params;
+        my ($start, $count) = ($params->{start}, $params->{count});
+
+        my @users
+            = map { { id => $_, %{ $USERS{$_} } } }
+              sort { $a <=> $b } keys %USERS;
+
+        $start = $start > scalar @users ? scalar @users : $start;
+        $count = $count > scalar @users ? scalar @users : $count;
+
+        my @slice = @users[$start .. $count];
+        { data => \@slice }
     };
 
     # create new user
     post params => [
         required => ['name', $Raisin::Types::String],
         required => ['password', $Raisin::Types::String],
-        optional => ['email', $Raisin::Types::String, undef, qr/prev-regex/],
+        optional => ['email', $Raisin::Types::String, undef, qr/[^@]@[^.].\w+/],
     ],
     sub {
         my $params = shift;
 
         my $id = max(keys %USERS) + 1;
-
         $USERS{$id} = $params;
 
-        res->json;
-        { success => 1 }
+        { success => $id }
     };
 
     # /user/<id>
     route_param id => $Raisin::Types::Integer,
     sub {
         # get user
-#        get sub {
-#            my $params = shift;
-#            res->json;
-#            { data => $USERS{ $params->{id} } || 'Nothing found!' }
-#        };
-        get params => [
-            optional => ['view', $Raisin::Types::String, '', qr/all|one/],
-        ],
-        sub {
+        get sub {
             my $params = shift;
-            res->json;
             { data => $USERS{ $params->{id} } || 'Nothing found!' }
         };
 
         # edit user
         put params => [
             optional => ['password', $Raisin::Types::String],
-            optional => ['email', $Raisin::Types::String, undef, qr/next-regex/],
+            optional => ['email', $Raisin::Types::String, undef, qr/[^@]@[^.].\w+/],
         ],
         sub {
             my $params = shift;
 
-            $USERS{ $params->{id} } = { map { $_ => $params->{$_} } qw(password email) };
+            my $updated = 0;
+            for (grep { $params->{$_} } qw(password email)) {
+                $USERS{ $params->{id} }{$_} = $params->{$_};
+                $updated = 1;
+            }
 
-            res->json;
-            { success => 1 }
+            { success => $updated }
         };
 
         # /user/<id>/bump
@@ -100,19 +105,13 @@ namespace user => sub {
             # get bump count
             get sub {
                 my $params = shift;
-
-                res->json;
                 { data => $USERS{ $params->{id} }{bumped} }
             };
 
             # bump user
             put sub {
                 my $params = shift;
-
-                $USERS{ $params->{id} }{bumped}++;
-
-                res->json;
-                { success => 1 }
+                { success => ++$USERS{ $params->{id} }{bumped} }
             };
         };
     };
