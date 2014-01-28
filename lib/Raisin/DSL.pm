@@ -15,6 +15,7 @@ our @EXPORT = qw(
     req res params session
     delete get head options patch post put
     api_format
+    plugin
 );
 
 my $app;
@@ -32,7 +33,7 @@ sub import {
     warnings->import;
     feature->import(':5.12');
 
-    $app = Raisin->new;
+    $app = Raisin->new(caller => $caller);
 }
 
 #
@@ -107,11 +108,12 @@ sub session { $app->session(@_) }
 #
 #
 #
+sub plugin { $app->load_plugin(@_) }
 sub api_format { $app->api_format(@_) }
 
-sub error {
-    # NOTE render error 500?
-    $app->res->render_error(@_);
-}
+#sub error {
+#    # NOTE render error 500?
+#    $app->res->render_error(@_);
+#}
 
 1;

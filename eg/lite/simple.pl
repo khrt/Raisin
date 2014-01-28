@@ -33,7 +33,13 @@ my %USERS = (
     },
 );
 
+plugin 'Logger' => outputs => [['Screen', min_level => 'warning']];
 api_format 'yaml';
+
+
+logger(error => 'Logger!');
+error('Error!');
+
 
 # /user
 namespace user => sub {
@@ -45,7 +51,6 @@ namespace user => sub {
     ],
     sub {
         my $params = shift;
-warn Dumper $params;
         my ($start, $count) = ($params->{start}, $params->{count});
 
         my @users

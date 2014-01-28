@@ -5,6 +5,7 @@ use warnings;
 use feature ':5.12';
 
 use Carp;
+use DDP;
 #use Plack::Builder;
 use Plack::Util;
 
@@ -16,13 +17,23 @@ our $VERSION = '0.1';
 our $CODENAME = 'Cabernet Sauvignon';
 
 sub new {
-    my $class = shift;
-    my $self = bless {}, ref $class || $class;
+    my ($class, %args) = @_;
+    my $self = bless { %args }, ref $class || $class;
 
     $self->{routes} = Raisin::Routes->new;
     $self->{mounted} = [];
 
     $self;
+}
+
+sub load_plugin {
+    my ($self, $name, @args) = @_;
+    return if $self->{loaded_plugins}{$name};
+
+    my $class = Plack::Util::load_class($name, 'Raisin::Plugin');
+    my $module = $self->{loaded_plugins}{$name} = $class->new($self);
+
+    $module->build(@args);
 }
 
 # Routes
@@ -89,7 +100,7 @@ sub psgi {
 #        }
     }
 
-    # Set content type
+    # Set content type   --> TODO: See api_format
     $res->content_type($self->api_format);
 
     # Exec `before`
@@ -153,6 +164,8 @@ say '* ' . $route->path;
 #say '*' . ' DATA -' x 3;
 #say Dumper $data;
 
+            # TODO check for FORMAT plugins
+
             # Exec `after`
             $self->hook('after')->($self);
 
@@ -204,12 +217,13 @@ sub finalize {
 sub api_format {
     my ($self, $name, $type) = @_;
 
+    ### TODO Load Plugin::Format::<$name>
+
     $self->{'api.format'} = do {
         if ($name && $type) {
             $type;
         }
         elsif ($name) {
-            # TODO
             my $ctypes = {
                 'json' => 'application/json',
                 'text' => 'text/plain',
