@@ -29,7 +29,6 @@ sub register {
         my $class = ref $self->app;
         my $caller = $self->app->{caller};
 
-
         my $glob = "${class}::${name}";
         my $app_glob = "${caller}::${name}";
 
@@ -37,12 +36,14 @@ sub register {
             croak "Redefining of $glob not allowed";
         }
 
-        if (ref $item ne 'CODE') {
-            croak "$glob item should be closed";
+        if (ref $item eq 'CODE') {
+            *{$glob} = $item;
+            *{$app_glob} = $item;
         }
-
-        *{$glob} = $item;
-        *{$app_glob} = $item;
+        else {
+            $self->app->{$name} = $item;
+            *{$glob} = sub { shift->{$name} };
+        }
     }
 }
 
@@ -57,3 +58,7 @@ __END__
 Raisin::Plugin
 
 =head1 SYNOPSYS
+
+=head1 DESCRIPTION
+
+=end

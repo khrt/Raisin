@@ -5,7 +5,7 @@ use warnings;
 use feature ':5.12';
 
 use Carp;
-use DDP;
+use DDP; # XXX
 #use Plack::Builder;
 use Plack::Util;
 
@@ -18,7 +18,7 @@ our $CODENAME = 'Cabernet Sauvignon';
 
 sub new {
     my ($class, %args) = @_;
-    my $self = bless { %args }, ref $class || $class;
+    my $self = bless { %args }, $class;
 
     $self->{routes} = Raisin::Routes->new;
     $self->{mounted} = [];
@@ -38,12 +38,7 @@ sub load_plugin {
 
 # Routes
 sub routes { shift->{routes} }
-
-sub add_route {
-    my $self = shift;
-    $self->routes->add(@_);
-}
-
+sub add_route { shift->routes->add(@_) }
 
 # Hooks
 sub hook {
@@ -63,6 +58,7 @@ sub mount_package {
     $package = Plack::Util::load_class($package);
     $package->new;
     $path;
+    # TODO:
 }
 
 sub run {
@@ -92,18 +88,15 @@ sub psgi {
     my $req = $self->req(Raisin::Request->new($env));
     my $res = $self->res(Raisin::Response->new($self));
 
-    # Check incoming content type
-    if (my $format = $self->api_format) {
-#        if ($req->content_type =~ /$format/) {
+    # TODO Check incoming content type
+#    if (my $content_type = $self->default_content_type) {
+#        if (!$req->content_type or $req->content_type ne $content_type) {
 #            $res->render_error(409, 'Invalid format!');
 #            return $self->res->finalize;
 #        }
-    }
+#    }
 
-    # Set content type   --> TODO: See api_format
-    $res->content_type($self->api_format);
-
-    # Exec `before`
+    # HOOK Before
     $self->hook('before')->($self);
 
     # Find route
@@ -116,11 +109,9 @@ sub psgi {
         $res->render_404;
         return $res->finalize;
     }
-#say '* ROUTES OK';
 
     eval {
         foreach my $route (@$routes) {
-say '* ' . $route->path;
             my $code = $route->code; # endpoint
 
             if (!$code || (ref($code) && ref($code) ne 'CODE')) {
@@ -128,9 +119,11 @@ say '* ' . $route->path;
             }
 
             # Log
-            # TODO
+            if ($self->can('logger')) {
+                $self->logger(info => $req->method . ' ' . $route->path);
+            }
 
-            # Exec `before validation`
+            # HOOK Before validation
             $self->hook('before_validation')->($self);
 
             # Load params
@@ -156,7 +149,7 @@ say '* ' . $route->path;
 #say Dumper \%declared_params;
 #say ' =' x 3;
 
-            # Exec `after validation`
+            # HOOK After validation
             $self->hook('after_validation')->($self);
 
             # Eval code
@@ -164,10 +157,13 @@ say '* ' . $route->path;
 #say '*' . ' DATA -' x 3;
 #say Dumper $data;
 
-            # TODO check for FORMAT plugins
+            # Format plugins
+            if ($self->can('serialize')) {
+                $data = $self->serialize($data);
+            }
 
-            # Exec `after`
-            $self->hook('after')->($self);
+            # Set default content type
+            $res->content_type($self->default_content_type);
 
             # Bridge?
 #        if ($route->bridge) {
@@ -183,21 +179,21 @@ say '* ' . $route->path;
                 return $data if ref($data) eq 'CODE'; # TODO check delayed responses
                 $res->render($data) if not $res->rendered;
             }
+
+            # HOOK After
+            $self->hook('after')->($self);
         }
 
         if (!$res->rendered) {
             die 'Nothing rendered!';
         }
-
     };
 
-#say '* EVAL END';
     if (my $e = $@) {
         #$e = longmess($e);
         $res->render_500($e);
     }
 
-#say '* FINALIZE';
     $self->finalize;
 }
 
@@ -215,29 +211,12 @@ sub finalize {
 
 # Application defaults
 sub api_format {
-    my ($self, $name, $type) = @_;
-
-    ### TODO Load Plugin::Format::<$name>
-
-    $self->{'api.format'} = do {
-        if ($name && $type) {
-            $type;
-        }
-        elsif ($name) {
-            my $ctypes = {
-                'json' => 'application/json',
-                'text' => 'text/plain',
-                'xml'  => 'application/xml',
-                'yaml' => 'application/yaml',
-            };
-
-            $ctypes->{$name};
-        }
-        else {
-            $self->{'api.format'} || 'text/plain';
-        }
-    };
+    my ($self, $name) = @_;
+    $name = $name =~ /\+/ ? $name : "Format::$name";
+    $self->load_plugin($name);
 }
+
+sub default_content_type { shift->{default_content_type} || 'text/plain' }
 
 # Request and Response and shortcuts
 sub req {
@@ -256,7 +235,6 @@ sub params {
     #$_[0]->req->query_parameters
     #$_[0]->req->body_parameters
     $_[0]->req->parameters
-    # and route parameters
 }
 
 sub session {

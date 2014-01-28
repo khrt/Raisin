@@ -11,15 +11,14 @@ use YAML 'Load';
 
 use lib "$Bin/../lib";
 
-my $app = Plack::Util::load_psgi("$Bin/../eg/lite/simple.pl");
-my $t;
-
 my %NEW_USER = (
     name     => 'Obi-Wan Kenobi',
     password => 'somepassword',
     email    => 'ow.kenobi@jedi.com',
 );
 my @USER_IDS;
+
+my $app = Plack::Util::load_psgi("$Bin/../eg/lite/simple.pl");
 
 test_psgi $app, sub {
     my $cb  = shift;
@@ -79,7 +78,7 @@ test_psgi $app, sub {
         }
         ok my $c = $res->content, 'content';
         ok my $o = Load($c), 'decode';
-        is $o->{success}, 1, 'success';
+        #is $o->{success}, 1, 'success';
     };
 };
 
@@ -136,36 +135,3 @@ test_psgi $app, sub {
 };
 
 done_testing;
-exit;
-
-#$t = Plack::Test->create($app);
-#my $res = $t->request(GET "/user/2?view=all&view=none");
-#diag $res->content;
-#
-#note ' *** ' x 5;
-#
-#$t = Plack::Test->create($app);
-#$res = $t->request(PUT "/user/2/bump");
-#diag $res->content;
-#
-#$t = Plack::Test->create($app);
-#$res = $t->request(PUT "/user/2/bump");
-#diag $res->content;
-#
-#note ' *** ' x 5;
-#
-#$t = Plack::Test->create($app);
-#$res = $t->request(GET "/user/2/bump");
-#diag $res->content;
-#
-#note ' *** ' x 5;
-#
-#$t = Plack::Test->create($app);
-#$res = $t->request(GET "/user/2");
-#diag $res->content;
-#
-#note ' *** ' x 5;
-#
-#$t = Plack::Test->create($app);
-#$res = $t->request(GET "/failed");
-#diag $res->content;

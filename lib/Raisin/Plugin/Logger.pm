@@ -9,8 +9,8 @@ use Carp;
 use Log::Dispatch;
 
 sub build {
-    my ($self, %args) = @_;
-    my $logger = $self->{logger} = Log::Dispatch->new(%args);
+    my ($self, @args) = @_;
+    my $logger = $self->{logger} = Log::Dispatch->new(@args);
 
     # Register a few levels
     my @levels_to_register = qw/debug info error/;

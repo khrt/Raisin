@@ -14,8 +14,7 @@ our @EXPORT = qw(
     namespace route_param
     req res params session
     delete get head options patch post put
-    api_format
-    plugin
+    plugin api_format
 );
 
 my $app;
@@ -25,14 +24,13 @@ my @NS = ('');
 
 sub import {
     my $class = shift;
-    my $caller = caller;
-
     $class->export_to_level(1, @_);
 
     strict->import;
     warnings->import;
     feature->import(':5.12');
 
+    my $caller = caller;
     $app = Raisin->new(caller => $caller);
 }
 
@@ -77,7 +75,7 @@ sub namespace {
         %SETTINGS = %prev_settings;
     }
 
-    (join '/', @NS) || '/'
+    (join '/', @NS) || '/';
 }
 
 
