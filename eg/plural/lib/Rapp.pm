@@ -8,7 +8,7 @@ use lib ("$Bin/../lib", "$Bin/../../../lib");
 
 use Raisin::DSL;
 
-api_format 'YAML';
+api_format 'JSON';
 
 before sub {
 #    my $self = shift;
