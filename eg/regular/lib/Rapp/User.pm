@@ -30,14 +30,17 @@ namespace user => sub {
     ],
     sub {
         my $params = shift;
-        my @users = map { $USERS{$_} } sort { $a <=> $b } keys %USERS;
         my ($start, $count) = ($params->{start}, $params->{count});
+
+        my @users
+            = map { { id => $_, %{ $USERS{$_} } } }
+              sort { $a <=> $b } keys %USERS;
 
         $start = $start > scalar @users ? scalar @users : $start;
         $count = $count > scalar @users ? scalar @users : $count;
 
-        res->json;
-        @users[$start, $count];
+        my @slice = @users[$start .. $count];
+        { data => \@slice }
     };
 
     # create new user
@@ -52,7 +55,6 @@ namespace user => sub {
         my $id = max(keys %USERS) + 1;
         $USERS{$id} = $params;
 
-        res->json;
         { success => 1 }
     };
 
@@ -62,7 +64,6 @@ namespace user => sub {
         # get user
         get sub {
             my $params = shift;
-            res->json;
             { data => $USERS{ $params->{id} } || 'Nothing found!' }
         };
 
@@ -76,7 +77,6 @@ namespace user => sub {
             for (qw(password email)) {
                 $USERS{ $params->{id} }{$_} = $params->{$_};
             }
-            res->json;
             { success => 1 }
         };
 
@@ -85,7 +85,6 @@ namespace user => sub {
             # get bump count
             get sub {
                 my $params = shift;
-                res->json;
                 { data => $USERS{ $params->{id} }{bumped} }
             };
 
@@ -93,7 +92,6 @@ namespace user => sub {
             put sub {
                 my $params = shift;
                 $USERS{ $params->{id} }{bumped}++;
-                res->json;
                 { success => 1 }
             };
         };

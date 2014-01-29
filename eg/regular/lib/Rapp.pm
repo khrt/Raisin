@@ -3,18 +3,21 @@ package Rapp;
 use strict;
 use warnings;
 
-use lib "$FindBin::Bin/../../lib"; # ->Raisin/lib
+use FindBin '$Bin';
+use lib ("$Bin/../lib", "$Bin/../../../lib");
 
 use Raisin::DSL;
-
-use Rapp::Host;
-use Rapp::User;
 
 #before sub {
 #    error('FORBIDDEN', 401) if not authenticated
 #}
 
-mount 'Rapp::Host' => 'v2';
+api_format 'YAML';
+
 mount 'Rapp::User';
+mount 'Rapp::Host';
+
+#require Rapp::Host;
+#require Rapp::User;
 
 1;

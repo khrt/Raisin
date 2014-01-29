@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Raisin::DSL;
+use Raisin::Types;
 
 # USERS
 my %HOSTS = (
@@ -34,14 +35,17 @@ namespace host => sub {
     ],
     sub {
         my $params = shift;
-        my @hosts = map { $HOSTS{$_} } sort { $a <=> $b } keys %HOSTS;
         my ($start, $count) = ($params->{start}, $params->{count});
+
+        my @hosts
+            = map { { id => $_, %{ $HOSTS{$_} } } }
+              sort { $a <=> $b } keys %HOSTS;
 
         $start = $start > scalar @hosts ? scalar @hosts : $start;
         $count = $count > scalar @hosts ? scalar @hosts : $count;
 
-        res->json;
-        @hosts[$start, $count];
+        my @slice = @hosts[$start .. $count];
+        { data => \@slice }
     };
 
     # create new host
@@ -55,7 +59,6 @@ namespace host => sub {
         my $id = max(keys %HOSTS) + 1;
         $HOSTS{$id} = $params;
 
-        res->json;
         { success => 1 }
     };
 
@@ -65,7 +68,6 @@ namespace host => sub {
         # get host
         get sub {
             my $params = shift;
-            res->json;
             { data => $HOSTS{ $params->{id} } || 'Nothing found!' }
         };
 
@@ -76,7 +78,6 @@ namespace host => sub {
         sub {
             my $params = shift;
             $HOSTS{ $params->{id} }{state} = $params->{state};
-            res->json;
             { success => 1 }
         };
     };

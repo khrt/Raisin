@@ -53,12 +53,14 @@ sub add_hook {
 
 # Application
 sub mount_package {
-    my ($self, $package, $path) = @_;
-
+    my ($self, $package) = @_;
+    push @{ $self->{mounted} }, $package;
     $package = Plack::Util::load_class($package);
-    $package->new;
-    $path;
-    # TODO:
+
+p $self->routes;
+#say $package;
+#$package->new;
+#say '--- ' x 10;
 }
 
 sub run {
@@ -319,7 +321,7 @@ It's a clone of Grape (Ruby REST-like API micro-framework).
 
 =head1 AUTHOR
 
-Artur Khabibullin - khrt <at> ya.org
+Artur Khabibullin - khrt <at> ya.ru
 
 =head1 LICENSE
 

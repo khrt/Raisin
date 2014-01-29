@@ -15,7 +15,7 @@ sub new {
 
 sub rendered {
     my ($self, $rendered) = @_;
-    $self->{rendered} = $rendered if $rendered;
+    $self->{rendered} = $rendered if defined $rendered;
     $self->{rendered};
 }
 

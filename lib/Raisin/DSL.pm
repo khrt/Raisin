@@ -7,9 +7,12 @@ use feature ':5.12';
 use base 'Exporter';
 
 use Raisin;
+use DDP; # XXX
 
 our @EXPORT = qw(
     to_app run
+    mount new
+
     hook
     namespace route_param
     req res params session
@@ -31,15 +34,15 @@ sub import {
     feature->import(':5.12');
 
     my $caller = caller;
-    $app = Raisin->new(caller => $caller);
+    $app ||= Raisin->new(caller => $caller);
 }
 
 #
 # Execution
 #
-sub to_app { $app->psgi } # XXX run?
-sub new    { $app->run } # XXX to_app?
-sub run    { $app->run }
+sub run { $app->run(@_) }
+sub to_app { sub { $app->psgi(@_) } }
+#sub to_app { $app->run(@_) }
 
 #
 # Compile
