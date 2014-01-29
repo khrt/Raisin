@@ -11,6 +11,6 @@ use lib ("$Bin/../lib", "$Bin/../../../lib");
 use Rapp;
 
 builder {
-    mount '/api' => Rapp->to_app;
-#    mount '/live-api' => Rapp->new(docs => 1);
+    mount '/api' => Rapp->new;
+    mount '/live-api' => Rapp->new(visualize => 1);
 };

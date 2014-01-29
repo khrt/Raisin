@@ -13,7 +13,9 @@ our @EXPORT = qw(
     to_app run
     mount new
 
-    hook
+    before before_validation
+    after_validation after
+
     namespace route_param
     req res params session
     delete get head options patch post put
@@ -41,7 +43,16 @@ sub import {
 # Execution
 #
 sub run { $app->run(@_) }
-sub to_app { sub { $app->psgi(@_) } }
+sub new {
+    my ($self, %args) = @_;
+
+    if ($args{visualize}) {
+        sub { [200, [], ['API visualizer!']] }
+    }
+    else {
+        sub { $app->psgi(@_) }
+    }
+}
 #sub to_app { $app->run(@_) }
 
 #

@@ -8,14 +8,18 @@ use lib ("$Bin/../lib", "$Bin/../../../lib");
 
 use Raisin::DSL;
 
-#before sub {
-#    error('FORBIDDEN', 401) if not authenticated
-#}
-
 api_format 'YAML';
 
-mount 'Rapp::User';
+before sub {
+#    my $self = shift;
+#    say 'before each route?';
+#    say $self->req->method;
+#    say $self->req->path;
+    #error('FORBIDDEN', 401) if not authenticated
+};
+
 mount 'Rapp::Host';
+mount 'Rapp::User';
 
 #require Rapp::Host;
 #require Rapp::User;

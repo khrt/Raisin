@@ -56,11 +56,6 @@ sub mount_package {
     my ($self, $package) = @_;
     push @{ $self->{mounted} }, $package;
     $package = Plack::Util::load_class($package);
-
-p $self->routes;
-#say $package;
-#$package->new;
-#say '--- ' x 10;
 }
 
 sub run {
@@ -103,9 +98,6 @@ sub psgi {
 
     # Find route
     my $routes = $self->routes->find($req->method, $req->path);
-#say '*' . ' ROUTES' x 3;
-#say Dumper $routes;
-#say '*' . ' <--' x 3;
 
     if (!@$routes) {
         $res->render_404;
@@ -132,7 +124,7 @@ sub psgi {
             my $params = $req->parameters->mixed;
             my $named = $route->named;
 #say '-' . ' PATH PARAMS -' x 3;
-#warn Dumper $named;
+#p $named;
 #say '*' . ' <--' x 3;
 
             # Validation # TODO BROKEN
@@ -148,7 +140,7 @@ sub psgi {
 
             my $declared_params = $req->declared_params;
 #say '-' . ' DECLARED PARAMS -' x 3;
-#say Dumper \%declared_params;
+#p %declared_params;
 #say ' =' x 3;
 
             # HOOK After validation
@@ -156,8 +148,6 @@ sub psgi {
 
             # Eval code
             my $data = $code->($declared_params);
-#say '*' . ' DATA -' x 3;
-#say Dumper $data;
 
             # Format plugins
             if ($self->can('serialize')) {
@@ -187,7 +177,7 @@ sub psgi {
         }
 
         if (!$res->rendered) {
-            die 'Nothing rendered!';
+            croak 'Nothing rendered!';
         }
     };
 
@@ -233,11 +223,7 @@ sub res {
     $self->{res};
 }
 
-sub params {
-    #$_[0]->req->query_parameters
-    #$_[0]->req->body_parameters
-    $_[0]->req->parameters
-}
+sub params { shift->req->parameters }
 
 sub session {
     my $self = shift;
