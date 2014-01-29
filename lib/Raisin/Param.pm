@@ -84,8 +84,6 @@ sub validate {
 
 __END__
 
-=pod
-
 =head1 NAME
 
 Raisin::Param

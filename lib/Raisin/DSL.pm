@@ -51,14 +51,12 @@ sub new {
         for (@{ $app->routes->{routes} }) {
             $map .= $_->method . "\t" . $_->path . "\n"
         }
-
         sub { [200, [], [$map]] }
     }
     else {
-        sub { $app->psgi(@_) }
+        $app->run
     }
 }
-#sub to_app { $app->run(@_) }
 
 #
 # Compile
@@ -108,9 +106,9 @@ sub route_param {
 #
 sub delete  { $app->add_route('DELETE',  namespace(), %SETTINGS, @_) }
 sub get     { $app->add_route('GET',     namespace(), %SETTINGS, @_) }
-#sub head    { $app->add_route('HEAD',    namespace(), %SETTINGS, @_) }
-#sub options { $app->add_route('OPTIONS', namespace(), %SETTINGS, @_) }
-#sub patch   { $app->add_route('PATCH',   namespace(), %SETTINGS, @_) }
+sub head    { $app->add_route('HEAD',    namespace(), %SETTINGS, @_) }
+sub options { $app->add_route('OPTIONS', namespace(), %SETTINGS, @_) }
+sub patch   { $app->add_route('PATCH',   namespace(), %SETTINGS, @_) }
 sub post    { $app->add_route('POST',    namespace(), %SETTINGS, @_) }
 sub put     { $app->add_route('PUT',     namespace(), %SETTINGS, @_) }
 

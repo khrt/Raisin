@@ -51,8 +51,6 @@ sub register {
 
 __END__
 
-=pod
-
 =head1 NAME
 
 Raisin::Plugin
@@ -61,4 +59,4 @@ Raisin::Plugin
 
 =head1 DESCRIPTION
 
-=end
+=cut

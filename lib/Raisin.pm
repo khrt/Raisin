@@ -237,8 +237,6 @@ sub session {
 
 1;
 
-=pod
-
 =head1 NAME
 
 Raisin - A REST-like API micro-framework for Perl.
@@ -261,18 +259,31 @@ Raisin - A REST-like API micro-framework for Perl.
     );
 
     namespace '/user' => sub {
-        get sub {
-            map {
-                my $id = $_;
-                [ map { { $_ => $USERS{$id}{$_} } } keys $USERS{$id} ]
-            } keys %USERS;
+        get params => [
+            #required/optional => [name, type, default, regex]
+            optional => ['start', $Raisin::Types::Integer, 0],
+            optional => ['count', $Raisin::Types::Integer, 10],
+        ],
+        sub {
+            my $params = shift;
+            my ($start, $count) = ($params->{start}, $params->{count});
+
+            my @users
+                = map { { id => $_, %{ $USERS{$_} } } }
+                  sort { $a <=> $b } keys %USERS;
+
+            $start = $start > scalar @users ? scalar @users : $start;
+            $count = $count > scalar @users ? scalar @users : $count;
+
+            my @slice = @users[$start .. $count];
+            { data => \@slice }
         };
 
-        post params => {
+        post params => [
             required => ['name', $Raisin::Types::String],
             required => ['password', $Raisin::Types::String],
             optional => ['email', $Raisin::Types::String, undef, qr/.+\@.+/],
-        },
+        ],
         sub {
             my $params = shift;
 
@@ -286,9 +297,9 @@ Raisin - A REST-like API micro-framework for Perl.
         sub {
             get sub {
                 my $params = shift;
-                %USERS{$params{id}};
+                %USERS{ $params->{id} };
             };
-        }:
+        };
     };
 
     run;
@@ -299,15 +310,125 @@ Raisin is a REST-like API micro-framework for Perl.
 It's designed to run on Plack, providing a simple DSL
 to easily develop RESTful APIs.
 
-It's a clone of Grape (Ruby REST-like API micro-framework).
+It's a clone of L<Grape|https://github.com/intridea/grape>.
 
-=over
+=head1 KEYWORDS
 
-=item * GitHub: https://github.com/khrt/Raisin
+=head2 namespace
+
+    namespace user => sub { ... };
+
+=head2 route_param
+
+    route_param id => $Raisin::Types::Integer, sub { ... };
+
+=head2 delete, get, post, put
+
+These are shortcuts to C<route> restricted to the corresponding HTTP method.
+
+    get sub { 'GET' };
+
+    get params => [
+        required => ['id', $Raisin::Types::Integer],
+        optional => ['key', $Raisin::Types::String],
+    ],
+    sub { 'GET' };
+
+=head2 req
+
+An alias for C<$self-E<gt>req>, this provides quick access to the
+L<Raisin::Request> object for the current route.
+
+=head2 res
+
+An alias for C<$self-E<gt>res>, this provides quick access to the
+L<Raisin::Response> object for the current route.
+
+=head2 params
+
+An alias for C<$self-E<gt>params> that gets the GET and POST parameters.
+When used with no arguments, it will return an array with the names of all http
+parameters. Otherwise, it will return the value of the requested http parameter.
+
+=head2 session
+
+An alias for C<$self-E<gt>session> that returns (optional) psgix.session hash.
+When it exists, you can retrieve and store per-session data from and to this hash.
+
+=head2 plugin
+
+Loads a Raisin module. The module options may be specified after the module name.
+Compatible with L<Kelp> modules.
+
+    plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
+
+=head2 api_format
+
+Load a C<Raisin::Plugin::Format> plugin. Already exists L<Raisin::Plugin::Format::JSON>
+and L<Raisin::Plugin::Format::YAML>.
+
+    api_format 'JSON';
+
+=head2 mount
+
+Mount multiple API implementations inside another one.  These don't have to be
+different versions, but may be components of the same API.
+
+    mount 'RApp::User';
+    mount 'RApp::Host';
+
+=head2 run, new
+
+Creates and returns a PSGI ready subroutine, and makes the app ready for C<Plack>.
+
+=head1 ROUTING
+
+about routing
+
+=head1 PARAMETERS
+
+    get params => [
+        optional => ['start', $Raisin::Types::Integer, 0],
+        optional => ['count', $Raisin::Types::Integer, 10],
+        required => ['email', $Raisin::Types::String, undef, qr/[^@]@[^.].\w+/],
+    ],
+
+=head2 Declared params
+
+required/optional => [name, type, default, regex]
+
+=head2 Types
+
+See L<Raisin::Types>
+
+=head1 HOOKS
+
+C<before>, C<before_validation>, C<after_validation>, C<after>
+
+=head1 ADDING MIDDLEWARE
+
+You can easily add middleware to your application using C<middleware> keyword.
+
+=head1 PLUGINS
+
+See L<Raisin::Plugin>
+
+=head1 DEPLOYING
+
+Plack::Builder ...
+
+=head1 GitHub
+
+https://github.com/khrt/Raisin
 
 =head1 AUTHOR
 
 Artur Khabibullin - khrt <at> ya.ru
+
+=head1 ACKNOWLEDGEMENTS
+
+This module's interface was inspired by L<Kelp>, which was inspired L<Dancer>,
+which in its turn was inspired by Sinatra, so Viva La Open Source!
 
 =head1 LICENSE
 

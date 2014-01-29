@@ -98,8 +98,6 @@ sub find {
 
 __END__
 
-=pod
-
 =head1 NAME
 
 Raisin::Routes - Routing

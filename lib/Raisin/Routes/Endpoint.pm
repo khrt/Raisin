@@ -87,8 +87,6 @@ sub named {
 
 __END__
 
-=pod
-
 =head1 NAME
 
 Raisin::Routes::Endpoint

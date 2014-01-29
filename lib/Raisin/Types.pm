@@ -43,8 +43,6 @@ our $Integer
 
 __END__
 
-=pod
-
 =head1 NAME
 
 Raisin::Types - default types for Raisin
