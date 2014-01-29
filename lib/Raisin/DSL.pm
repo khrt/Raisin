@@ -42,12 +42,17 @@ sub import {
 #
 # Execution
 #
-sub run { $app->run(@_) }
+sub run { $app->run }
 sub new {
     my ($self, %args) = @_;
 
     if ($args{visualize}) {
-        sub { [200, [], ['API visualizer!']] }
+        my $map;
+        for (@{ $app->routes->{routes} }) {
+            $map .= $_->method . "\t" . $_->path . "\n"
+        }
+
+        sub { [200, [], [$map]] }
     }
     else {
         sub { $app->psgi(@_) }
