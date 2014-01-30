@@ -213,6 +213,8 @@ sub session {
 
 1;
 
+__END__
+
 =head1 NAME
 
 Raisin - A REST-like API micro-framework for Perl.
