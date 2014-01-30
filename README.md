@@ -2,7 +2,7 @@
 
 Raisin - A REST-like API micro-framework for Perl.
 
-# SYNOPSYS
+# SYNOPSIS
 
 ```perl
 use Raisin::DSL;

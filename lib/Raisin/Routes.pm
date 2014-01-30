@@ -102,7 +102,7 @@ __END__
 
 Raisin::Routes - Routing
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
     use Raisin::Routes;
     my $r = Raisin::Routes->new;

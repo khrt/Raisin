@@ -217,7 +217,7 @@ sub session {
 
 Raisin - A REST-like API micro-framework for Perl.
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
     use Raisin::DSL;
 

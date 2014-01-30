@@ -25,7 +25,7 @@ __END__
 
 Raisin::Types::Base
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
     my $Price =
         Raisin::Types::Base->new(

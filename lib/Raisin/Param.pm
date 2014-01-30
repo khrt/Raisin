@@ -83,7 +83,7 @@ __END__
 
 Raisin::Param
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
     use Raisin::Param;
 

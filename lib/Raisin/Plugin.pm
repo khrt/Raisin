@@ -55,7 +55,7 @@ __END__
 
 Raisin::Plugin
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
 =head1 DESCRIPTION
 
