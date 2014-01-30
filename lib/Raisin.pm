@@ -470,8 +470,26 @@ Optional parameters can have a default value.
 
 =head3 Types
 
+
+
+=over
+
+=item *
+
+L<Raisin::Type::Integer>
+
+=item *
+
+L<Raisin::Type::String>
+
+=item *
+
+L<Raisin::Type::Scalar>
+
+=back
+
 TODO
-See L<Raisin::Types>
+See L<Raisin::Type>
 
 =head2 Hooks
 
@@ -563,9 +581,14 @@ Default to C<TXT>.
 
 =head1 HEADERS
 
-TODO
-set headers
-get headers
+Use C<res> to set up response headers. See L<Plack::Response>.
+
+    res->headers(['X-Application' => 'Raisin Application');
+
+Use C<req> to read request headers. See L<Plack::Request>.
+
+    req->header('X-Application');
+    req->headers;
 
 =head1 AUTHENTICATION
 
