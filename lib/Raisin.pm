@@ -36,6 +36,11 @@ sub load_plugin {
     $module->build(@args);
 }
 
+sub load_middleware {
+    my ($self, $name, @args) = @_;
+    die 'implement me!';
+}
+
 # Routes
 sub routes { shift->{routes} }
 sub add_route { shift->routes->add(@_) }
@@ -123,7 +128,8 @@ sub psgi {
             # Load params
             my $params = $req->parameters->mixed;
             my $named = $route->named;
-#say '-' . ' PATH PARAMS -' x 3;
+#say '-' . ' PARAMS -' x 3;
+#p $params;
 #p $named;
 #say '*' . ' <--' x 3;
 
@@ -141,7 +147,7 @@ sub psgi {
             my $declared_params = $req->declared_params;
 #say '-' . ' DECLARED PARAMS -' x 3;
 #p %declared_params;
-#say ' =' x 3;
+#say '*' . ' <--' x 3;
 
             # HOOK After validation
             $self->hook('after_validation')->($self);
@@ -150,21 +156,12 @@ sub psgi {
             my $data = $code->($declared_params);
 
             # Format plugins
-            if ($self->can('serialize')) {
+            if (ref $data && $self->can('serialize')) {
                 $data = $self->serialize($data);
             }
 
             # Set default content type
             $res->content_type($self->default_content_type);
-
-            # Bridge?
-#        if ($route->bridge) {
-#            if (!$data) {
-#                $res->render_401 if not $res->rendered;
-#                last;
-#            }
-#            next;
-#        }
 
             if (defined $data) {
                 # Handle delayed response
@@ -307,22 +304,20 @@ Raisin - A REST-like API micro-framework for Perl.
 =head1 DESCRIPTION
 
 Raisin is a REST-like API micro-framework for Perl.
-It's designed to run on Plack, providing a simple DSL
-to easily develop RESTful APIs.
-
-It's a clone of L<Grape|https://github.com/intridea/grape>.
+It's designed to run on Plack, providing a simple DSL to easily develop RESTful APIs.
+It was inspired by L<Grape|https://github.com/intridea/grape>.
 
 =head1 KEYWORDS
 
-=head2 namespace
+=head3 namespace
 
     namespace user => sub { ... };
 
-=head2 route_param
+=head3 route_param
 
     route_param id => $Raisin::Types::Integer, sub { ... };
 
-=head2 delete, get, post, put
+=head3 delete, get, post, put
 
 These are shortcuts to C<route> restricted to the corresponding HTTP method.
 
@@ -334,88 +329,288 @@ These are shortcuts to C<route> restricted to the corresponding HTTP method.
     ],
     sub { 'GET' };
 
-=head2 req
+=head3 req
 
 An alias for C<$self-E<gt>req>, this provides quick access to the
 L<Raisin::Request> object for the current route.
 
-=head2 res
+=head3 res
 
 An alias for C<$self-E<gt>res>, this provides quick access to the
 L<Raisin::Response> object for the current route.
 
-=head2 params
+=head3 params
 
 An alias for C<$self-E<gt>params> that gets the GET and POST parameters.
 When used with no arguments, it will return an array with the names of all http
 parameters. Otherwise, it will return the value of the requested http parameter.
 
-=head2 session
+Returns L<Hash::MultiValue> object.
+
+=head3 session
 
 An alias for C<$self-E<gt>session> that returns (optional) psgix.session hash.
 When it exists, you can retrieve and store per-session data from and to this hash.
 
-=head2 plugin
+=head3 api_format
+
+Load a C<Raisin::Plugin::Format> plugin.
+
+Already exists L<Raisin::Plugin::Format::JSON> and L<Raisin::Plugin::Format::YAML>.
+
+    api_format 'JSON';
+
+=head3 plugin
 
 Loads a Raisin module. The module options may be specified after the module name.
 Compatible with L<Kelp> modules.
 
     plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
 
-=head2 api_format
+=head3 middleware
 
-Load a C<Raisin::Plugin::Format> plugin. Already exists L<Raisin::Plugin::Format::JSON>
-and L<Raisin::Plugin::Format::YAML>.
+Loads middleware to your application.
 
-    api_format 'JSON';
+    middleware '+Plack::Middleware::Session' => { store => 'File' };
+    middleware '+Plack::Middleware::ContentLength';
 
-=head2 mount
+=head3 mount
 
 Mount multiple API implementations inside another one.  These don't have to be
 different versions, but may be components of the same API.
 
-    mount 'RApp::User';
-    mount 'RApp::Host';
+In C<RaisinApp.pm>:
 
-=head2 run, new
+    package RaisinApp;
+
+    use Raisin::DSL;
+
+    api_format 'JSON';
+
+    mount 'RaisinApp::User';
+    mount 'RaisinApp::Host';
+
+    1;
+
+=head3 run, new
 
 Creates and returns a PSGI ready subroutine, and makes the app ready for C<Plack>.
 
-=head1 ROUTING
+=head2 Parameters
 
-about routing
+Request parameters are available through the params hash object. This includes
+GET, POST and PUT parameters, along with any named parameters you specify in
+your route strings.
 
-=head1 PARAMETERS
+Parameters are automatically populated from the request body on POST and PUT
+for form input, JSON and YAML content-types.
+
+In the case of conflict between either of:
+
+=over
+
+=item *
+
+route string parameters
+
+=item *
+
+GET, POST and PUT parameters
+
+=item *
+
+the contents of the request body on POST and PUT
+
+=back
+
+route string parameters will have precedence.
+
+Query string and body parameters will be merged (see L<Plack::Request/parameters>)
+
+=head3 Validation and coercion
+
+You can define validations and coercion options for your parameters using a params block.
+
+Parameters can be C<required> and C<optional>. C<optional> parameters can have a
+default value.
 
     get params => [
-        optional => ['start', $Raisin::Types::Integer, 0],
-        optional => ['count', $Raisin::Types::Integer, 10],
-        required => ['email', $Raisin::Types::String, undef, qr/[^@]@[^.].\w+/],
+        required => ['name', $Raisin::Types::String],
+        optional => ['number', $Raisin::Types::Integer, 10],
     ],
+    sub {
+        my $params = shift;
+        "$params->{number}: $params->{name}";
+    };
 
-=head2 Declared params
 
-required/optional => [name, type, default, regex]
+Positional arguments:
 
-=head2 Types
+=over
 
+=item *
+
+name
+
+=item *
+
+type
+
+=item *
+
+default value
+
+=item *
+
+regex
+
+=back
+
+Optional parameters can have a default value.
+
+=head3 Types
+
+TODO
 See L<Raisin::Types>
 
-=head1 HOOKS
+=head2 Hooks
 
-C<before>, C<before_validation>, C<after_validation>, C<after>
+This blocks can be executed before or after every API call, using
+C<before>, C<after>, C<before_validation> and C<after_validation>.
 
-=head1 ADDING MIDDLEWARE
+Before and after callbacks execute in the following order:
 
-You can easily add middleware to your application using C<middleware> keyword.
+=over
+
+=item *
+
+before
+
+=item *
+
+before_validation
+
+=item *
+
+after_validation
+
+=item *
+
+after
+
+=back
+
+The block applies to every API call
+
+    before sub {
+        my $self = shift;
+        say $self->req->method . "\t" . $self->req->path;
+    };
+
+    after_validation sub {
+        my $self = shift;
+        say $self->res->body;
+    };
+
+Steps 3 and 4 only happen if validation succeeds.
+
+=head1 API FORMATS
+
+By default, Raisin supports C<YAML>, C<JSON>, and C<TXT> content-types.
+The default format is C<TXT>.
+
+Serialization takes place automatically. For example, you do not have to call
+C<encode_json> in each C<JSON> API implementation.
+
+Your API can declare which types to support by using C<api_format>.
+
+    api_format 'JSON';
+
+Custom formatters for existing and additional types can be defined with a
+L<Raisin::Plugin::Format>.
+
+Built-in formats are the following:
+
+=over
+
+=item *
+
+C<JSON>: call JSON::encode_json.
+
+=item *
+
+C<YAML>: call YAML::Dump.
+
+=item *
+
+C<TXT>: call Data::Dumper->Dump if not SCALAR.
+
+=back
+
+The order for choosing the format is the following.
+
+=over
+
+=item *
+
+Use the C<api_format> set by the C<api_format> option, if specified.
+
+=item *
+
+Default to C<TXT>.
+
+=back
+
+=head1 HEADERS
+
+TODO
+set headers
+get headers
+
+=head1 AUTHENTICATION
+
+TODO
+Built-in plugin L<Raisin::Plugin::Authentication>
+L<Raisin::Plugin::Authentication::Basic>
+L<Raisin::Plugin::Authentication::Digest>
+
+=head1 LOGGING
+
+TODO
+Built-in plugin L<Raisin::Plugin::Logger>.
+
+=head1 MIDDLEWARE
+
+You can easily add any L<Plack> middleware to your application using
+C<middleware> keyword.
 
 =head1 PLUGINS
 
-See L<Raisin::Plugin>
+Raisin can be extended using custom I<modules>. Each new module must be a subclass
+of the C<Raisin::Plugin> namespace. Modules' job is to initialize and register new
+methods into the web application class.
+
+For more see L<Raisin::Plugin>.
+
+=head1 TESTING
+
+TODO
+L<Plack::Test>
 
 =head1 DEPLOYING
 
-Plack::Builder ...
+See examples and/or L<Plack::App::URLMap>.
+In C<app.psgi>:
+
+    use Plack::Builder;
+
+    use RaisinApp;
+    use KelpApp;
+
+    builder {
+        mount '/' => KelpApp->new->run;
+        mount '/api/rest' => RaisinApp->new;
+    };
 
 =head1 GitHub
 
@@ -427,8 +622,8 @@ Artur Khabibullin - khrt <at> ya.ru
 
 =head1 ACKNOWLEDGEMENTS
 
-This module's interface was inspired by L<Kelp>, which was inspired L<Dancer>,
-which in its turn was inspired by Sinatra, so Viva La Open Source!
+This module was inspired by L<Kelp>, which was inspired by L<Dancer>,
+which in its turn was inspired by Sinatra.
 
 =head1 LICENSE
 

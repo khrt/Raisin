@@ -13,13 +13,16 @@ our @EXPORT = qw(
     to_app run
     mount new
 
+    middleware
+
+    plugin api_format
+
     before before_validation
     after_validation after
 
     namespace route_param
     req res params session
     delete get head options patch post put
-    plugin api_format
 );
 
 my $app;
@@ -62,6 +65,7 @@ sub new {
 # Compile
 #
 sub mount { $app->mount_package(@_) }
+sub middleware { die 'TODO' } # TODO
 
 #
 # Hooks

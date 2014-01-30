@@ -25,6 +25,12 @@ sub render {
     $self->status(200) if not $self->status;
     $self->content_type('text/plain') if not $self->content_type;
 
+    if (ref $body) {
+        require Data::Dumper;
+        $body = Data::Dumper->new([$body], ['body'])
+            ->Purity(1)->Terse(1)->Deepcopy(1)->Dump;
+    }
+
     $self->body(encode 'UTF-8', $body);
     $self->rendered(1);
 
