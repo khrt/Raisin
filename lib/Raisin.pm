@@ -84,16 +84,8 @@ sub psgi {
     my ($self, $env) = @_;
 
     # Diffrent for each response
-    my $req = $self->req(Raisin::Request->new($env));
-    my $res = $self->res(Raisin::Response->new($self));
-
-    # TODO Check incoming content type
-#    if (my $content_type = $self->default_content_type) {
-#        if (!$req->content_type or $req->content_type ne $content_type) {
-#            $res->render_error(409, 'Invalid format!');
-#            return $self->res->finalize;
-#        }
-#    }
+    my $req = $self->req(Raisin::Request->new($self, $env));
+    my $res = $self->res(Raisin::Response->new);
 
     # HOOK Before
     $self->hook('before')->($self);
@@ -125,39 +117,30 @@ sub psgi {
             # Load params
             my $params = $req->parameters->mixed;
             my $named = $route->named;
-#say '-' . ' PARAMS -' x 3;
-#p $params;
-#p $named;
-#say '*' . ' <--' x 3;
 
             $req->set_declared_params($route->params);
             $req->set_named_params($route->named);
 
-            # Validation
-            if (not $req->validate_params) {
+            # Populate and validate declared params
+            if (not $req->populate_params) {
                 warn '* ' . 'INVALID PARAMS! ' x 5;
                 $res->render_error(400, 'Invalid params!');
                 last;
             }
 
-            my $declared_params = $req->declared_params;
-#say '-' . ' DECLARED PARAMS -' x 3;
-#p %declared_params;
-#say '*' . ' <--' x 3;
-
             # HOOK After validation
             $self->hook('after_validation')->($self);
 
+            # Set default content type
+            $res->content_type($self->default_content_type);
+
             # Eval code
-            my $data = $code->($declared_params);
+            my $data = $code->($req->declared_params);
 
             # Format plugins
             if (ref $data && $self->can('serialize')) {
                 $data = $self->serialize($data);
             }
-
-            # Set default content type
-            $res->content_type($self->default_content_type);
 
             if (defined $data) {
                 # Handle delayed response
@@ -600,6 +583,12 @@ Raisin has a buil-in logger based on Log::Dispatch. You can enable it by
 
     plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
 
+Exports C<logger> subroutine.
+
+    logger(debug => 'Debug!');
+    logger(warn => 'Warn!');
+    logger(error => 'Error!');
+
 See L<Raisin::Plugin::Logger>.
 
 =head1 MIDDLEWARE
@@ -617,8 +606,23 @@ For more see L<Raisin::Plugin>.
 
 =head1 TESTING
 
-TODO
-L<Plack::Test>
+See L<Plack::Test>, L<Test::More> and etc.
+
+    my $app = Plack::Util::load_psgi("$Bin/../script/raisinapp.pl");
+
+    test_psgi $app, sub {
+        my $cb  = shift;
+        my $res = $cb->(GET '/user');
+
+        subtest 'GET /user' => sub {
+            if (!is $res->code, 200) {
+                diag $res->content;
+                BAIL_OUT 'FAILED!';
+            }
+            my $got = Load($res->content);
+            isdeeply $got, $expected, 'Data!';
+        };
+    };
 
 =head1 DEPLOYING
 

@@ -33,7 +33,7 @@ my %USERS = (
     },
 );
 
-plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
+#plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
 api_format 'YAML';
 
 # /user
@@ -90,8 +90,6 @@ namespace user => sub {
         ],
         sub {
             my $params = shift;
-
-            debug(Dumper $params);
 
             my $updated = 0;
             for (grep { $params->{$_} } qw(password email)) {

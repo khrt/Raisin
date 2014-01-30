@@ -2,34 +2,53 @@ package Raisin::Request;
 
 use strict;
 use warnings;
+use feature ':5.12';
 
 use Carp;
 use base 'Plack::Request';
 
 sub new {
-    my ($class, $env) = @_;
+    my ($class, $app, $env) = @_;
     my $self = $class->SUPER::new($env);
+    $self->{app} = $app;
     $self;
 }
+
+sub app { shift->{app} }
 
 sub declared_params { shift->{'raisin.params'} }
 
 sub set_declared_params {
     my ($self, $declared) = @_;
-    $self->{'raisin.params.declared'} = $declared if $declared;
+    $self->{'raisin.params.declared'} = $declared;
 }
 
 sub set_named_params {
     my ($self, $named) = @_;
-    $self->{'raisin.params.named'} = $named if $named;
+    $self->{'raisin.params.named'} = $named;
 }
 
-sub validate_params {
+sub populate_params {
     my $self = shift;
 
     my $declared = $self->{'raisin.params.declared'};
     my $named = $self->{'raisin.params.named'};
-    my $params = $self->parameters->mixed;
+
+    my $params = do {
+        if ($self->method =~ /POST|PUT/ && (my $content = $self->content)) {
+            if ($self->app->can('deserialize')
+                && ($self->content_type eq $self->app->default_content_type))
+            {
+                $self->app->deserialize($content);
+            }
+            elsif ($self->content_type eq 'application/x-www-form-urlencoded') {
+                $self->body_parameters->mixed;
+            }
+        }
+        else {
+            $self->query_parameters->mixed;
+        }
+    };
 
     foreach my $p (@$declared) {
         my $name = $p->name;

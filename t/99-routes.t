@@ -18,7 +18,7 @@ my %NEW_USER = (
 );
 my @USER_IDS;
 
-my $app = Plack::Util::load_psgi("$Bin/../eg/singular/user.pl");
+my $app = Plack::Util::load_psgi("$Bin/../eg/singular/routes.pl");
 
 test_psgi $app, sub {
     my $cb  = shift;
@@ -69,7 +69,12 @@ test_psgi $app, sub {
 
 test_psgi $app, sub {
     my $cb  = shift;
-    my $res = $cb->(PUT "/user/$USER_IDS[-1]", [password => 'newpassword']);
+
+    my $res = $cb->(
+        PUT "/user/$USER_IDS[-1]",
+        Content => "password=new",
+        Content_Type => 'application/x-www-form-urlencoded'
+    );
 
     subtest "PUT /user/$USER_IDS[-1]" => sub {
         if (!is $res->code, 200) {
@@ -78,7 +83,7 @@ test_psgi $app, sub {
         }
         ok my $c = $res->content, 'content';
         ok my $o = Load($c), 'decode';
-        #is $o->{success}, 1, 'success';
+        is $o->{success}, 1, 'success';
     };
 };
 

@@ -39,7 +39,7 @@ sub validate {
 
     # Optional and empty
     if (!defined($$value) && !$self->required) {
-        say STDERR "$self->{name} optional and empty.";
+        #say STDERR "$self->{name} optional and empty.";
         return 1;
     }
 
