@@ -563,7 +563,7 @@ Default to C<TXT>.
 
 Use C<res> to set up response headers. See L<Plack::Response>.
 
-    res->headers(['X-Application' => 'Raisin Application');
+    res->headers(['X-Application' => 'Raisin Application']);
 
 Use C<req> to read request headers. See L<Plack::Request>.
 
