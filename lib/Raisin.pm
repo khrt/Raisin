@@ -6,7 +6,6 @@ use feature ':5.12';
 
 use Carp;
 use DDP; # XXX
-#use Plack::Builder;
 use Plack::Util;
 
 use Raisin::Request;
@@ -109,7 +108,7 @@ sub psgi {
 
     eval {
         foreach my $route (@$routes) {
-            my $code = $route->code; # endpoint
+            my $code = $route->code;
 
             if (!$code || (ref($code) && ref($code) ne 'CODE')) {
                 die 'Invalid endpoint for ' . $req->path;
@@ -131,11 +130,10 @@ sub psgi {
 #p $named;
 #say '*' . ' <--' x 3;
 
-            # Validation # TODO BROKEN
             $req->set_declared_params($route->params);
             $req->set_named_params($route->named);
 
-            # What TODO if parameters is invalid?
+            # Validation
             if (not $req->validate_params) {
                 warn '* ' . 'INVALID PARAMS! ' x 5;
                 $res->render_error(400, 'Invalid params!');

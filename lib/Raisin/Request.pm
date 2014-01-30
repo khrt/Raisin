@@ -37,7 +37,7 @@ sub validate_params {
         # Route params has more precedence than query params
         my $value = $named->{$name} // $params->{$name};
 
-        if (not $p->validate($value)) {
+        if (not $p->validate(\$value)) {
             $p->required ? return : next;
         }
 

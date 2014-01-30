@@ -32,27 +32,29 @@ sub validate {
 
     # Required
     # Only optional parameters can has default value
-    if ($self->required && !$value) {
+    if ($self->required && !$$value) {
         say STDERR "$self->{name} required but empty!";
         return;
     }
 
     # Optional and empty
-    if (!defined($value) && !$self->required) {
+    if (!defined($$value) && !$self->required) {
         say STDERR "$self->{name} optional and empty.";
         return 1;
     }
 
-    if ($value && ref $value && ref $value ne 'ARRAY') {
+    if ($$value && ref $$value && ref $$value ne 'ARRAY') {
         carp "$self->{name} \$value should be SCALAR or ARRAYREF";
         return;
     }
 
-    if (ref $value ne 'ARRAY') {
-        $value = [$value];
+    my $was_scalar;
+    if (ref $$value ne 'ARRAY') {
+        $was_scalar = 1;
+        $$value = [$$value];
     }
 
-    for my $v (@$value) {
+    for my $v (@$$value) {
         if (!$self->type->check($v)) {
             carp "$self->{name} check() failed";
             return;
@@ -64,9 +66,11 @@ sub validate {
         }
 
         if (my $in = $self->type->in) {
-            $v = $in->($v);
+            $in->(\$v);
         }
     }
+
+    $$value = $$value->[0] if $was_scalar;
 
     1;
 }

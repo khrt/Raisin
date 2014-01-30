@@ -35,7 +35,8 @@ Raisin::Types::Base
                 $v =~ /^[\d.]*$/;
             },
             in => sub {
-                sprintf '%.2f', shift;
+                my $v = shift; # SCALAR REF
+                $$v = sprintf '%.2f', $$v;
             },
         );
 
