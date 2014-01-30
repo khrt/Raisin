@@ -6,53 +6,41 @@ use warnings;
 use feature ':5.12';
 
 use Carp;
+use DDP;
 
 sub new {
-    my $class = shift;
+    my ($class, $kind, $required, $options) = @_;
     my $self = bless {}, $class;
-    $self->_build(@_);
-    $self;
-}
-
-sub _build {
-    my ($self, $kind, $required, $options) = @_;
 
     $self->{required} = $required eq 'required' ? 1 : 0;
     $self->{named} = $kind eq 'named' ? 1 : 0;
+
     @$self{qw(name type default regex)} = @$options;
+    $self;
 }
 
-sub default { $_[0]->{default} || $_[0]->type->default }
-sub name { shift->{name} }
-sub regex { $_[0]->{regex} || $_[0]->type->regex }
 sub required { shift->{required} }
-sub named { shift->{named} }
-sub type { shift->{type} }
+sub named    { shift->{named} }
 
-sub value {
-    my ($self, $value) = @_;
-    $self->{value} = $value if defined $value;
-    $self->{value} // $self->default // $self->type->default // '';
-}
+sub name    { shift->{name} }
+sub type    { shift->{type} }
+sub default { shift->{default} }
+sub regex   { shift->{regex} }
 
 sub validate {
     my ($self, $value) = @_;
 
-    # TODO Don't working
-    if (!$value && $self->value) {
-        carp "$self->{name} use default value";
-        return 1;
-    }
-
-    if (!$value && !$self->required) {
-#        carp "$self->{name} optional: skip it";
-        return 1;
-    }
-
-
+    # Required
+    # Only optional parameters can has default value
     if ($self->required && !$value) {
-        carp "$self->{name} required but empty!";
+        say STDERR "$self->{name} required but empty!";
         return;
+    }
+
+    # Optional and empty
+    if (!defined($value) && !$self->required) {
+        say STDERR "$self->{name} optional and empty.";
+        return 1;
     }
 
     if ($value && ref $value && ref $value ne 'ARRAY') {
@@ -60,20 +48,23 @@ sub validate {
         return;
     }
 
-    $value = [$value] if not ref $value eq 'ARRAY';
+    if (ref $value ne 'ARRAY') {
+        $value = [$value];
+    }
 
     for my $v (@$value) {
         if (!$self->type->check($v)) {
             carp "$self->{name} check() failed";
             return;
         }
-        elsif ($self->{regex} && ($v !~ /$self->{regex}/)) {
-            carp "$self->{name} regex failed [$v !~ $self->{regex}]";
+
+        if ($self->regex && $v !~ $self->regex) {
+            carp "$self->{name} ->regex failed";
             return;
         }
 
-        if ($self->type->in) {
-            $self->value($self->type->in->($self->value));
+        if (my $in = $self->type->in) {
+            $v = $in->($v);
         }
     }
 
@@ -90,12 +81,18 @@ Raisin::Param
 
 =head1 SYNOPSYS
 
-    use Raisin::Param
+    use Raisin::Param;
 
 =head1 DESCRIPTION
 
 Raisin Param
 
-=over
+=head3 required
+
+    $p->required;
+
+=head3 validate
+
+    $value = $p->validate($value);
 
 =cut

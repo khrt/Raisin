@@ -3,13 +3,14 @@
 use strict;
 use warnings;
 
-use Data::Dumper;
+use DDP;
 use FindBin;
 use List::Util qw(max);
 
 use lib "$FindBin::Bin/../../lib"; # ->Raisin/lib
 
 use Raisin::DSL;
+use Raisin::Types;
 
 my %USERS = (
     1 => {
@@ -28,6 +29,26 @@ my %USERS = (
 middleware 'Runtime';
 #middleware '+Plack::Middleware::SimpleLogger';
 
-get sub { \%USERS };
+get params => [
+    optional => ['password', $Raisin::Types::String, undef, qr/qwerty/],
+    optional => ['email', $Raisin::Types::String, 'NA'],
+],
+sub {
+    my $params = shift;
+    p $params;
+
+    \%USERS
+};
+
+post params => [
+    optional => ['password', $Raisin::Types::String, undef, qr/ytrewq/],
+    optional => ['email', $Raisin::Types::String, 'AN'],
+],
+sub {
+    my $params = shift;
+    p $params;
+
+    \%USERS
+};
 
 run;

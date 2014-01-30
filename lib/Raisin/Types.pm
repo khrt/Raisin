@@ -8,35 +8,29 @@ use Raisin::Types::Base;
 
 our $Scalar
     = Raisin::Types::Base->new(
-        #default => '',
         check => sub {
-            my ($self, $v) = @_;
+            my $v = shift;
             ref \$v eq 'SCALAR';
         },
         #in => sub {},
-        #regex => qr//,
     );
 
 our $String
     = Raisin::Types::Base->new(
-        #default => '',
         check => sub {
-            my ($self, $v) = @_;
-            $v =~ /${ $self->regex }/;
+            my $v = shift;
+            $v =~ /^[\t\r\n\p{IsPrint}]{0,32766}/;
         },
         #in => sub {},
-        regex => qr/^[\t\r\n\p{IsPrint}]{0,32766}$/,
     );
 
 our $Integer
     = Raisin::Types::Base->new(
-        default => 0,
         check => sub {
-            my ($self, $v) = @_;
-            $v =~ /${ $self->regex }/;
+            my $v = shift;
+            $v =~ /^\d+$/;
         },
         #in => sub {},
-        regex => qr/^\d+$/,
     );
 
 1;
@@ -47,10 +41,24 @@ __END__
 
 Raisin::Types - default types for Raisin
 
-=head1 SYNOPSYS
-
 =head1 DESCRIPTION
 
+Built-in types for Raisin.
+
 =over
+
+=item *
+
+C<Raisin::Types::Integer>
+
+=item *
+
+C<Raisin::Types::String>
+
+=item *
+
+C<Raisin::Types::Scalar>
+
+=back
 
 =cut

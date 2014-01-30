@@ -6,18 +6,53 @@ use warnings;
 sub new {
     my ($class, %args) = @_;
     my $self = bless {}, $class;
-    @$self{keys %args} = values %args;
+    @$self{qw(check in)} = @args{qw(check in)};
     $self;
 }
 
-sub default { shift->{default} }
-
 sub check {
-    my ($self, $value) = @_;
-    $self->{check}->($self, $value);
+    my ($self, $v) = @_;
+    $self->{check}->($v);
 }
 
 sub in { shift->{in} }
-sub regex { shift->{regex} }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Raisin::Types::Base
+
+=head1 SYNOPSYS
+
+    my $Price =
+        Raisin::Types::Base->new(
+            check => sub {
+                my $v = shift;
+                return if ref $v;
+                $v =~ /^[\d.]*$/;
+            },
+            in => sub {
+                sprintf '%.2f', shift;
+            },
+        );
+
+=head1 DESCRIPTION
+
+C<check> then C<in>.
+
+=head3 new
+
+Create new type.
+
+=head3 check
+
+Check subroutine.
+
+=head3 in
+
+Some actions on the checked value.
+
+=cut

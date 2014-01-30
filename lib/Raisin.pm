@@ -70,7 +70,6 @@ sub run {
 
     # Add middleware
     for my $class (keys %{ $self->{middleware} }) {
-
         # Make sure the middleware was not already loaded
         next if $self->{_loaded_middleware}->{$class}++;
 
@@ -219,7 +218,7 @@ sub res {
     $self->{res};
 }
 
-sub params { shift->req->parameters }
+sub params { shift->req->parameters->mixed }
 
 sub session {
     my $self = shift;
@@ -470,26 +469,26 @@ Optional parameters can have a default value.
 
 =head3 Types
 
-
+Custom types
 
 =over
 
 =item *
 
-L<Raisin::Type::Integer>
+L<Raisin::Types::Integer>
 
 =item *
 
-L<Raisin::Type::String>
+L<Raisin::Types::String>
 
 =item *
 
-L<Raisin::Type::Scalar>
+L<Raisin::Types::Scalar>
 
 =back
 
 TODO
-See L<Raisin::Type>
+See L<Raisin::Types>, L<Raisin::Types::Base>
 
 =head2 Hooks
 
@@ -599,8 +598,11 @@ L<Raisin::Plugin::Authentication::Digest>
 
 =head1 LOGGING
 
-TODO
-Built-in plugin L<Raisin::Plugin::Logger>.
+Raisin has a buil-in logger based on Log::Dispatch. You can enable it by
+
+    plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
+
+See L<Raisin::Plugin::Logger>.
 
 =head1 MIDDLEWARE
 
@@ -622,16 +624,52 @@ L<Plack::Test>
 
 =head1 DEPLOYING
 
-See examples and/or L<Plack::App::URLMap>.
-In C<app.psgi>:
+See L<Plack::Builder>, L<Plack::App::URLMap>.
+
+=head2 Kelp
 
     use Plack::Builder;
-
     use RaisinApp;
     use KelpApp;
 
     builder {
         mount '/' => KelpApp->new->run;
+        mount '/api/rest' => RaisinApp->new;
+    };
+
+=head2 Dancer
+
+    use Plack::Builder;
+    use Dancer ':syntax';
+    use Dancer::Handler;
+    use RaisinApp;
+
+    my $dancer = sub {
+        setting appdir => '/home/dotcloud/current';
+        load_app "My::App";
+        Dancer::App->set_running_app("My::App");
+        my $env = shift;
+        Dancer::Handler->init_request_headers($env);
+        my $req = Dancer::Request->new(env => $env);
+        Dancer->dance($req);
+    };
+
+    builder {
+        mount "/" => $dancer;
+        mount '/api/rest' => RaisinApp->new;
+    };
+
+=head2 Mojolicious::Lite
+
+    use Plack::Builder;
+    use RaisinApp;
+
+    builder {
+        mount '/' => builder {
+            enable 'Deflater';
+            require 'my_mojolicious-lite_app.pl';
+        };
+
         mount '/api/rest' => RaisinApp->new;
     };
 
