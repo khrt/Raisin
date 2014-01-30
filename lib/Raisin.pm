@@ -22,6 +22,7 @@ sub new {
 
     $self->{routes} = Raisin::Routes->new;
     $self->{mounted} = [];
+    $self->{middleware} = {};
 
     $self;
 }
@@ -36,9 +37,9 @@ sub load_plugin {
     $module->build(@args);
 }
 
-sub load_middleware {
+sub add_middleware {
     my ($self, $name, @args) = @_;
-    die 'implement me!';
+    $self->{middleware}{$name} = \@args;
 }
 
 # Routes
@@ -68,17 +69,15 @@ sub run {
     my $app = sub { $self->psgi(@_) };
 
     # Add middleware
-#    if (defined(my $middleware = $self->config('middleware'))) {
-#        for my $class (@$middleware) {
-#
-#            # Make sure the middleware was not already loaded
-#            next if $self->{_loaded_middleware}->{$class}++;
-#
-#            my $mw = Plack::Util::load_class($class, 'Plack::Middleware');
-#            my $args = $self->config("middleware_init.$class") // {};
-#            $app = $mw->wrap($app, %$args);
-#        }
-#    }
+    for my $class (keys %{ $self->{middleware} }) {
+
+        # Make sure the middleware was not already loaded
+        next if $self->{_loaded_middleware}->{$class}++;
+
+        my $mw = Plack::Util::load_class($class, 'Plack::Middleware');
+        my $args = $self->{middleware}{$class};
+        $app = $mw->wrap($app, @$args);
+    }
 
     return $app;
 }
@@ -373,6 +372,7 @@ Loads middleware to your application.
 
     middleware '+Plack::Middleware::Session' => { store => 'File' };
     middleware '+Plack::Middleware::ContentLength';
+    middleware 'Runtime'; # will be loaded Plack::Middleware::Runtime
 
 =head3 mount
 

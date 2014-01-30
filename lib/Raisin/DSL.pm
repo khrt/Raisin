@@ -65,7 +65,7 @@ sub new {
 # Compile
 #
 sub mount { $app->mount_package(@_) }
-sub middleware { die 'TODO' } # TODO
+sub middleware { $app->add_middleware(@_) }
 
 #
 # Hooks

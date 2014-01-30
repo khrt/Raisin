@@ -24,6 +24,10 @@ my %USERS = (
     },
 );
 
+#middleware '+Plack::Middleware::ContentLength';
+middleware 'Runtime';
+#middleware '+Plack::Middleware::SimpleLogger';
+
 get sub { \%USERS };
 
 run;
