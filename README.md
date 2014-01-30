@@ -4,7 +4,9 @@ Raisin - A REST-like API micro-framework for Perl.
 
 # SYNOPSYS
 
-    use Raisin::DSL;
+```perl
+
+use Raisin::DSL;
 
     my %USERS = (
         1 => {
@@ -64,6 +66,7 @@ Raisin - A REST-like API micro-framework for Perl.
     };
 
     run;
+```
 
 # DESCRIPTION
 
@@ -75,16 +78,21 @@ It was inspired by [Grape](https://github.com/intridea/grape).
 
 ### namespace
 
+```perl
     namespace user => sub { ... };
+```
 
 ### route\_param
 
+```perl
     route_param id => $Raisin::Types::Integer, sub { ... };
+```
 
 ### delete, get, post, put
 
 These are shortcuts to `route` restricted to the corresponding HTTP method.
 
+```perl
     get sub { 'GET' };
 
     get params => [
@@ -92,6 +100,7 @@ These are shortcuts to `route` restricted to the corresponding HTTP method.
         optional => ['key', $Raisin::Types::String],
     ],
     sub { 'GET' };
+```
 
 ### req
 
@@ -122,21 +131,29 @@ Load a `Raisin::Plugin::Format` plugin.
 
 Already exists [Raisin::Plugin::Format::JSON](https://metacpan.org/pod/Raisin::Plugin::Format::JSON) and [Raisin::Plugin::Format::YAML](https://metacpan.org/pod/Raisin::Plugin::Format::YAML).
 
+```perl
     api_format 'JSON';
+```
 
 ### plugin
 
 Loads a Raisin module. The module options may be specified after the module name.
 Compatible with [Kelp](https://metacpan.org/pod/Kelp) modules.
 
+```perl
     plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
+
+```
 
 ### middleware
 
 Loads middleware to your application.
 
+```perl
     middleware '+Plack::Middleware::Session' => { store => 'File' };
     middleware '+Plack::Middleware::ContentLength';
+    middleware 'Runtime'; # will be loaded Plack::Middleware::Runtime
+```
 
 ### mount
 
@@ -145,6 +162,7 @@ different versions, but may be components of the same API.
 
 In `RaisinApp.pm`:
 
+```perl
     package RaisinApp;
 
     use Raisin::DSL;
@@ -155,6 +173,7 @@ In `RaisinApp.pm`:
     mount 'RaisinApp::Host';
 
     1;
+```
 
 ### run, new
 
@@ -186,6 +205,7 @@ You can define validations and coercion options for your parameters using a para
 Parameters can be `required` and `optional`. `optional` parameters can have a
 default value.
 
+```perl
     get params => [
         required => ['name', $Raisin::Types::String],
         optional => ['number', $Raisin::Types::Integer, 10],
@@ -194,6 +214,7 @@ default value.
         my $params = shift;
         "$params->{number}: $params->{name}";
     };
+```
 
 
 
@@ -208,8 +229,14 @@ Optional parameters can have a default value.
 
 ### Types
 
+Custom types
+
+- [Raisin::Types::Integer](https://metacpan.org/pod/Raisin::Types::Integer)
+- [Raisin::Types::String](https://metacpan.org/pod/Raisin::Types::String)
+- [Raisin::Types::Scalar](https://metacpan.org/pod/Raisin::Types::Scalar)
+
 TODO
-See [Raisin::Types](https://metacpan.org/pod/Raisin::Types)
+See [Raisin::Types](https://metacpan.org/pod/Raisin::Types), [Raisin::Types::Base](https://metacpan.org/pod/Raisin::Types::Base)
 
 ## Hooks
 
@@ -225,6 +252,7 @@ Before and after callbacks execute in the following order:
 
 The block applies to every API call
 
+```perl
     before sub {
         my $self = shift;
         say $self->req->method . "\t" . $self->req->path;
@@ -234,6 +262,7 @@ The block applies to every API call
         my $self = shift;
         say $self->res->body;
     };
+```
 
 Steps 3 and 4 only happen if validation succeeds.
 
@@ -247,7 +276,9 @@ Serialization takes place automatically. For example, you do not have to call
 
 Your API can declare which types to support by using `api_format`.
 
+```perl
     api_format 'JSON';
+```
 
 Custom formatters for existing and additional types can be defined with a
 [Raisin::Plugin::Format](https://metacpan.org/pod/Raisin::Plugin::Format).
@@ -265,9 +296,18 @@ The order for choosing the format is the following.
 
 # HEADERS
 
-TODO
-set headers
-get headers
+Use `res` to set up response headers. See [Plack::Response](https://metacpan.org/pod/Plack::Response).
+
+```perl
+    res->headers(['X-Application' => 'Raisin Application');
+```
+
+Use `req` to read request headers. See [Plack::Request](https://metacpan.org/pod/Plack::Request).
+
+```perl
+    req->header('X-Application');
+    req->headers;
+```
 
 # AUTHENTICATION
 
@@ -278,8 +318,21 @@ Built-in plugin [Raisin::Plugin::Authentication](https://metacpan.org/pod/Raisin
 
 # LOGGING
 
-TODO
-Built-in plugin [Raisin::Plugin::Logger](https://metacpan.org/pod/Raisin::Plugin::Logger).
+Raisin has a buil-in logger based on Log::Dispatch. You can enable it by
+
+```perl
+    plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
+```
+
+Exports `logger` subroutine.
+
+```perl
+    logger(debug => 'Debug!');
+    logger(warn => 'Warn!');
+    logger(error => 'Error!');
+```
+
+See [Raisin::Plugin::Logger](https://metacpan.org/pod/Raisin::Plugin::Logger).
 
 # MIDDLEWARE
 
@@ -296,16 +349,34 @@ For more see [Raisin::Plugin](https://metacpan.org/pod/Raisin::Plugin).
 
 # TESTING
 
-TODO
-[Plack::Test](https://metacpan.org/pod/Plack::Test)
+See [Plack::Test](https://metacpan.org/pod/Plack::Test), [Test::More](https://metacpan.org/pod/Test::More) and etc.
+
+```perl
+    my $app = Plack::Util::load_psgi("$Bin/../script/raisinapp.pl");
+
+    test_psgi $app, sub {
+        my $cb  = shift;
+        my $res = $cb->(GET '/user');
+
+        subtest 'GET /user' => sub {
+            if (!is $res->code, 200) {
+                diag $res->content;
+                BAIL_OUT 'FAILED!';
+            }
+            my $got = Load($res->content);
+            isdeeply $got, $expected, 'Data!';
+        };
+    };
+```
 
 # DEPLOYING
 
-See examples and/or [Plack::App::URLMap](https://metacpan.org/pod/Plack::App::URLMap).
-In `app.psgi`:
+See [Plack::Builder](https://metacpan.org/pod/Plack::Builder), [Plack::App::URLMap](https://metacpan.org/pod/Plack::App::URLMap).
 
+## Kelp
+
+```perl
     use Plack::Builder;
-
     use RaisinApp;
     use KelpApp;
 
@@ -313,6 +384,47 @@ In `app.psgi`:
         mount '/' => KelpApp->new->run;
         mount '/api/rest' => RaisinApp->new;
     };
+```
+
+## Dancer
+
+```perl
+    use Plack::Builder;
+    use Dancer ':syntax';
+    use Dancer::Handler;
+    use RaisinApp;
+
+    my $dancer = sub {
+        setting appdir => '/home/dotcloud/current';
+        load_app "My::App";
+        Dancer::App->set_running_app("My::App");
+        my $env = shift;
+        Dancer::Handler->init_request_headers($env);
+        my $req = Dancer::Request->new(env => $env);
+        Dancer->dance($req);
+    };
+
+    builder {
+        mount "/" => $dancer;
+        mount '/api/rest' => RaisinApp->new;
+    };
+```
+
+## Mojolicious::Lite
+
+```perl
+    use Plack::Builder;
+    use RaisinApp;
+
+    builder {
+        mount '/' => builder {
+            enable 'Deflater';
+            require 'my_mojolicious-lite_app.pl';
+        };
+
+        mount '/api/rest' => RaisinApp->new;
+    };
+```
 
 # GitHub
 
