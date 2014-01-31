@@ -10,10 +10,9 @@ use Raisin;
 use DDP; # XXX
 
 our @EXPORT = qw(
-    to_app run
-    mount new
+    run new visualize
 
-    middleware
+    mount middleware
 
     plugin api_format
 
@@ -46,20 +45,8 @@ sub import {
 # Execution
 #
 sub run { $app->run }
-sub new {
-    my ($self, %args) = @_;
-
-    if ($args{visualize}) {
-        my $map;
-        for (@{ $app->routes->{routes} }) {
-            $map .= $_->method . "\t" . $_->path . "\n"
-        }
-        sub { [200, [], [$map]] }
-    }
-    else {
-        $app->run
-    }
-}
+sub new { $app->run }
+sub visualize { $app->visualize }
 
 #
 # Compile

@@ -26,6 +26,12 @@ sub new {
     $self;
 }
 
+sub mount_package {
+    my ($self, $package) = @_;
+    push @{ $self->{mounted} }, $package;
+    Plack::Util::load_class($package);
+}
+
 sub load_plugin {
     my ($self, $name, @args) = @_;
     return if $self->{loaded_plugins}{$name};
@@ -39,6 +45,17 @@ sub load_plugin {
 sub add_middleware {
     my ($self, $name, @args) = @_;
     $self->{middleware}{$name} = \@args;
+}
+
+# Generate SWAGGER compliant JSON API Declaration
+sub visualize {
+    my $self = shift;
+
+    my $map;
+    for (@{ $self->routes->{routes} }) {
+        $map .= $_->method . "\t" . $_->path . "\n"
+    }
+    sub { [200, [], [$map]] }
 }
 
 # Routes
@@ -57,12 +74,6 @@ sub add_hook {
 }
 
 # Application
-sub mount_package {
-    my ($self, $package) = @_;
-    push @{ $self->{mounted} }, $package;
-    $package = Plack::Util::load_class($package);
-}
-
 sub run {
     my $self = shift;
     my $app = sub { $self->psgi(@_) };

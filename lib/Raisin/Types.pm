@@ -3,7 +3,6 @@ package Raisin::Types;
 use strict;
 use warnings;
 
-use Regexp::Common;
 use Raisin::Types::Base;
 
 our $Scalar
