@@ -9,7 +9,7 @@ use List::Util qw(max);
 
 use lib "$FindBin::Bin/../../lib"; # ->Raisin/lib
 
-use Raisin::DSL;
+use Raisin::API;
 use Raisin::Types;
 
 my %USERS = (

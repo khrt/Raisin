@@ -232,7 +232,7 @@ Raisin - A REST-like API micro-framework for Perl.
 
 =head1 SYNOPSIS
 
-    use Raisin::DSL;
+    use Raisin::API;
 
     my %USERS = (
         1 => {
@@ -376,7 +376,7 @@ In C<RaisinApp.pm>:
 
     package RaisinApp;
 
-    use Raisin::DSL;
+    use Raisin::API;
 
     api_format 'JSON';
 

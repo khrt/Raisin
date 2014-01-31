@@ -3,7 +3,7 @@ package Rapp::User;
 use strict;
 use warnings;
 
-use Raisin::DSL;
+use Raisin::API;
 use Raisin::Types;
 
 # USERS

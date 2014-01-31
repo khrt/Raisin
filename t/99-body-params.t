@@ -19,7 +19,7 @@ my %params = (
 );
 
 my $json_app = eval {
-    use Raisin::DSL;
+    use Raisin::API;
     use Raisin::Types;
     api_format 'JSON';
     post params => [
@@ -31,7 +31,7 @@ my $json_app = eval {
 };
 
 #my $yaml_app = eval {
-#    use Raisin::DSL;
+#    use Raisin::API;
 #    use Raisin::Types;
 #    api_format 'YAML';
 #    post params => [

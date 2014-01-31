@@ -6,7 +6,7 @@ use warnings;
 use FindBin '$Bin';
 use lib ("$Bin/../lib", "$Bin/../../../lib");
 
-use Raisin::DSL;
+use Raisin::API;
 
 api_format 'JSON';
 

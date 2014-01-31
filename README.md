@@ -4,7 +4,7 @@ Raisin - A REST-like API micro-framework for Perl.
 
 # SYNOPSIS
 
-    use Raisin::DSL;
+    use Raisin::API;
 
     my %USERS = (
         1 => {
@@ -148,7 +148,7 @@ In `RaisinApp.pm`:
 
     package RaisinApp;
 
-    use Raisin::DSL;
+    use Raisin::API;
 
     api_format 'JSON';
 

@@ -1,4 +1,4 @@
-package Raisin::DSL;
+package Raisin::API;
 
 use strict;
 use warnings;
