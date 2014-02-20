@@ -47,17 +47,6 @@ sub add_middleware {
     $self->{middleware}{$name} = \@args;
 }
 
-# Generate SWAGGER compliant JSON API Declaration
-sub visualize {
-    my $self = shift;
-
-    my $map;
-    for (@{ $self->routes->{routes} }) {
-        $map .= $_->method . "\t" . $_->path . "\n"
-    }
-    sub { [200, [], [$map]] }
-}
-
 # Routes
 sub routes { shift->{routes} }
 sub add_route { shift->routes->add(@_) }

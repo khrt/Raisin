@@ -6,7 +6,7 @@ use warnings;
 use feature ':5.12';
 
 use Carp;
-use DDP;
+use DDP; # XXX
 
 sub new {
     my ($class, $kind, $required, $options) = @_;
