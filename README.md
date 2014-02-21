@@ -308,7 +308,7 @@ See [Raisin::Plugin::Logger](https://metacpan.org/pod/Raisin::Plugin::Logger).
 
 # API DOCUMENTATION
 
-Swagger compatible API documentations.
+[Swagger](https://github.com/wordnik/swagger-core) compatible API documentations.
 
     plugin 'APIDocs';
 

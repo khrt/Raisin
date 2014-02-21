@@ -616,7 +616,7 @@ See L<Raisin::Plugin::Logger>.
 
 =head1 API DOCUMENTATION
 
-Swagger compatible API documentations.
+L<Swagger|https://github.com/wordnik/swagger-core> compatible API documentations.
 
     plugin 'APIDocs';
 
