@@ -116,6 +116,12 @@ Returns [Hash::MultiValue](https://metacpan.org/pod/Hash::MultiValue) object.
 An alias for `$self->session` that returns (optional) psgix.session hash.
 When it exists, you can retrieve and store per-session data from and to this hash.
 
+### api\_version
+
+Set an API version header.
+
+    api_version 1.23;
+
 ### api\_format
 
 Load a `Raisin::Plugin::Format` plugin.
@@ -195,8 +201,6 @@ default value.
         my $params = shift;
         "$params->{number}: $params->{name}";
     };
-
-
 
 Positional arguments:
 
@@ -301,6 +305,16 @@ Exports `logger` subroutine.
     logger(error => 'Error!');
 
 See [Raisin::Plugin::Logger](https://metacpan.org/pod/Raisin::Plugin::Logger).
+
+# API DOCUMENTATION
+
+Swagger compatible API documentations.
+
+    plugin 'APIDocs';
+
+Documentation available on `http://<url>/api-docs` url.
+
+For more see [Raisin::Plugin::APIDocs](https://metacpan.org/pod/Raisin::Plugin::APIDocs).
 
 # MIDDLEWARE
 
