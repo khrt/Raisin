@@ -2,7 +2,6 @@ package Raisin::Plugin;
 
 use strict;
 use warnings;
-use feature ':5.12';
 
 use Carp;
 

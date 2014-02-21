@@ -3,8 +3,6 @@ package Raisin::Routes::Endpoint;
 use strict;
 use warnings;
 
-use feature ':5.12';
-
 sub new {
     my ($class, %args) = @_;
     my $self = bless {}, $class;

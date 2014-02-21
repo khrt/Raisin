@@ -2,9 +2,7 @@ package Raisin::Request;
 
 use strict;
 use warnings;
-use feature ':5.12';
 
-use Carp;
 use base 'Plack::Request';
 
 sub new {
@@ -34,6 +32,7 @@ sub populate_params {
     my $declared = $self->{'raisin.params.declared'};
     my $named = $self->{'raisin.params.named'};
 
+    # Serialization / Deserialization
     my $params = do {
         if ($self->method =~ /POST|PUT/ && (my $content = $self->content)) {
             if ($self->app->can('deserialize')

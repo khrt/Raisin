@@ -3,9 +3,10 @@ package Raisin::Response;
 use strict;
 use warnings;
 
-use Carp;
-use Encode;
 use base 'Plack::Response';
+
+use Carp;
+use Encode 'encode';
 
 sub new {
     my $class = shift;

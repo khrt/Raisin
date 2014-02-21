@@ -3,10 +3,7 @@ package Raisin::Param;
 use strict;
 use warnings;
 
-use feature ':5.12';
-
 use Carp;
-use DDP; # XXX
 
 sub new {
     my ($class, $kind, $required, $options) = @_;
@@ -33,13 +30,13 @@ sub validate {
     # Required
     # Only optional parameters can has default value
     if ($self->required && !$$value) {
-        say STDERR "$self->{name} required but empty!";
+        carp "$self->{name} required but empty!";
         return;
     }
 
     # Optional and empty
     if (!defined($$value) && !$self->required) {
-        #say STDERR "$self->{name} optional and empty.";
+        #carp STDERR "$self->{name} optional and empty.";
         return 1;
     }
 

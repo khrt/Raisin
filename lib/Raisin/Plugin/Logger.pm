@@ -5,7 +5,6 @@ use warnings;
 
 use base 'Raisin::Plugin';
 
-use Carp;
 use Log::Dispatch;
 
 sub build {
