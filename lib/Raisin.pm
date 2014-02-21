@@ -87,6 +87,11 @@ sub psgi {
     my $req = $self->req(Raisin::Request->new($self, $env));
     my $res = $self->res(Raisin::Response->new);
 
+    # Build API docs if needed
+    if ($self->can('build_api_docs')) {
+        $self->build_api_docs;
+    }
+
     # HOOK Before
     $self->hook('before')->($self);
 
@@ -169,6 +174,10 @@ sub psgi {
 sub before_finalize {
     my $self = shift;
     $self->res->header('X-Framework' => "Raisin $VERSION");
+
+    if ($self->api_version) {
+        $self->res->header('X-API-Version' => $self->api_version);
+    }
 }
 
 sub finalize {
@@ -178,6 +187,12 @@ sub finalize {
 }
 
 # Application defaults
+sub api_version {
+    my ($self, $version) = @_;
+    $self->{version} = $version if $version;
+    $self->{version}
+}
+
 sub api_format {
     my ($self, $name) = @_;
     $name = $name =~ /\+/ ? $name : "Format::$name";
@@ -332,6 +347,12 @@ Returns L<Hash::MultiValue> object.
 
 An alias for C<$self-E<gt>session> that returns (optional) psgix.session hash.
 When it exists, you can retrieve and store per-session data from and to this hash.
+
+=head3 api_version
+
+Set an API version header.
+
+    api_version 1.23;
 
 =head3 api_format
 
@@ -592,6 +613,16 @@ Exports C<logger> subroutine.
     logger(error => 'Error!');
 
 See L<Raisin::Plugin::Logger>.
+
+=head1 API DOCUMENTATION
+
+Swagger compatible API documentations.
+
+    plugin 'APIDocs';
+
+Documentation available on C<http://E<lt>urlE<gt>/api-docs> url.
+
+For more see L<Raisin::Plugin::APIDocs>.
 
 =head1 MIDDLEWARE
 

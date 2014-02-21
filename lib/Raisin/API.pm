@@ -10,11 +10,11 @@ use Raisin;
 use DDP; # XXX
 
 our @EXPORT = qw(
-    run new visualize
+    run new
 
     mount middleware
 
-    plugin api_format
+    plugin api_format api_version
 
     before before_validation
     after_validation after
@@ -46,7 +46,6 @@ sub import {
 #
 sub run { $app->run }
 sub new { $app->run }
-sub visualize { $app->visualize }
 
 #
 # Compile
@@ -116,6 +115,7 @@ sub session { $app->session(@_) }
 #
 sub plugin { $app->load_plugin(@_) }
 sub api_format { $app->api_format(@_) }
+sub api_version { $app->api_version(@_) }
 
 #sub error {
 #    # NOTE render error 500?

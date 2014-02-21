@@ -33,7 +33,8 @@ my %USERS = (
     },
 );
 
-#plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
+plugin 'APIDocs';
+#plugin 'Logger', outputs => [['Screen', min_level => 'debug']];
 api_format 'YAML';
 
 # /user
