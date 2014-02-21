@@ -2,15 +2,12 @@ package Raisin::Plugin::APIDocs;
 
 use strict;
 use warnings;
-use feature ':5.12';
-
-use constant SWAGGER_VERSION => '1.2';
 
 use base 'Raisin::Plugin';
 
-use Carp;
-use DDP;
-use JSON;
+use JSON 'encode_json';
+
+use constant SWAGGER_VERSION => '1.2';
 
 sub build {
     my $self = shift;
@@ -26,6 +23,7 @@ sub build {
     $self->register(build_api_docs => sub { $self->build_api_docs });
 }
 
+# TODO
 sub build_api_docs {
     my $self = shift;
     return 1 if $self->{done};
@@ -141,3 +139,5 @@ Raisin::Plugin::APIDocs
 =head1 DESCRIPTION
 
 Generate Swagger compatible API documentaions.
+
+=cut
