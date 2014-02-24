@@ -32,6 +32,7 @@ sub build_api_docs {
 
     my %apis;
 
+    # Prepare API data
     for my $r (@{ $app->routes->routes }) {
         my $path = $r->path;
         $path =~ s#:([^/]+)#{$1}#g;
@@ -42,13 +43,13 @@ sub build_api_docs {
         for my $p (@{ $r->params }) {
 
             # Types
+            #  - boolean
             #  - integer, int32
             #  - integer, int64
-            #  - number, float
             #  - number, double
+            #  - number, float
             #  - string
             #  - string, byte
-            #  - boolean
             #  - string, date
             #  - string, date-time
 
@@ -76,7 +77,7 @@ sub build_api_docs {
             path => $path,
             operations => [{
                 method => $r->method,
-                nickname => 'NICKNAME',
+                #DEL#nickname => 'NICKNAME',
                 notes => 'NOTES',
                 parameters => \@parameters,
                 summary => 'SUMMARY',
@@ -92,6 +93,7 @@ sub build_api_docs {
     );
     $template{apiVersion} = $self->app->api_version if $self->app->api_version;
 
+    # Prepare index
     my %index = (%template);
     for my $ns (keys %apis) {
         my $api = {
@@ -102,13 +104,14 @@ sub build_api_docs {
         push @{ $index{apis} }, $api;
     }
 
+    # Add routes
     $app->add_route(
         GET => '/api-docs',
         sub { encode_json \%index }
     );
 
     for my $ns (keys %apis) {
-        my $base_path = $app->req->base->as_string;
+        my $base_path = $app->req ? $app->req->base->as_string : '';
         $base_path =~ s#/$##;
 
         my %description = (
