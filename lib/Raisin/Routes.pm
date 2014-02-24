@@ -68,7 +68,7 @@ sub add {
     if ($self->list->{$method}{$path}) {
         carp "Route `$path` via `$method` is redefined";
     }
-    $self->list->{$method}{$path} = scalar(@{ $self->{routes} }) - 1;
+    $self->list->{$method}{$path} = scalar @{ $self->{routes} };
 }
 
 sub cache { shift->{cache} }
