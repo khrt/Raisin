@@ -7,7 +7,6 @@ use feature ':5.12';
 use base 'Exporter';
 
 use Raisin;
-use DDP; # XXX
 
 our @EXPORT = qw(
     run new
