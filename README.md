@@ -213,14 +213,14 @@ Optional parameters can have a default value.
 
 ### Types
 
-Custom types
+Here is built-in types
 
 - [Raisin::Types::Integer](https://metacpan.org/pod/Raisin::Types::Integer)
 - [Raisin::Types::String](https://metacpan.org/pod/Raisin::Types::String)
 - [Raisin::Types::Scalar](https://metacpan.org/pod/Raisin::Types::Scalar)
 
-TODO
-See [Raisin::Types](https://metacpan.org/pod/Raisin::Types), [Raisin::Types::Base](https://metacpan.org/pod/Raisin::Types::Base)
+You can create your own types as well. See examples in [Raisin::Types](https://metacpan.org/pod/Raisin::Types).
+Also see [Raisin::Types::Base](https://metacpan.org/pod/Raisin::Types::Base).
 
 ## Hooks
 
