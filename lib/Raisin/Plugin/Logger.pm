@@ -6,6 +6,8 @@ use warnings;
 use base 'Raisin::Plugin';
 
 use Log::Dispatch;
+use POSIX qw(strftime);
+use Time::HiRes qw(time);
 
 sub build {
     my ($self, @args) = @_;
@@ -36,13 +38,9 @@ sub build {
 sub message {
     my ($self, $level, @messages) = @_;
 
-    my @a = localtime(time);
-    my $date = sprintf(
-        "%4i-%02i-%02i %02i:%02i:%02i",
-        $a[5] + 1900,
-        $a[4] + 1,
-        $a[3], $a[2], $a[1], $a[0]
-    );
+    my $t = time;
+    my $date = strftime "%Y-%m-%d %H:%M:%S", localtime $t;
+    $date .= sprintf ".%03d", ($t - int($t)) * 1000;
 
     for (@messages) {
         $self->{logger}->log(
