@@ -31,6 +31,7 @@
       },
       "develop" : {
          "requires" : {
+            "Data::Printer" : "0.35",
             "Test::Pod" : "1.41"
          }
       },
@@ -39,6 +40,7 @@
             "Carp" : "0",
             "JSON" : "0",
             "Plack" : "1.0030",
+            "Plack::Middleware::CrossOrigin" : "0.009",
             "YAML" : "0",
             "perl" : "5.008005"
          }
