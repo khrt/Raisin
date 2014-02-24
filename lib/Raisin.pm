@@ -473,7 +473,7 @@ Optional parameters can have a default value.
 
 =head3 Types
 
-Custom types
+Here is built-in types
 
 =over
 
@@ -491,8 +491,8 @@ L<Raisin::Types::Scalar>
 
 =back
 
-TODO
-See L<Raisin::Types>, L<Raisin::Types::Base>
+You can create your own types as well. See examples in L<Raisin::Types>.
+Also see L<Raisin::Types::Base>.
 
 =head2 Hooks
 

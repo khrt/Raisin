@@ -60,4 +60,8 @@ C<Raisin::Types::Scalar>
 
 =back
 
+=head1 MAKE YOUR OWN
+
+See L<Raisin::Types::Base>.
+
 =cut

@@ -54,6 +54,6 @@ Check subroutine.
 
 =head3 in
 
-Some actions on the checked value.
+Some actions on the value.
 
 =cut
