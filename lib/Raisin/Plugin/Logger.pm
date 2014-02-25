@@ -38,11 +38,11 @@ sub build {
 sub message {
     my ($self, $level, @messages) = @_;
 
-    my $t = time;
-    my $date = strftime "%Y-%m-%d %H:%M:%S", localtime $t;
-    $date .= sprintf ".%03d", ($t - int($t)) * 1000;
-
     for (@messages) {
+        my $t = time;
+        my $date = strftime "%Y-%m-%d %H:%M:%S", localtime $t;
+        $date .= sprintf ".%03d", ($t - int($t)) * 1000;
+
         $self->{logger}->log(
             level   => $level,
             message => sprintf("%s - %s - %s\n",

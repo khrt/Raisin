@@ -4,8 +4,7 @@ use strict;
 use warnings;
 use feature ':5.12';
 
-use Carp;
-use DDP; # XXX
+use Carp qw(croak carp longmess);
 use Plack::Util;
 
 use Raisin::Request;
