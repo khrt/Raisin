@@ -2,7 +2,6 @@ package Raisin;
 
 use strict;
 use warnings;
-use feature ':5.12';
 
 use Carp qw(croak carp longmess);
 use Plack::Util;
