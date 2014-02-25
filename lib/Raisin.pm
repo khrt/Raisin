@@ -108,12 +108,12 @@ sub psgi {
             my $code = $route->code;
 
             if (!$code || (ref($code) && ref($code) ne 'CODE')) {
-                die 'Invalid endpoint for ' . $req->path;
+                croak 'Invalid endpoint for ' . $req->path;
             }
 
             # Log
             if ($self->can('logger')) {
-                $self->logger(info => $req->method . ' ' . $route->path);
+                $self->logger(info => $req->method . q{ } . $route->path);
             }
 
             # HOOK Before validation
@@ -128,7 +128,7 @@ sub psgi {
 
             # Populate and validate declared params
             if (not $req->populate_params) {
-                warn '* ' . 'INVALID PARAMS! ' x 5;
+                carp '* ' . 'INVALID PARAMS! ' x 5;
                 $res->render_error(400, 'Invalid params!');
                 last;
             }
@@ -160,12 +160,12 @@ sub psgi {
         if (!$res->rendered) {
             croak 'Nothing rendered!';
         }
-    };
 
-    if (my $e = $@) {
-        #$e = longmess($e);
+        1;
+    } or do {
+        my $e = longmess($@);
         $res->render_500($e);
-    }
+    };
 
     $self->finalize;
 }
@@ -195,7 +195,7 @@ sub api_version {
 
 sub api_format {
     my ($self, $name) = @_;
-    $name = $name =~ /\+/ ? $name : "Format::$name";
+    $name = $name =~ /\+/x ? $name : "Format::$name";
     $self->load_plugin($name);
 }
 
