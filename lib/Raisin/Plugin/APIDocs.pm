@@ -62,8 +62,8 @@ sub build_api_docs {
 
             my %p = (
                 allowMultiple => JSON::true,
-                #defaultValue => JSON::false,
-                description => 'DESCRIPTION',
+                defaultValue => $p->default || JSON::false,
+                description => uc($p->name) . ' DESCRIPTION',
                 format => ref $p->type,
                 name => $p->name,
                 paramType => $param_type,
@@ -137,10 +137,18 @@ __END__
 
 =head1 NAME
 
-Raisin::Plugin::APIDocs
+Raisin::Plugin::APIDocs - Generate API documentation.
+
+=head1 SYNOPSIS
+
+    plugin 'APIDocs';
 
 =head1 DESCRIPTION
 
-Generate Swagger compatible API documentaions.
+Generate L<Swagger|https://github.com/wordnik/swagger-core>
+compatible API documentaions.
+
+Provides documentation in Swagger compatible format by C</api-docs> URL.
+You can use this url in L<Swagger UI|http://swagger.wordnik.com/>.
 
 =cut
