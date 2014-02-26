@@ -98,7 +98,7 @@ __END__
 
 =head1 NAME
 
-Raisin::Routes - Routing
+Raisin::Routes - Routing class for Raisin.
 
 =head1 SYNOPSIS
 
@@ -146,7 +146,7 @@ Optional
 
     /user/?id
 
-=head1 SUBROUTINES
+=head1 METHODS
 
 =head2 add
 
@@ -155,10 +155,6 @@ Adds a new route
 =head2 find
 
 Looking for a route
-
-=over
-
-=cut
 
 =head1 ACKNOWLEDGEMENTS
 

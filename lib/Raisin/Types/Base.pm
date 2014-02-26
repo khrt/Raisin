@@ -23,7 +23,7 @@ __END__
 
 =head1 NAME
 
-Raisin::Types::Base
+Raisin::Types::Base - Base class for Raisin::Types.
 
 =head1 SYNOPSIS
 
@@ -42,18 +42,22 @@ Raisin::Types::Base
 
 =head1 DESCRIPTION
 
-C<check> then C<in>.
+Base class for each Raisin type.
 
-=head3 new
+Contains two method base methods: C<check> and C<in>.
 
-Create new type.
+=head1 METHODS
 
 =head3 check
 
-Check subroutine.
+Check value.
+
+    $Price->check(\$value);
 
 =head3 in
 
-Some actions on the value.
+Apply some actions on the value.
+
+    $Price->in(\$value);
 
 =cut

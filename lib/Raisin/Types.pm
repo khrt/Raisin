@@ -38,11 +38,11 @@ __END__
 
 =head1 NAME
 
-Raisin::Types - default types for Raisin
+Raisin::Types - Default parameter types for Raisin.
 
 =head1 DESCRIPTION
 
-Built-in types for Raisin.
+Built-in Raisin parameters types.
 
 =over
 

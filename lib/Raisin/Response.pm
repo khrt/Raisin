@@ -51,3 +51,33 @@ sub render_error {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Raisin::Response - Response class for Raisin.
+
+=head1 SYNOPSIS
+
+    Raisin::Response->new;
+
+=head1 DESCRIPTION
+
+Extends L<Plack::Response>.
+
+=head1 METHODS
+
+=head3 rendered
+
+=head3 render
+
+=head3 render_401
+
+=head3 render_404
+
+=head3 render_500
+
+=head3 render_error
+
+=cut

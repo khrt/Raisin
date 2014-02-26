@@ -52,10 +52,32 @@ __END__
 
 =head1 NAME
 
-Raisin::Plugin
+Raisin::Plugin - Base class for Raisin plugins.
 
 =head1 SYNOPSIS
 
+    package Raisin::Plugin::Hello;
+    use base 'Raisin::Plugin';
+
+    sub build {
+        my ($self, %args) = @_;
+        $self->register(hello => sub { print 'Hello!' });
+    }
+
 =head1 DESCRIPTION
+
+Provides the base class for creating Raisin plugins.
+
+=head1 METHODS
+
+=head3 build
+
+Main method for each plugin.
+
+=head3 register
+
+Registers one or many methods into the application.
+
+    $self->register(hello => sub { print 'Hello!' });
 
 =cut

@@ -10,8 +10,8 @@ use Raisin::Request;
 use Raisin::Response;
 use Raisin::Routes;
 
-our $VERSION = '0.1';
-our $CODENAME = 'Cabernet Sauvignon';
+our $VERSION = '0.2';
+our $CODENAME = 'Caladoc';
 
 sub new {
     my ($class, %args) = @_;
@@ -305,9 +305,13 @@ It was inspired by L<Grape|https://github.com/intridea/grape>.
 
 =head3 namespace
 
+Adds a route to application.
+
     namespace user => sub { ... };
 
 =head3 route_param
+
+Define a route parameter as a namespace C<route_param>.
 
     route_param id => $Raisin::Types::Integer, sub { ... };
 
@@ -591,10 +595,11 @@ Use C<req> to read request headers. See L<Plack::Request>.
     req->header('X-Application');
     req->headers;
 
-=head1 AUTHENTICATION
+=for comment AUTHENTICATION
 
 TODO
-Built-in plugin L<Raisin::Plugin::Authentication>
+Built-in plugins
+L<Raisin::Plugin::Authentication>
 L<Raisin::Plugin::Authentication::Basic>
 L<Raisin::Plugin::Authentication::Digest>
 
@@ -618,7 +623,7 @@ L<Swagger|https://github.com/wordnik/swagger-core> compatible API documentations
 
     plugin 'APIDocs';
 
-Documentation available on C<http://E<lt>urlE<gt>/api-docs> url.
+Documentation available on C<http://E<lt>urlE<gt>/api-docs> URL.
 
 For more see L<Raisin::Plugin::APIDocs>.
 
@@ -706,13 +711,17 @@ See L<Plack::Builder>, L<Plack::App::URLMap>.
         mount '/api/rest' => RaisinApp->new;
     };
 
-=head1 GitHub
+=head1 EXAMPLES
 
-https://github.com/khrt/Raisin
+See examples.
+
+=head1 GITHUB
+
+L<https://github.com/khrt/Raisin|https://github.com/khrt/Raisin>
 
 =head1 AUTHOR
 
-Artur Khabibullin - khrt <at> ya.ru
+Artur Khabibullin - khrt E<lt>atE<gt> ya.ru
 
 =head1 ACKNOWLEDGEMENTS
 

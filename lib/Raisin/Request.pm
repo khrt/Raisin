@@ -69,3 +69,31 @@ sub populate_params {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Raisin::Request - Request class for Raisin.
+
+=head1 SYNOPSIS
+
+    Raisin::Request->new($self, $env);
+
+=head1 DESCRIPTION
+
+Extends L<Plack::Request>.
+
+=head1 METHODS
+
+=head3 app
+
+=head3 declared_params
+
+=head3 set_declared_params
+
+=head3 set_named_params
+
+=head3 populate_params
+
+=cut

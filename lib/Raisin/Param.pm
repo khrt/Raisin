@@ -78,22 +78,40 @@ __END__
 
 =head1 NAME
 
-Raisin::Param
-
-=head1 SYNOPSIS
-
-    use Raisin::Param;
+Raisin::Param - Parameter class for Raisin.
 
 =head1 DESCRIPTION
 
-Raisin Param
+Parameter class for L<Raisin>. Validates request paramters.
 
-=head3 required
+=head3 required { shift->{required} }
 
-    $p->required;
+Returns C<true> if it's required parameter.
+
+=head3 named
+
+Returns C<true> if it's path parameter.
+
+=head3 name
+
+Returns parameter name.
+
+=head3 type
+
+Returns paramter type object.
+
+=head3 default
+
+Returns default value if exists or C<undef>.
+
+=head3 regex
+
+Return paramter regex if exists or C<undef>.
 
 =head3 validate
 
-    $value = $p->validate($value);
+Process and validate parameter. Takes B<reference> as the input paramter.
+
+    $p->validate(\$value);
 
 =cut

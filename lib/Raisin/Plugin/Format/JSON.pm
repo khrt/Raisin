@@ -18,3 +18,15 @@ sub build {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Raisin::Plugin::Format::JSON - JSON serialization plugin for Raisin.
+
+=head1 DESCRIPTION
+
+Provides C<deserialize> and C<serialize> methods for Raisin.
+
+=cut

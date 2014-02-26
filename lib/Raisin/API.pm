@@ -84,14 +84,13 @@ sub namespace {
     (join '/', @NS) || '/';
 }
 
-
 sub route_param {
     my ($param, $type, $block) = @_;
     namespace(":$param", $block, named => [required => [$param, $type]]);
 }
 
 #
-# Action DSL
+# Actions
 #
 sub delete  { $app->add_route('DELETE',  namespace(), %SETTINGS, @_) }
 sub get     { $app->add_route('GET',     namespace(), %SETTINGS, @_) }
@@ -120,5 +119,17 @@ sub api_version { $app->api_version(@_) }
 #    # NOTE render error 500?
 #    $app->res->render_error(@_);
 #}
+
+__END__
+
+=head1 NAME
+
+Raisin::API - Provides Raisin DSL
+
+=head1 DESCRIPTION
+
+See L<Raisin>.
+
+=cut
 
 1;

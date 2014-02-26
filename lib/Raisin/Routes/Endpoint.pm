@@ -87,7 +87,7 @@ __END__
 
 =head1 NAME
 
-Raisin::Routes::Endpoint
+Raisin::Routes::Endpoint - Endpoint class for Raisin::Routes.
 
 =head1 ACKNOWLEDGEMENTS
 
