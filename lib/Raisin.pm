@@ -10,7 +10,7 @@ use Raisin::Request;
 use Raisin::Response;
 use Raisin::Routes;
 
-our $VERSION = '0.2';
+our $VERSION = '0.11';
 our $CODENAME = 'Caladoc';
 
 sub new {
