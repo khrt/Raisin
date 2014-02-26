@@ -9,6 +9,7 @@ use lib ("$Bin/../lib", "$Bin/../../../lib");
 use Raisin::API;
 
 api_format 'JSON';
+plugin 'APIDocs';
 
 before sub {
 #    my $self = shift;
@@ -20,7 +21,6 @@ before sub {
 
 mount 'Rapp::Host';
 mount 'Rapp::User';
-
 #require Rapp::Host;
 #require Rapp::User;
 

@@ -12,5 +12,4 @@ use Rapp;
 
 builder {
     mount '/api' => Rapp->new;
-    mount '/live-api' => Rapp->new(visualize => 1);
 };

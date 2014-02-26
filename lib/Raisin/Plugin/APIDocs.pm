@@ -77,11 +77,11 @@ sub build_api_docs {
             path => $path,
             operations => [{
                 method => $r->method,
-                #DEL#nickname => 'NICKNAME',
-                notes => 'NOTES',
+                nickname => $r->method . '_' . $path,
+                notes => '',
                 parameters => \@parameters,
-                summary => 'SUMMARY',
-                type => 'TYPE',
+                summary => '',
+                type => '',
             }],
         );
 
