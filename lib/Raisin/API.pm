@@ -2,7 +2,6 @@ package Raisin::API;
 
 use strict;
 use warnings;
-use feature ':5.12';
 
 use base 'Exporter';
 
@@ -34,7 +33,6 @@ sub import {
 
     strict->import;
     warnings->import;
-    feature->import(':5.12');
 
     my $caller = caller;
     $app ||= Raisin->new(caller => $caller);
@@ -124,7 +122,7 @@ __END__
 
 =head1 NAME
 
-Raisin::API - Provides Raisin DSL
+Raisin::API - Provides Raisin DSL.
 
 =head1 DESCRIPTION
 
