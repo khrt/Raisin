@@ -1,0 +1,48 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use File::Basename;
+use File::Path 'make_path';
+use File::Slurp 'write_file';
+use Getopt::Long;
+
+# DEBUG:
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+# END
+use Raisin;
+
+my $path = '.';
+my ($help, $verbose, $version);
+
+GetOptions(
+    'help'    => \$help,
+    'path=s'  => \$path,
+    'verbose' => \$verbose,
+    'version' => \$version,
+);
+
+if ($version) {
+    print "Raisin v.$Raisin::VERSION\n";
+    exit;
+}
+
+my $name = $ARGV[0] || do { $help = 1; '' };
+
+if ($help) {
+    print <<HELP_END;
+Usage: raisin [options] <name>
+
+Options:
+    --help          This help screen
+    --path=s        Path where to create the files
+    --verbose       Verbose output
+    --version       Display version information
+
+HELP_END
+    exit;
+}
+
+
