@@ -75,9 +75,13 @@ It was inspired by [Grape](https://github.com/intridea/grape).
 
 ### namespace
 
+Adds a route to application.
+
     namespace user => sub { ... };
 
 ### route\_param
+
+Define a route parameter as a namespace `route_param`.
 
     route_param id => $Raisin::Types::Integer, sub { ... };
 
@@ -285,10 +289,9 @@ Use `req` to read request headers. See [Plack::Request](https://metacpan.org/pod
     req->header('X-Application');
     req->headers;
 
-# AUTHENTICATION
-
 TODO
-Built-in plugin [Raisin::Plugin::Authentication](https://metacpan.org/pod/Raisin::Plugin::Authentication)
+Built-in plugins
+[Raisin::Plugin::Authentication](https://metacpan.org/pod/Raisin::Plugin::Authentication)
 [Raisin::Plugin::Authentication::Basic](https://metacpan.org/pod/Raisin::Plugin::Authentication::Basic)
 [Raisin::Plugin::Authentication::Digest](https://metacpan.org/pod/Raisin::Plugin::Authentication::Digest)
 
@@ -312,7 +315,7 @@ See [Raisin::Plugin::Logger](https://metacpan.org/pod/Raisin::Plugin::Logger).
 
     plugin 'APIDocs';
 
-Documentation available on `http://<url>/api-docs` url.
+Documentation available on `http://<url>/api-docs` URL.
 
 For more see [Raisin::Plugin::APIDocs](https://metacpan.org/pod/Raisin::Plugin::APIDocs).
 
@@ -400,9 +403,13 @@ See [Plack::Builder](https://metacpan.org/pod/Plack::Builder), [Plack::App::URLM
         mount '/api/rest' => RaisinApp->new;
     };
 
-# GitHub
+# EXAMPLES
 
-https://github.com/khrt/Raisin
+See examples.
+
+# GITHUB
+
+[https://github.com/khrt/Raisin](https://github.com/khrt/Raisin)
 
 # AUTHOR
 
