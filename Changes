@@ -1,5 +1,10 @@
+0.12 Fixes
+    - Fix cpantesters.org failes;
+    - Remove Perl 5.12 dependency;
+    - Update dependency in cpanfile;
+
 0.11 Swagger support
     - Basic Swagger support;
 
 0.1 Initial release
-    - Adding base functionality
+    - Adding base functionality;
