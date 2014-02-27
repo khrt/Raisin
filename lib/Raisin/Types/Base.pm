@@ -44,7 +44,7 @@ Raisin::Types::Base - Base class for Raisin::Types.
 
 Base class for each Raisin type.
 
-Contains two method base methods: C<check> and C<in>.
+Contains two base methods: C<check> and C<in>.
 
 =head1 METHODS
 
