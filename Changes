@@ -1,3 +1,10 @@
+0.13 Fixes
+    - More functional `raisin` script;
+    - Update dependencies;
+    - Update POD;
+    - Needs Perl 5.10 at least;
+
+
 0.12 Fixes
     - Fix cpantesters.org failes;
     - Remove Perl 5.12 dependency;
