@@ -1,6 +1,6 @@
 # NAME
 
-Raisin - A REST-like API micro-framework for Perl.
+Raisin - REST-like API micro-framework for Perl.
 
 # SYNOPSIS
 
@@ -73,19 +73,19 @@ It was inspired by [Grape](https://github.com/intridea/grape).
 
 # KEYWORDS
 
-### namespace
+## namespace
 
 Adds a route to application.
 
     namespace user => sub { ... };
 
-### route\_param
+## route\_param
 
 Define a route parameter as a namespace `route_param`.
 
     route_param id => $Raisin::Types::Integer, sub { ... };
 
-### delete, get, post, put
+## delete, get, post, put
 
 These are shortcuts to `route` restricted to the corresponding HTTP method.
 
@@ -97,17 +97,34 @@ These are shortcuts to `route` restricted to the corresponding HTTP method.
     ],
     sub { 'GET' };
 
-### req
+## req
 
 An alias for `$self->req`, this provides quick access to the
 [Raisin::Request](https://metacpan.org/pod/Raisin::Request) object for the current route.
 
-### res
+Use `req` to get access to the request headers, params, etc.
+
+    use DDP;
+    p req->headers;
+    p req->params;
+
+    say req->header('X-Header');
+
+See also [Plack::Request](https://metacpan.org/pod/Plack::Request).
+
+## res
 
 An alias for `$self->res`, this provides quick access to the
 [Raisin::Response](https://metacpan.org/pod/Raisin::Response) object for the current route.
 
-### params
+Use `res` to set up response parameters.
+
+    res->status(403);
+    res->headers(['X-Application' => 'Raisin Application']);
+
+See also [Plack::Response](https://metacpan.org/pod/Plack::Response).
+
+## params
 
 An alias for `$self->params` that gets the GET and POST parameters.
 When used with no arguments, it will return an array with the names of all http
@@ -115,33 +132,41 @@ parameters. Otherwise, it will return the value of the requested http parameter.
 
 Returns [Hash::MultiValue](https://metacpan.org/pod/Hash::MultiValue) object.
 
-### session
+    say req->params->{name};
+
+## session
 
 An alias for `$self->session` that returns (optional) psgix.session hash.
 When it exists, you can retrieve and store per-session data from and to this hash.
 
-### api\_version
+    # store param
+    session->{hello} = 'World!';
+
+    # read param
+    say session->{name};
+
+## api\_version
 
 Set an API version header.
 
     api_version 1.23;
 
-### api\_format
+## api\_format
 
-Load a `Raisin::Plugin::Format` plugin.
+Loads a plugin from `Raisin::Plugin::Format` namespace.
 
 Already exists [Raisin::Plugin::Format::JSON](https://metacpan.org/pod/Raisin::Plugin::Format::JSON) and [Raisin::Plugin::Format::YAML](https://metacpan.org/pod/Raisin::Plugin::Format::YAML).
 
     api_format 'JSON';
 
-### plugin
+## plugin
 
 Loads a Raisin module. The module options may be specified after the module name.
 Compatible with [Kelp](https://metacpan.org/pod/Kelp) modules.
 
     plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
 
-### middleware
+## middleware
 
 Loads middleware to your application.
 
@@ -149,7 +174,7 @@ Loads middleware to your application.
     middleware '+Plack::Middleware::ContentLength';
     middleware 'Runtime'; # will be loaded Plack::Middleware::Runtime
 
-### mount
+## mount
 
 Mount multiple API implementations inside another one.  These don't have to be
 different versions, but may be components of the same API.
@@ -167,11 +192,11 @@ In `RaisinApp.pm`:
 
     1;
 
-### run, new
+## run, new
 
 Creates and returns a PSGI ready subroutine, and makes the app ready for `Plack`.
 
-## Parameters
+# Parameters
 
 Request parameters are available through the params hash object. This includes
 GET, POST and PUT parameters, along with any named parameters you specify in
@@ -190,7 +215,7 @@ route string parameters will have precedence.
 
 Query string and body parameters will be merged (see ["parameters" in Plack::Request](https://metacpan.org/pod/Plack::Request#parameters))
 
-### Validation and coercion
+## Validation and coercion
 
 You can define validations and coercion options for your parameters using a params block.
 
@@ -215,7 +240,7 @@ Positional arguments:
 
 Optional parameters can have a default value.
 
-### Types
+## Types
 
 Here is built-in types
 
@@ -226,7 +251,7 @@ Here is built-in types
 You can create your own types as well. See examples in [Raisin::Types](https://metacpan.org/pod/Raisin::Types).
 Also see [Raisin::Types::Base](https://metacpan.org/pod/Raisin::Types::Base).
 
-## Hooks
+# Hooks
 
 This blocks can be executed before or after every API call, using
 `before`, `after`, `before_validation` and `after_validation`.
@@ -254,8 +279,8 @@ Steps 3 and 4 only happen if validation succeeds.
 
 # API FORMATS
 
-By default, Raisin supports `YAML`, `JSON`, and `TXT` content-types.
-The default format is `TXT`.
+By default, Raisin supports `YAML`, `JSON`, and `TEXT` content-types.
+The default format is `TEXT`.
 
 Serialization takes place automatically. For example, you do not have to call
 `encode_json` in each `JSON` API implementation.
@@ -267,27 +292,22 @@ Your API can declare which types to support by using `api_format`.
 Custom formatters for existing and additional types can be defined with a
 [Raisin::Plugin::Format](https://metacpan.org/pod/Raisin::Plugin::Format).
 
-Built-in formats are the following:
+## JSON
 
-- `JSON`: call JSON::encode\_json.
-- `YAML`: call YAML::Dump.
-- `TXT`: call Data::Dumper->Dump if not SCALAR.
+Call `JSON::encode_json` and `JSON::decode_json`.
+
+## YAML
+
+Call `YAML::Dump` and `JSON::Load`.
+
+## TEXT
+
+Call `Data::Dumper->Dump` if output data is not a string.
 
 The order for choosing the format is the following.
 
-- Use the `api_format` set by the `api_format` option, if specified.
-- Default to `TXT`.
-
-# HEADERS
-
-Use `res` to set up response headers. See [Plack::Response](https://metacpan.org/pod/Plack::Response).
-
-    res->headers(['X-Application' => 'Raisin Application']);
-
-Use `req` to read request headers. See [Plack::Request](https://metacpan.org/pod/Plack::Request).
-
-    req->header('X-Application');
-    req->headers;
+- Use the `api_format` if specified.
+- Fallback to `TEXT`.
 
 TODO
 Built-in plugins
@@ -297,7 +317,7 @@ Built-in plugins
 
 # LOGGING
 
-Raisin has a buil-in logger based on Log::Dispatch. You can enable it by
+Raisin has a built-in logger based on `Log::Dispatch`. You can enable it by
 
     plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
 
@@ -322,7 +342,7 @@ For more see [Raisin::Plugin::APIDocs](https://metacpan.org/pod/Raisin::Plugin::
 # MIDDLEWARE
 
 You can easily add any [Plack](https://metacpan.org/pod/Plack) middleware to your application using
-`middleware` keyword.
+`middleware` keyword. See ["middleware" in Raisin](https://metacpan.org/pod/Raisin#middleware).
 
 # PLUGINS
 
@@ -330,7 +350,7 @@ Raisin can be extended using custom _modules_. Each new module must be a subclas
 of the `Raisin::Plugin` namespace. Modules' job is to initialize and register new
 methods into the web application class.
 
-For more see [Raisin::Plugin](https://metacpan.org/pod/Raisin::Plugin).
+For more see ["plugin" in Raisin](https://metacpan.org/pod/Raisin#plugin) and [Raisin::Plugin](https://metacpan.org/pod/Raisin::Plugin).
 
 # TESTING
 
@@ -354,7 +374,10 @@ See [Plack::Test](https://metacpan.org/pod/Plack::Test), [Test::More](https://me
 
 # DEPLOYING
 
-See [Plack::Builder](https://metacpan.org/pod/Plack::Builder), [Plack::App::URLMap](https://metacpan.org/pod/Plack::App::URLMap).
+Deploying a Raisin application is done the same way any other Plack
+application is deployed:
+
+    > plackup -E deployment -s Starman app.psgi
 
 ## Kelp
 
@@ -403,6 +426,8 @@ See [Plack::Builder](https://metacpan.org/pod/Plack::Builder), [Plack::App::URLM
         mount '/api/rest' => RaisinApp->new;
     };
 
+Also see [Plack::Builder](https://metacpan.org/pod/Plack::Builder), [Plack::App::URLMap](https://metacpan.org/pod/Plack::App::URLMap).
+
 # EXAMPLES
 
 See examples.
@@ -413,14 +438,26 @@ See examples.
 
 # AUTHOR
 
-Artur Khabibullin - khrt <at> ya.ru
+Artur Khabibullin - rtkh <at> cpan.org
 
 # ACKNOWLEDGEMENTS
 
-This module was inspired by [Kelp](https://metacpan.org/pod/Kelp), which was inspired by [Dancer](https://metacpan.org/pod/Dancer),
-which in its turn was inspired by Sinatra.
+This module was inspired both by Grape and [Kelp](https://metacpan.org/pod/Kelp),
+which was inspired by [Dancer](https://metacpan.org/pod/Dancer), which in its turn was inspired by Sinatra.
 
 # LICENSE
 
 This module and all the modules in this package are governed by the same license
 as Perl itself.
+
+# POD ERRORS
+
+Hey! __The above document had some coding errors, which are explained below:__
+
+- Around line 591:
+
+    &#x3d;back without =over
+
+- Around line 726:
+
+    &#x3d;back without =over

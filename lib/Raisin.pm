@@ -10,7 +10,7 @@ use Raisin::Request;
 use Raisin::Response;
 use Raisin::Routes;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 sub new {
     my ($class, %args) = @_;
@@ -229,7 +229,7 @@ __END__
 
 =head1 NAME
 
-Raisin - A REST-like API micro-framework for Perl.
+Raisin - REST-like API micro-framework for Perl.
 
 =head1 SYNOPSIS
 
@@ -302,19 +302,19 @@ It was inspired by L<Grape|https://github.com/intridea/grape>.
 
 =head1 KEYWORDS
 
-=head3 namespace
+=head2 namespace
 
 Adds a route to application.
 
     namespace user => sub { ... };
 
-=head3 route_param
+=head2 route_param
 
 Define a route parameter as a namespace C<route_param>.
 
     route_param id => $Raisin::Types::Integer, sub { ... };
 
-=head3 delete, get, post, put
+=head2 delete, get, post, put
 
 These are shortcuts to C<route> restricted to the corresponding HTTP method.
 
@@ -326,17 +326,34 @@ These are shortcuts to C<route> restricted to the corresponding HTTP method.
     ],
     sub { 'GET' };
 
-=head3 req
+=head2 req
 
 An alias for C<$self-E<gt>req>, this provides quick access to the
 L<Raisin::Request> object for the current route.
 
-=head3 res
+Use C<req> to get access to the request headers, params, etc.
+
+    use DDP;
+    p req->headers;
+    p req->params;
+
+    say req->header('X-Header');
+
+See also L<Plack::Request>.
+
+=head2 res
 
 An alias for C<$self-E<gt>res>, this provides quick access to the
 L<Raisin::Response> object for the current route.
 
-=head3 params
+Use C<res> to set up response parameters.
+
+    res->status(403);
+    res->headers(['X-Application' => 'Raisin Application']);
+
+See also L<Plack::Response>.
+
+=head2 params
 
 An alias for C<$self-E<gt>params> that gets the GET and POST parameters.
 When used with no arguments, it will return an array with the names of all http
@@ -344,33 +361,41 @@ parameters. Otherwise, it will return the value of the requested http parameter.
 
 Returns L<Hash::MultiValue> object.
 
-=head3 session
+    say req->params->{name};
+
+=head2 session
 
 An alias for C<$self-E<gt>session> that returns (optional) psgix.session hash.
 When it exists, you can retrieve and store per-session data from and to this hash.
 
-=head3 api_version
+    # store param
+    session->{hello} = 'World!';
+
+    # read param
+    say session->{name};
+
+=head2 api_version
 
 Set an API version header.
 
     api_version 1.23;
 
-=head3 api_format
+=head2 api_format
 
-Load a C<Raisin::Plugin::Format> plugin.
+Loads a plugin from C<Raisin::Plugin::Format> namespace.
 
 Already exists L<Raisin::Plugin::Format::JSON> and L<Raisin::Plugin::Format::YAML>.
 
     api_format 'JSON';
 
-=head3 plugin
+=head2 plugin
 
 Loads a Raisin module. The module options may be specified after the module name.
 Compatible with L<Kelp> modules.
 
     plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
 
-=head3 middleware
+=head2 middleware
 
 Loads middleware to your application.
 
@@ -378,7 +403,7 @@ Loads middleware to your application.
     middleware '+Plack::Middleware::ContentLength';
     middleware 'Runtime'; # will be loaded Plack::Middleware::Runtime
 
-=head3 mount
+=head2 mount
 
 Mount multiple API implementations inside another one.  These don't have to be
 different versions, but may be components of the same API.
@@ -396,11 +421,11 @@ In C<RaisinApp.pm>:
 
     1;
 
-=head3 run, new
+=head2 run, new
 
 Creates and returns a PSGI ready subroutine, and makes the app ready for C<Plack>.
 
-=head2 Parameters
+=head1 Parameters
 
 Request parameters are available through the params hash object. This includes
 GET, POST and PUT parameters, along with any named parameters you specify in
@@ -431,7 +456,7 @@ route string parameters will have precedence.
 
 Query string and body parameters will be merged (see L<Plack::Request/parameters>)
 
-=head3 Validation and coercion
+=head2 Validation and coercion
 
 You can define validations and coercion options for your parameters using a params block.
 
@@ -472,7 +497,7 @@ regex
 
 Optional parameters can have a default value.
 
-=head3 Types
+=head2 Types
 
 Here is built-in types
 
@@ -495,7 +520,7 @@ L<Raisin::Types::Scalar>
 You can create your own types as well. See examples in L<Raisin::Types>.
 Also see L<Raisin::Types::Base>.
 
-=head2 Hooks
+=head1 Hooks
 
 This blocks can be executed before or after every API call, using
 C<before>, C<after>, C<before_validation> and C<after_validation>.
@@ -538,8 +563,8 @@ Steps 3 and 4 only happen if validation succeeds.
 
 =head1 API FORMATS
 
-By default, Raisin supports C<YAML>, C<JSON>, and C<TXT> content-types.
-The default format is C<TXT>.
+By default, Raisin supports C<YAML>, C<JSON>, and C<TEXT> content-types.
+The default format is C<TEXT>.
 
 Serialization takes place automatically. For example, you do not have to call
 C<encode_json> in each C<JSON> API implementation.
@@ -551,21 +576,17 @@ Your API can declare which types to support by using C<api_format>.
 Custom formatters for existing and additional types can be defined with a
 L<Raisin::Plugin::Format>.
 
-Built-in formats are the following:
+=head2 JSON
 
-=over
+Call C<JSON::encode_json> and C<JSON::decode_json>.
 
-=item *
+=head2 YAML
 
-C<JSON>: call JSON::encode_json.
+Call C<YAML::Dump> and C<JSON::Load>.
 
-=item *
+=head2 TEXT
 
-C<YAML>: call YAML::Dump.
-
-=item *
-
-C<TXT>: call Data::Dumper->Dump if not SCALAR.
+Call C<Data::Dumper-E<gt>Dump> if output data is not a string.
 
 =back
 
@@ -575,24 +596,13 @@ The order for choosing the format is the following.
 
 =item *
 
-Use the C<api_format> set by the C<api_format> option, if specified.
+Use the C<api_format> if specified.
 
 =item *
 
-Default to C<TXT>.
+Fallback to C<TEXT>.
 
 =back
-
-=head1 HEADERS
-
-Use C<res> to set up response headers. See L<Plack::Response>.
-
-    res->headers(['X-Application' => 'Raisin Application']);
-
-Use C<req> to read request headers. See L<Plack::Request>.
-
-    req->header('X-Application');
-    req->headers;
 
 =for comment AUTHENTICATION
 
@@ -604,7 +614,7 @@ L<Raisin::Plugin::Authentication::Digest>
 
 =head1 LOGGING
 
-Raisin has a buil-in logger based on Log::Dispatch. You can enable it by
+Raisin has a built-in logger based on C<Log::Dispatch>. You can enable it by
 
     plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
 
@@ -629,7 +639,7 @@ For more see L<Raisin::Plugin::APIDocs>.
 =head1 MIDDLEWARE
 
 You can easily add any L<Plack> middleware to your application using
-C<middleware> keyword.
+C<middleware> keyword. See L<Raisin/middleware>.
 
 =head1 PLUGINS
 
@@ -637,7 +647,7 @@ Raisin can be extended using custom I<modules>. Each new module must be a subcla
 of the C<Raisin::Plugin> namespace. Modules' job is to initialize and register new
 methods into the web application class.
 
-For more see L<Raisin::Plugin>.
+For more see L<Raisin/plugin> and L<Raisin::Plugin>.
 
 =head1 TESTING
 
@@ -661,7 +671,10 @@ See L<Plack::Test>, L<Test::More> and etc.
 
 =head1 DEPLOYING
 
-See L<Plack::Builder>, L<Plack::App::URLMap>.
+Deploying a Raisin application is done the same way any other Plack
+application is deployed:
+
+    > plackup -E deployment -s Starman app.psgi
 
 =head2 Kelp
 
@@ -710,6 +723,10 @@ See L<Plack::Builder>, L<Plack::App::URLMap>.
         mount '/api/rest' => RaisinApp->new;
     };
 
+=back
+
+Also see L<Plack::Builder>, L<Plack::App::URLMap>.
+
 =head1 EXAMPLES
 
 See examples.
@@ -720,12 +737,12 @@ L<https://github.com/khrt/Raisin|https://github.com/khrt/Raisin>
 
 =head1 AUTHOR
 
-Artur Khabibullin - khrt E<lt>atE<gt> ya.ru
+Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
 
 =head1 ACKNOWLEDGEMENTS
 
-This module was inspired by L<Kelp>, which was inspired by L<Dancer>,
-which in its turn was inspired by Sinatra.
+This module was inspired both by Grape and L<Kelp>,
+which was inspired by L<Dancer>, which in its turn was inspired by Sinatra.
 
 =head1 LICENSE
 
