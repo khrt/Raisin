@@ -425,7 +425,7 @@ In C<RaisinApp.pm>:
 
 Creates and returns a PSGI ready subroutine, and makes the app ready for C<Plack>.
 
-=head1 Parameters
+=head1 PARAMETERS
 
 Request parameters are available through the params hash object. This includes
 GET, POST and PUT parameters, along with any named parameters you specify in
@@ -520,7 +520,7 @@ L<Raisin::Types::Scalar>
 You can create your own types as well. See examples in L<Raisin::Types>.
 Also see L<Raisin::Types::Base>.
 
-=head1 Hooks
+=head1 HOOKS
 
 This blocks can be executed before or after every API call, using
 C<before>, C<after>, C<before_validation> and C<after_validation>.
@@ -602,13 +602,12 @@ Fallback to C<TEXT>.
 
 =back
 
-=for comment AUTHENTICATION
+=head1 AUTHENTICATION
 
 TODO
-Built-in plugins
-L<Raisin::Plugin::Authentication>
-L<Raisin::Plugin::Authentication::Basic>
-L<Raisin::Plugin::Authentication::Digest>
+L<Raisin::Plugin::Auth>
+L<Raisin::Plugin::Auth::Basic>
+L<Raisin::Plugin::Auth::Token>
 
 =head1 LOGGING
 

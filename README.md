@@ -196,7 +196,7 @@ In `RaisinApp.pm`:
 
 Creates and returns a PSGI ready subroutine, and makes the app ready for `Plack`.
 
-# Parameters
+# PARAMETERS
 
 Request parameters are available through the params hash object. This includes
 GET, POST and PUT parameters, along with any named parameters you specify in
@@ -251,7 +251,7 @@ Here is built-in types
 You can create your own types as well. See examples in [Raisin::Types](https://metacpan.org/pod/Raisin::Types).
 Also see [Raisin::Types::Base](https://metacpan.org/pod/Raisin::Types::Base).
 
-# Hooks
+# HOOKS
 
 This blocks can be executed before or after every API call, using
 `before`, `after`, `before_validation` and `after_validation`.
@@ -309,11 +309,12 @@ The order for choosing the format is the following.
 - Use the `api_format` if specified.
 - Fallback to `TEXT`.
 
+# AUTHENTICATION
+
 TODO
-Built-in plugins
-[Raisin::Plugin::Authentication](https://metacpan.org/pod/Raisin::Plugin::Authentication)
-[Raisin::Plugin::Authentication::Basic](https://metacpan.org/pod/Raisin::Plugin::Authentication::Basic)
-[Raisin::Plugin::Authentication::Digest](https://metacpan.org/pod/Raisin::Plugin::Authentication::Digest)
+[Raisin::Plugin::Auth](https://metacpan.org/pod/Raisin::Plugin::Auth)
+[Raisin::Plugin::Auth::Basic](https://metacpan.org/pod/Raisin::Plugin::Auth::Basic)
+[Raisin::Plugin::Auth::Token](https://metacpan.org/pod/Raisin::Plugin::Auth::Token)
 
 # LOGGING
 
