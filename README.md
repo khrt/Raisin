@@ -449,15 +449,3 @@ which was inspired by [Dancer](https://metacpan.org/pod/Dancer), which in its tu
 
 This module and all the modules in this package are governed by the same license
 as Perl itself.
-
-# POD ERRORS
-
-Hey! __The above document had some coding errors, which are explained below:__
-
-- Around line 591:
-
-    &#x3d;back without =over
-
-- Around line 726:
-
-    &#x3d;back without =over

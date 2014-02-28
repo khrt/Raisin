@@ -588,8 +588,6 @@ Call C<YAML::Dump> and C<JSON::Load>.
 
 Call C<Data::Dumper-E<gt>Dump> if output data is not a string.
 
-=back
-
 The order for choosing the format is the following.
 
 =over
@@ -722,8 +720,6 @@ application is deployed:
 
         mount '/api/rest' => RaisinApp->new;
     };
-
-=back
 
 Also see L<Plack::Builder>, L<Plack::App::URLMap>.
 
