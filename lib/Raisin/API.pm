@@ -107,16 +107,19 @@ sub params { $app->params(@_) }
 sub session { $app->session(@_) }
 
 #
-#
+# System
 #
 sub plugin { $app->load_plugin(@_) }
+
 sub api_format { $app->api_format(@_) }
 sub api_version { $app->api_version(@_) }
 
-#sub error {
-#    # NOTE render error 500?
-#    $app->res->render_error(@_);
-#}
+#
+# Render
+#
+sub error { $app->res->render_error(@_) }
+
+1;
 
 __END__
 
@@ -129,5 +132,3 @@ Raisin::API - Provides Raisin DSL.
 See L<Raisin>.
 
 =cut
-
-1;
