@@ -17,3 +17,4 @@ Output format
     * based on accept content type header;
     * based on path extension;
 Path extension should have more priority rather accept header.
+
