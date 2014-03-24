@@ -13,9 +13,11 @@ use JSON;
 
 use lib "$Bin/../lib";
 
-my %params = (
-    param1 => 'value1',
-    param2 => ['value2.0', 'value2.1'],
+my %PARAMS = (
+    param0 => 0,
+    param1 => 1,
+    param2 => 'value1',
+    param3 => ['value2.0', 'value2.1'],
 );
 
 my $json_app = eval {
@@ -23,8 +25,11 @@ my $json_app = eval {
     use Raisin::Types;
     api_format 'JSON';
     post params => [
-        optional => ['param1', $Raisin::Types::String],
+        requires => ['param0', $Raisin::Types::Integer],
+        required => ['param1', $Raisin::Types::Integer],
+
         optional => ['param2', $Raisin::Types::String],
+        optional => ['param3', $Raisin::Types::String],
     ],
     sub { shift };
     run;
@@ -44,45 +49,59 @@ my $json_app = eval {
 
 test_psgi $json_app, sub {
     my $cb  = shift;
-    my $req = encode_json(\%params);
+    my $req = encode_json({ param1 => 0 });
     my $res = $cb->(
         POST '/',
         Content => $req,
         Content_Type => 'application/json'
     );
 
-    #note explain $res->content_type;
+    #note $res->content_type;
 
-    my $data = decode_json($res->content);
-    is_deeply $data, \%params, 'POST JSON';
+    is($res->code, 400, 'Invalid params');
 };
 
 test_psgi $json_app, sub {
     my $cb  = shift;
-    my $req = Dump(\%params);
+    my $req = encode_json(\%PARAMS);
+    my $res = $cb->(
+        POST '/',
+        Content => $req,
+        Content_Type => 'application/json'
+    );
+
+    #note $res->content_type;
+
+    my $data = decode_json($res->content);
+    is_deeply $data, \%PARAMS, 'POST JSON';
+};
+
+test_psgi $json_app, sub {
+    my $cb  = shift;
+    my $req = Dump(\%PARAMS);
     my $res = $cb->(
         POST '/',
         Content => $req,
         Content_Type => 'application/yaml'
     );
 
-    #note explain $res->content_type;
-    #note explain $res->content;
+    #note $res->content_type;
+    #note $res->content;
 
     like $res->content, qr/500/, 'POST YAML FAILED';
     #my $data = Load($res->content);
-    #is_deeply $data, \%params, 'POST YAML';
+    #is_deeply $data, \%PARAMS, 'POST YAML';
 };
 
 test_psgi $json_app, sub {
     my $cb  = shift;
     my $res = $cb->(
         POST '/',
-        Content => [%params],
+        Content => [%PARAMS],
     );
 
     my $data = decode_json($res->content);
-    is_deeply $data, \%params, 'POST Form input';
+    is_deeply $data, \%PARAMS, 'POST Form input';
 };
 
 done_testing;

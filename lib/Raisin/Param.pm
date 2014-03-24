@@ -9,7 +9,7 @@ sub new {
     my ($class, $kind, $required, $options) = @_;
     my $self = bless {}, $class;
 
-    $self->{required} = $required eq 'required' ? 1 : 0;
+    $self->{required} = $required =~ /^require(s|d)$/ ? 1 : 0;
     $self->{named} = $kind eq 'named' ? 1 : 0;
 
     @$self{qw(name type default regex)} = @$options;
@@ -25,33 +25,33 @@ sub default { shift->{default} }
 sub regex   { shift->{regex} }
 
 sub validate {
-    my ($self, $value) = @_;
+    my ($self, $ref_value) = @_;
 
     # Required
     # Only optional parameters can has default value
-    if ($self->required && !$$value) {
+    if ($self->required && !defined($$ref_value)) {
         carp "$self->{name} required but empty!";
         return;
     }
 
     # Optional and empty
-    if (!defined($$value) && !$self->required) {
+    if (!defined($$ref_value) && !$self->required) {
         #carp STDERR "$self->{name} optional and empty.";
         return 1;
     }
 
-    if ($$value && ref $$value && ref $$value ne 'ARRAY') {
-        carp "$self->{name} \$value should be SCALAR or ARRAYREF";
+    if ($$ref_value && ref $$ref_value && ref $$ref_value ne 'ARRAY') {
+        carp "$self->{name} \$ref_value should be SCALAR or ARRAYREF";
         return;
     }
 
     my $was_scalar;
-    if (ref $$value ne 'ARRAY') {
+    if (ref $$ref_value ne 'ARRAY') {
         $was_scalar = 1;
-        $$value = [$$value];
+        $$ref_value = [$$ref_value];
     }
 
-    for my $v (@$$value) {
+    for my $v (@$$ref_value) {
         if (!$self->type->check($v)) {
             carp "$self->{name} check() failed";
             return;
@@ -67,7 +67,7 @@ sub validate {
         }
     }
 
-    $$value = $$value->[0] if $was_scalar;
+    $$ref_value = $$ref_value->[0] if $was_scalar;
 
     1;
 }

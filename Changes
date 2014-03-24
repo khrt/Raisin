@@ -1,3 +1,6 @@
+0.2 Fixes & Improvments
+    - Accept both keywords `required` and `requires` in Param.pm;
+
 0.13 Fixes
     - More functional `raisin` script;
     - Update dependencies;
