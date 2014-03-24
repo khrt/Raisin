@@ -52,6 +52,8 @@ sub populate_params {
     foreach my $p (@$declared) {
         my $name = $p->name;
 
+        $self->{'raisin.params'}{$name} = undef;
+
         # Route params has more precedence than query params
         my $value = $named->{$name} // $params->{$name};
 

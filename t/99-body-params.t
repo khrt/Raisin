@@ -63,6 +63,28 @@ test_psgi $json_app, sub {
 
 test_psgi $json_app, sub {
     my $cb  = shift;
+    my $req = encode_json({ param0 => 0, param1 => 1 });
+    my $res = $cb->(
+        POST '/',
+        Content => $req,
+        Content_Type => 'application/json'
+    );
+
+    #note $res->content_type;
+
+    my %STANDARD = (
+        param0 => 0,
+        param1 => 1,
+        param2 => undef,
+        param3 => undef,
+    );
+
+    my $data = decode_json($res->content);
+    is_deeply $data, \%STANDARD, 'POST JSON';
+};
+
+test_psgi $json_app, sub {
+    my $cb  = shift;
     my $req = encode_json(\%PARAMS);
     my $res = $cb->(
         POST '/',
