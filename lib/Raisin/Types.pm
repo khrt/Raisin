@@ -32,6 +32,15 @@ our $Integer
         #in => sub {},
     );
 
+our $Float
+    = Raisin::Types::Base->new(
+        check => sub {
+            my $v = shift;
+            $v =~ /^\d+(?:\.\d+)$/;
+        },
+        #in => sub {},
+    );
+
 1;
 
 __END__
