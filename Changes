@@ -1,3 +1,7 @@
+0.21 Refactor params
+    - Param.pm
+    - Routes.pm
+
 0.20 Fixes & Improvments
     - Accept both keywords `required` and `requires` in Param.pm;
     - `populate_params` now populates all declared params;

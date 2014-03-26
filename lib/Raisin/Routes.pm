@@ -40,9 +40,11 @@ sub add {
     my @params;
     if (@args && (my %args = @args)) {
         foreach my $key (qw(params named)) {
-            for (my $i = 0; $i < scalar @{ $args{$key} || [] }; $i += 2) {
-                my ($type, $options) = ($args{$key}[$i], $args{$key}[$i + 1]);
-                push @params, Raisin::Param->new($key, $type, $options);
+            while (my @param = splice @{ $args{$key} }, 0, 2) {
+                push @params, Raisin::Param->new(
+                    named => $key eq 'named' ? 1 : 0,
+                    param => \@param
+                );
             }
         }
     }

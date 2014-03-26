@@ -6,13 +6,13 @@ use warnings;
 use Carp;
 
 sub new {
-    my ($class, $kind, $required, $options) = @_;
+    my ($class, %args) = @_;
     my $self = bless {}, $class;
 
-    $self->{required} = $required =~ /^require(s|d)$/ ? 1 : 0;
-    $self->{named} = $kind eq 'named' ? 1 : 0;
+    $self->{named} = $args{named};
+    $self->{required} = $args{param}[0] =~ /^require(s|d)$/ ? 1 : 0;
 
-    @$self{qw(name type default regex)} = @$options;
+    @$self{qw(name type default regex)} = @{ $args{param}[1] };
     $self;
 }
 

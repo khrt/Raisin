@@ -1,4 +1,3 @@
-### NOTE Useless test
 
 use strict;
 use warnings;
@@ -13,21 +12,25 @@ use Raisin::Param;
 
 #required/optional => [name, type, default, regex]
 my @types = (
-    required => ['newint', $Raisin::Types::Integer, 0, qr/digit/],
-    required => ['int', $Raisin::Types::Integer],
     optional => ['str', $Raisin::Types::String, undef, qr/regex/],
+    required => ['newint', $Raisin::Types::Integer, 0, qr/digit/],
+    requires => ['int', $Raisin::Types::Integer],
 );
-#note explain @types;
 my @keys = qw(named params);
 
-for (my $i = 0; $i < scalar @types; $i += 2) {
-    my ($type, $options) = ($types[$i], $types[$i+1]);
+while (my @param = splice @types, 0, 2) {
+    my $required = $param[0] =~ /require(?:d|s)/ ? 1 : 0;
+    my $options = $param[1];
+
     my $key = $keys[int(rand(1))];
 
-    my $param = Raisin::Param->new($key, $type, $options);
+    my $param = Raisin::Param->new(
+        named => $key eq 'named' ? 1 : 0,
+        param => \@param
+    );
     isa_ok $param, 'Raisin::Param';
 
-    is $param->required, $type eq 'required' ? 1 : 0, 'required';
+    is $param->required, $required, 'required';
     is $param->named, $key eq 'named' ? 1 : 0, 'named';
     is $param->name, $options->[0], 'name';
     is $param->type, $options->[1], 'type';

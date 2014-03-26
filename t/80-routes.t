@@ -14,7 +14,15 @@ use Raisin::Types;
 my $r = Raisin::Routes->new;
 
 ok $r->add(POST => '/dump', sub {'DUMP'}), 'add DUMP';
-ok $r->add(POST => '/person', params => [optional => ['email', $Raisin::Types::String]], sub {'PERSON'}), 'add PERSON';
+ok $r->add(
+    POST   => '/person',
+    params => [
+        requires => ['name', $Raisin::Types::String],
+        optional => ['email', $Raisin::Types::String]
+    ],
+    sub {'PERSON'}
+    ),
+    'add PERSON';
 
 is $r->list->{POST}{'/person'}, 2, 'list';
 
