@@ -75,6 +75,10 @@ namespace user => sub {
         { success => $id }
     };
 
+    get 'path' => sub {
+        { data => 'path param' }
+    };
+
     # /user/<id>
     route_param id => $Raisin::Types::Integer,
     sub {

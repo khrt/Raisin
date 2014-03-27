@@ -67,7 +67,12 @@ sub match {
     my ($self, $method, $path) = @_;
 
     return if !$method || $method ne $self->method;
+use DDP;
+p $path;
+p $self->regex;
+warn $path =~ $self->regex;
     return if not (my @matched = $path =~ $self->regex);
+warn 'matched! ' x 3;
 
     my %named = map { $_ => $+{$_} } keys %+;
     $self->named(\%named);

@@ -37,6 +37,13 @@ sub add {
         return;
     }
 
+    # TODO: path params
+    # NOTE: IN PROGRESS
+    if (scalar @args == 1 || scalar @args == 3) {
+        $path = $path . '/' . shift(@args);
+        warn $path;
+    }
+
     my @params;
     if (@args && (my %args = @args)) {
         foreach my $key (qw(params named)) {
@@ -89,6 +96,8 @@ sub find {
     my @found
     #   = sort { $b->bridge <=> $a->bridge || $a->pattern cmp $b->pattern }
         = grep { $_->match($method, $path) } @$routes;
+use DDP;
+p @found;
 
     $self->cache->{$cache_key} = \@found;
     \@found;
