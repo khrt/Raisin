@@ -30,8 +30,8 @@ middleware 'Runtime';
 #middleware '+Plack::Middleware::SimpleLogger';
 
 get params => [
-    optional => ['password', $Raisin::Types::String, undef, qr/qwerty/],
-    optional => ['email', $Raisin::Types::String, 'NA'],
+    optional => ['password', 'Raisin::Types::String', undef, qr/qwerty/],
+    optional => ['email', 'Raisin::Types::String', 'NA'],
 ],
 sub {
     my $params = shift;
@@ -41,8 +41,8 @@ sub {
 };
 
 post params => [
-    optional => ['password', $Raisin::Types::String, undef, qr/ytrewq/],
-    optional => ['email', $Raisin::Types::String, 'AN'],
+    optional => ['password', 'Raisin::Types::String', undef, qr/ytrewq/],
+    optional => ['email', 'Raisin::Types::String', 'AN'],
 ],
 sub {
     my $params = shift;

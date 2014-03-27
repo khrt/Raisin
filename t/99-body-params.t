@@ -25,11 +25,11 @@ my $json_app = eval {
     use Raisin::Types;
     api_format 'JSON';
     post params => [
-        requires => ['param0', $Raisin::Types::Integer],
-        required => ['param1', $Raisin::Types::Integer],
+        requires => ['param0', 'Raisin::Types::Integer'],
+        required => ['param1', 'Raisin::Types::Integer'],
 
-        optional => ['param2', $Raisin::Types::String],
-        optional => ['param3', $Raisin::Types::String],
+        optional => ['param2', 'Raisin::Types::String'],
+        optional => ['param3', 'Raisin::Types::String'],
     ],
     sub { shift };
     run;
@@ -40,8 +40,8 @@ my $json_app = eval {
 #    use Raisin::Types;
 #    api_format 'YAML';
 #    post params => [
-#        optional => ['param1', $Raisin::Types::String],
-#        optional => ['param2', $Raisin::Types::String],
+#        optional => ['param1', 'Raisin::Types::String'],
+#        optional => ['param2', 'Raisin::Types::String'],
 #    ],
 #    sub { shift };
 #    run;

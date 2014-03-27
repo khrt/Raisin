@@ -7,14 +7,8 @@ no warnings 'redefine';
 use Raisin::Attributes;
 
 has name => sub {
-    my $self = shift;
-    my $class = ref $self ? ref $self : $self;
+    my $class = shift;
     my $name = (split /::/, $class)[-1];
-
-    if (ref $self && $self->{_type}) {
-        return $self->{_type};
-    }
-
     $name;
 };
 

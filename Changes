@@ -1,3 +1,6 @@
+0.22 Refactor params & types
+    - Update params to match *Refactor Types* TODO section;
+
 0.21 Refactor params
     - Param.pm
     - Routes.pm

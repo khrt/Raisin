@@ -42,8 +42,8 @@ namespace user => sub {
     # list all users
     get params => [
         #required/optional => [name, type, default, regex]
-        optional => ['start', $Raisin::Types::Integer, 0],
-        optional => ['count', $Raisin::Types::Integer, 10],
+        optional => ['start', 'Raisin::Types::Integer', 0],
+        optional => ['count', 'Raisin::Types::Integer', 10],
     ],
     sub {
         my $params = shift;
@@ -62,9 +62,9 @@ namespace user => sub {
 
     # create new user
     post params => [
-        required => ['name', $Raisin::Types::String],
-        required => ['password', $Raisin::Types::String],
-        optional => ['email', $Raisin::Types::String, undef, qr/[^@]@[^.].\w+/],
+        required => ['name', 'Raisin::Types::String'],
+        required => ['password', 'Raisin::Types::String'],
+        optional => ['email', 'Raisin::Types::String', undef, qr/[^@]@[^.].\w+/],
     ],
     sub {
         my $params = shift;
@@ -80,7 +80,7 @@ namespace user => sub {
     };
 
     # /user/<id>
-    route_param id => $Raisin::Types::Integer,
+    route_param id => 'Raisin::Types::Integer',
     sub {
         # get user
         get sub {
@@ -90,8 +90,8 @@ namespace user => sub {
 
         # edit user
         put params => [
-            optional => ['password', $Raisin::Types::String],
-            optional => ['email', $Raisin::Types::String, undef, qr/[^@]@[^.].\w+/],
+            optional => ['password', 'Raisin::Types::String'],
+            optional => ['email', 'Raisin::Types::String', undef, qr/[^@]@[^.].\w+/],
         ],
         sub {
             my $params = shift;

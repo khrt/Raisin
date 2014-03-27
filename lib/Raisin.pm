@@ -10,7 +10,7 @@ use Raisin::Request;
 use Raisin::Response;
 use Raisin::Routes;
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 
 sub new {
     my ($class, %args) = @_;
@@ -251,8 +251,8 @@ Raisin - REST-like API micro-framework for Perl.
     namespace '/user' => sub {
         get params => [
             #required/optional => [name, type, default, regex]
-            optional => ['start', $Raisin::Types::Integer, 0],
-            optional => ['count', $Raisin::Types::Integer, 10],
+            optional => ['start', 'Raisin::Types::Integer', 0],
+            optional => ['count', 'Raisin::Types::Integer', 10],
         ],
         sub {
             my $params = shift;
@@ -270,9 +270,9 @@ Raisin - REST-like API micro-framework for Perl.
         };
 
         post params => [
-            required => ['name', $Raisin::Types::String],
-            required => ['password', $Raisin::Types::String],
-            optional => ['email', $Raisin::Types::String, undef, qr/.+\@.+/],
+            required => ['name', 'Raisin::Types::String'],
+            required => ['password', 'Raisin::Types::String'],
+            optional => ['email', 'Raisin::Types::String', undef, qr/.+\@.+/],
         ],
         sub {
             my $params = shift;
@@ -283,7 +283,7 @@ Raisin - REST-like API micro-framework for Perl.
             { success => 1 }
         };
 
-        route_param 'id' => $Raisin::Types::Integer,
+        route_param 'id' => 'Raisin::Types::Integer',
         sub {
             get sub {
                 my $params = shift;
@@ -312,7 +312,7 @@ Adds a route to application.
 
 Define a route parameter as a namespace C<route_param>.
 
-    route_param id => $Raisin::Types::Integer, sub { ... };
+    route_param id => 'Raisin::Types::Integer', sub { ... };
 
 =head2 delete, get, post, put
 
@@ -321,8 +321,8 @@ These are shortcuts to C<route> restricted to the corresponding HTTP method.
     get sub { 'GET' };
 
     get params => [
-        required => ['id', $Raisin::Types::Integer],
-        optional => ['key', $Raisin::Types::String],
+        required => ['id', 'Raisin::Types::Integer'],
+        optional => ['key', 'Raisin::Types::String'],
     ],
     sub { 'GET' };
 
@@ -464,8 +464,8 @@ Parameters can be C<required> and C<optional>. C<optional> parameters can have a
 default value.
 
     get params => [
-        required => ['name', $Raisin::Types::String],
-        optional => ['number', $Raisin::Types::Integer, 10],
+        required => ['name', 'Raisin::Types::String'],
+        optional => ['number', 'Raisin::Types::Integer', 10],
     ],
     sub {
         my $params = shift;
@@ -502,6 +502,10 @@ Optional parameters can have a default value.
 Here is built-in types
 
 =over
+
+=item *
+
+L<Raisin::Types::Float>
 
 =item *
 

@@ -30,8 +30,8 @@ namespace host => sub {
     # list all hosts
     get params => [
         #required/optional => [name, type, default, values]
-        optional => ['start', $Raisin::Types::Integer, 0, qr/^\d+$/],
-        optional => ['count', $Raisin::Types::Integer, 10, qr/^\d+$/],
+        optional => ['start', 'Raisin::Types::Integer', 0, qr/^\d+$/],
+        optional => ['count', 'Raisin::Types::Integer', 10, qr/^\d+$/],
     ],
     sub {
         my $params = shift;
@@ -50,8 +50,8 @@ namespace host => sub {
 
     # create new host
     post params => [
-        required => ['name', $Raisin::Types::String],
-        required => ['user_id', $Raisin::Types::Integer],
+        required => ['name', 'Raisin::Types::String'],
+        required => ['user_id', 'Raisin::Types::Integer'],
     ],
     sub {
         my $params = shift;
@@ -63,7 +63,7 @@ namespace host => sub {
     };
 
     # /host/<id>
-    route_param id => $Raisin::Types::Integer,
+    route_param id => 'Raisin::Types::Integer',
     sub {
         # get host
         get sub {
@@ -73,7 +73,7 @@ namespace host => sub {
 
         # edit host
         put params => [
-            required => ['state', $Raisin::Types::String],
+            required => ['state', 'Raisin::Types::String'],
         ],
         sub {
             my $params = shift;
