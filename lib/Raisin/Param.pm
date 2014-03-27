@@ -52,7 +52,7 @@ sub validate {
     }
 
     for my $v (@$$ref_value) {
-        if (!$self->type->check($v)) {
+        unless ($self->type->new(\$v)) {
             carp "CHECK: `$self->{name}` has invalid value `$v`!";
             return;
         }
@@ -60,10 +60,6 @@ sub validate {
         if ($self->regex && $v !~ $self->regex) {
             carp "REGEX: `$self->{name}` has invalid value `$v`!";
             return;
-        }
-
-        if (my $in = $self->type->in) {
-            $in->(\$v);
         }
     }
 

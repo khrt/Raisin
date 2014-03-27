@@ -10,15 +10,29 @@ use lib "$Bin/../lib";
 use Raisin::Types;
 use Raisin::Param;
 
+my $int = Raisin::Types::Integer->new(\123);
+is ref $int, 'Raisin::Types::Integer', 'Integer: OK';
+$int = Raisin::Types::Integer->new(\1.23);
+is $int, undef, 'Integer: FAILED';
+
+my $float_value = 1.23;
+my $float = Raisin::Types::Float->new(\$float_value);
+is ref $float, 'Raisin::Types::Float', 'Float: OK';
+$float = Raisin::Types::Float->new(\'string');
+is $float, undef, 'Float: FAILED';
+is $float_value, '1.2300', 'Float: in';
+
 #required/optional => [name, type, default, regex]
 my @types = (
-    optional => ['str', $Raisin::Types::String, undef, qr/regex/],
-    required => ['float', $Raisin::Types::Float, 0, qr/^\d\.\d$/],
-    requires => ['int', $Raisin::Types::Integer],
+    optional => ['sclr', 'Raisin::Types::Scalar'],
+    optional => ['str', 'Raisin::Types::String', undef, qr/regex/],
+    required => ['float', 'Raisin::Types::Float', 0, qr/^\d\.\d+$/],
+    requires => ['int', 'Raisin::Types::Integer'],
 );
 my @values = (
+    [[['array']], 'scalar'],
     [qw(invalid regex)],
-    [qw(12 1.2)],
+    [12, '1.2000'],
     [qw(digit 123)]
 );
 my @keys = qw(named params);
@@ -43,9 +57,10 @@ while (my @param = splice @types, 0, 2) {
     is $param->required, $required, 'required';
     is $param->type, $options->[1], 'type';
 
-    my @validate_res = (undef, 1);
+    my @expected = (undef, 1);
     for my $v (@{ $values[$index] }) {
-        is $param->validate(\$v), shift @validate_res, $param->name;
+        is $param->validate(\$v), shift @expected,
+            $param->type->name . ': ' . $param->name . " [$v]";
     }
     $index++;
 }

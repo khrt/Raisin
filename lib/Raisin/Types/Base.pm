@@ -2,20 +2,38 @@ package Raisin::Types::Base;
 
 use strict;
 use warnings;
+no warnings 'redefine';
+
+use Raisin::Attributes;
+
+has name => sub {
+    my $self = shift;
+    my $class = ref $self ? ref $self : $self;
+    my $name = (split /::/, $class)[-1];
+
+    if (ref $self && $self->{_type}) {
+        return $self->{_type};
+    }
+
+    $name;
+};
+
+has check => sub { 1 };
+has in => sub { 1 };
+has regex => undef;
 
 sub new {
-    my ($class, %args) = @_;
+    my ($class, $ref_value) = @_;
     my $self = bless {}, $class;
-    @$self{qw(check in)} = @args{qw(check in)};
+
+    if ($self->regex) {
+        return unless $$ref_value =~ $self->regex;
+    }
+
+    $self->check($$ref_value) or return;
+    $self->in($ref_value);
     $self;
 }
-
-sub check {
-    my ($self, $v) = @_;
-    $self->{check}->($v);
-}
-
-sub in { shift->{in} }
 
 1;
 
@@ -27,18 +45,26 @@ Raisin::Types::Base - Base class for Raisin::Types.
 
 =head1 SYNOPSIS
 
-    my $Price =
-        Raisin::Types::Base->new(
-            check => sub {
-                my $v = shift;
-                return if ref $v;
-                $v =~ /^[\d.]*$/;
-            },
-            in => sub {
-                my $v = shift; # SCALAR REF
-                $$v = sprintf '%.2f', $$v;
-            },
-        );
+    package Raisin::Types::Integer;
+    use base 'Raisin::Types::Base';
+
+    sub regex { qr/^\d+$/ }
+    sub check {
+        my ($self, $v) = @_;
+        length($v) <= 10 ? 1 : 0
+    }
+    sub in {
+        my ($self, $v) = @_; # REF
+        $$v = sprintf 'INT:%d', $$v;
+    }
+
+    package main;
+
+    # validate 10.1
+    use Raisin::Types::Integer;
+
+    warn Raisin::Types::Integer->new(1234) ? 'valid' : 'invalid';
+    warn Raisin::Types::Integer->new(10.1) ? 'valid' : 'invalid';
 
 =head1 DESCRIPTION
 
@@ -48,16 +74,16 @@ Contains two base methods: C<check> and C<in>.
 
 =head1 METHODS
 
+=head3 regex
+
+Type regex.
+
 =head3 check
 
 Check value.
 
-    $Price->check(\$value);
-
 =head3 in
 
 Apply some actions on the value.
-
-    $Price->in(\$value);
 
 =cut

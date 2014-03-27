@@ -2,44 +2,40 @@ package Raisin::Types;
 
 use strict;
 use warnings;
+no warnings 'redefine';
 
-use Raisin::Types::Base;
 
-our $Scalar
-    = Raisin::Types::Base->new(
-        check => sub {
-            my $v = shift;
-            ref \$v eq 'SCALAR';
-        },
-        #in => sub {},
-    );
+package Raisin::Types::Integer;
+use base 'Raisin::Types::Base';
+sub regex { qr/^\d+$/ }
 
-our $String
-    = Raisin::Types::Base->new(
-        check => sub {
-            my $v = shift;
-            $v =~ /^[\t\r\n\p{IsPrint}]{0,32766}/;
-        },
-        #in => sub {},
-    );
+# ->
 
-our $Integer
-    = Raisin::Types::Base->new(
-        check => sub {
-            my $v = shift;
-            $v =~ /^\d+$/;
-        },
-        #in => sub {},
-    );
+package Raisin::Types::Float;
+use base 'Raisin::Types::Base';
+sub regex { qr/^\d+(?:\.\d+)$/ }
+sub in {
+    my ($self, $v) = @_;
+    $$v = sprintf '%.4f', $$v;
+}
 
-our $Float
-    = Raisin::Types::Base->new(
-        check => sub {
-            my $v = shift;
-            $v =~ /^\d+(?:\.\d+)$/;
-        },
-        #in => sub {},
-    );
+# ->
+
+package Raisin::Types::String;
+
+use base 'Raisin::Types::Base';
+sub regex { qr/^[\t\r\n\p{IsPrint}]{0,32766}/ }
+
+# ->
+
+package Raisin::Types::Scalar;
+
+use base 'Raisin::Types::Base';
+sub check {
+    my ($self, $v) = @_;
+    ref \$v eq 'SCALAR';
+}
+
 
 1;
 
@@ -58,6 +54,10 @@ Built-in Raisin parameters types.
 =item *
 
 C<Raisin::Types::Integer>
+
+=item *
+
+C<Raisin::Types::Float>
 
 =item *
 
