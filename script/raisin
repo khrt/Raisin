@@ -5,7 +5,6 @@ use warnings;
 
 use File::Basename;
 use File::Path 'make_path';
-use File::Slurp 'write_file';
 use Getopt::Long;
 
 # DEBUG:
