@@ -22,9 +22,8 @@ sub _attr {
     else {
         $attr = sub {
             my ($self, $value) = @_;
-            $self->{"_$name"} = $value if defined $value;
-            $self->{"_$name"} = $default if $default;
-            $self->{"_$name"};
+            $self->{$name} = $value if defined $value;
+            $self->{$name} // $default;
         };
     }
 
@@ -45,13 +44,13 @@ Raisin::Attributes - Simple attributes accessors for Raisin.
     use Raisin::Attributes;
 
     has hello => sub { 'hello' };
-    warn $self->hello;
+    say $self->hello; # -> hello
 
     has 'new';
-    warn $self->new;
+    say $self->new; # -> undef
 
     has key => 'value';
-    warn $self->key;
+    say $self->key; # -> value
 
 =head1 DESCRIPTION
 
@@ -69,8 +68,8 @@ Will produce:
 
     sub key {
         my ($self, $value) = @_;
-        $self->{_key} = $value if defined $value;
-        return $self->{_key} // 'value';
+        $self->{key} = $value if defined $value;
+        return $self->{key} // 'value';
     }
 
 =cut
