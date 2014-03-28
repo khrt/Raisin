@@ -10,7 +10,7 @@ use Raisin::Request;
 use Raisin::Response;
 use Raisin::Routes;
 
-our $VERSION = '0.22';
+our $VERSION = '0.23.0';
 
 sub new {
     my ($class, %args) = @_;
@@ -318,13 +318,43 @@ Define a route parameter as a namespace C<route_param>.
 
 These are shortcuts to C<route> restricted to the corresponding HTTP method.
 
+Each method could consists of max three parameters:
+
+=over
+
+=item *
+
+params
+
+=item *
+
+subroutine
+
+=item *
+
+path
+
+=back
+
+Where only C<subroutine> is required.
+
     get sub { 'GET' };
+
+    delete 'all' => sub { 'OK' };
 
     get params => [
         required => ['id', 'Raisin::Types::Integer'],
         optional => ['key', 'Raisin::Types::String'],
     ],
     sub { 'GET' };
+
+    put params => [
+        required => ['id', 'Raisin::Types::Integer'],
+        optional => ['name', 'Raisin::Types::String'],
+    ],
+    'all' => sub {
+        'GET'
+    };
 
 =head2 req
 

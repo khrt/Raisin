@@ -4,6 +4,15 @@ use strict;
 use warnings;
 
 use Carp;
+use Raisin::Attributes;
+
+has 'named';
+has 'required';
+
+has 'default';
+has 'name';
+has 'regex';
+has 'type';
 
 sub new {
     my ($class, %args) = @_;
@@ -16,21 +25,13 @@ sub new {
     $self;
 }
 
-sub required { shift->{required} }
-sub named    { shift->{named} }
-
-sub name    { shift->{name} }
-sub type    { shift->{type} }
-sub default { shift->{default} }
-sub regex   { shift->{regex} }
-
 sub validate {
-    my ($self, $ref_value) = @_;
+    my ($self, $ref_value, $quiet) = @_;
 
     # Required
     # Only optional parameters can has default value
     if ($self->required && !defined($$ref_value)) {
-        carp "$self->{name} required but empty!";
+        carp "$self->{name} required but empty!" unless $quiet;
         return;
     }
 
@@ -41,7 +42,7 @@ sub validate {
     }
 
     if ($$ref_value && ref $$ref_value && ref $$ref_value ne 'ARRAY') {
-        carp "$self->{name} \$ref_value should be SCALAR or ARRAYREF";
+        carp "$self->{name} \$ref_value should be SCALAR or ARRAYREF" unless $quiet;
         return;
     }
 
@@ -53,12 +54,12 @@ sub validate {
 
     for my $v (@$$ref_value) {
         unless ($self->type->new(\$v)) {
-            carp "CHECK: `$self->{name}` has invalid value `$v`!";
+            carp "CHECK: `$self->{name}` has invalid value `$v`!" unless $quiet;
             return;
         }
 
         if ($self->regex && $v !~ $self->regex) {
-            carp "REGEX: `$self->{name}` has invalid value `$v`!";
+            carp "REGEX: `$self->{name}` has invalid value `$v`!" unless $quiet;
             return;
         }
     }

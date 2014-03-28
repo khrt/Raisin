@@ -3,6 +3,16 @@ package Raisin::Routes::Endpoint;
 use strict;
 use warnings;
 
+use Raisin::Attributes;
+
+has 'check' => {};
+has 'code';
+has 'method';
+has 'params';
+has 'path';
+has 'regex';
+has 'tokens_re';
+
 sub new {
     my ($class, %args) = @_;
     my $self = bless {}, $class;
@@ -10,25 +20,18 @@ sub new {
     @$self{keys %args} = values %args;
 
     # Populate params index
-    $self->{check} = {};
     for (@{ $self->params }) {
         if ($_->named && (my $re = $_->regex)) {
-            $re =~ s/[\$^]//g;
-            $self->{check}{ $_->name } = $re;
+            if (my $re = $_->regex) {
+                $re =~ s/[\$^]//g;
+                $self->{check}{ $_->name } = $re;
+            }
         }
     }
 
-    $self->{regex} = $self->_build_regex;
+    $self->regex($self->_build_regex);
     $self;
 }
-
-sub check { shift->{check} }
-sub code { shift->{code} }
-sub method { shift->{method} }
-sub params { shift->{params} }
-sub path { shift->{path} }
-sub regex { shift->{regex} }
-sub tokens_re { shift->{tokens_re} }
 
 sub _build_regex {
     my ($self, %args) = @_;
@@ -67,14 +70,16 @@ sub match {
     my ($self, $method, $path) = @_;
 
     return if !$method || $method ne $self->method;
-use DDP;
-p $path;
-p $self->regex;
-warn $path =~ $self->regex;
     return if not (my @matched = $path =~ $self->regex);
-warn 'matched! ' x 3;
 
     my %named = map { $_ => $+{$_} } keys %+;
+
+    foreach my $p (@{ $self->params }) {
+        next unless $p->named;
+        my $copy = $named{$p->name};
+        return unless $p->validate(\$copy, 'shh!');
+    }
+
     $self->named(\%named);
 
     1;
@@ -96,6 +101,6 @@ Raisin::Routes::Endpoint - Endpoint class for Raisin::Routes.
 
 =head1 ACKNOWLEDGEMENTS
 
-This module heavily borrowed from L<Kelp::Routes::Pattern>.
+This module borrowed from L<Kelp::Routes::Pattern>.
 
 =cut
