@@ -89,13 +89,31 @@ Define a route parameter as a namespace `route_param`.
 
 These are shortcuts to `route` restricted to the corresponding HTTP method.
 
+Each method could consists of max three parameters:
+
+- params
+- subroutine
+- path
+
+Where only `subroutine` is required.
+
     get sub { 'GET' };
+
+    delete 'all' => sub { 'OK' };
 
     get params => [
         required => ['id', 'Raisin::Types::Integer'],
         optional => ['key', 'Raisin::Types::String'],
     ],
     sub { 'GET' };
+
+    put params => [
+        required => ['id', 'Raisin::Types::Integer'],
+        optional => ['name', 'Raisin::Types::String'],
+    ],
+    'all' => sub {
+        'GET'
+    };
 
 ## req
 

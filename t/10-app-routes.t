@@ -38,6 +38,19 @@ test_psgi $app, sub {
 
 test_psgi $app, sub {
     my $cb  = shift;
+    my $res = $cb->(GET '/user/all');
+
+    subtest 'GET /user/all' => sub {
+        is $res->code, 200;
+        ok my $c = $res->content, 'content';
+        ok my $o = Load($c), 'decode';
+        @USER_IDS = map { $_->{id} } grep { $_ } @{ $o->{data} };
+        ok scalar @USER_IDS, 'data';
+    };
+};
+
+test_psgi $app, sub {
+    my $cb  = shift;
     my $res = $cb->(POST '/user', [%NEW_USER]);
 
     subtest 'POST /user' => sub {
@@ -114,18 +127,6 @@ test_psgi $app, sub {
         ok my $c = $res->content, 'content';
         ok my $o = Load($c), 'decode';
         ok $o->{data}, 'data';
-    };
-};
-
-test_psgi $app, sub {
-    my $cb  = shift;
-    my $res = $cb->(GET '/user/path');
-
-    subtest 'GET /user/path' => sub {
-        is $res->code, 200;
-        ok my $c = $res->content, 'content';
-        ok my $o = Load($c), 'decode';
-        is $o->{data}, 'path param', 'data';
     };
 };
 

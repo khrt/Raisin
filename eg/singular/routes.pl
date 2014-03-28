@@ -60,6 +60,14 @@ namespace user => sub {
         { data => \@slice }
     };
 
+    get 'all' => sub {
+        my @users
+            = map { { id => $_, %{ $USERS{$_} } } }
+              sort { $a <=> $b } keys %USERS;
+        { data => \@users }
+    };
+
+
     # create new user
     post params => [
         required => ['name', 'Raisin::Types::String'],
@@ -73,10 +81,6 @@ namespace user => sub {
         $USERS{$id} = $params;
 
         { success => $id }
-    };
-
-    get 'path' => sub {
-        { data => 'path param' }
     };
 
     # /user/<id>
