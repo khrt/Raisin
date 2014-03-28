@@ -4,25 +4,18 @@ use strict;
 use warnings;
 no warnings 'redefine';
 
-use Raisin::Attributes;
-
-has name => sub {
+sub name {
     my $class = shift;
     my $name = (split /::/, $class)[-1];
     $name;
-};
+}
 
-has check => sub { 1 };
-has in => sub { 1 };
-has regex => undef;
+sub check { 1 }
+sub in { 1 }
 
 sub new {
     my ($class, $ref_value) = @_;
     my $self = bless {}, $class;
-
-    if ($self->regex) {
-        return unless $$ref_value =~ $self->regex;
-    }
 
     $self->check($$ref_value) or return;
     $self->in($ref_value);
@@ -42,7 +35,6 @@ Raisin::Types::Base - Base class for Raisin::Types.
     package Raisin::Types::Integer;
     use base 'Raisin::Types::Base';
 
-    sub regex { qr/^\d+$/ }
     sub check {
         my ($self, $v) = @_;
         length($v) <= 10 ? 1 : 0
@@ -68,9 +60,14 @@ Contains two base methods: C<check> and C<in>.
 
 =head1 METHODS
 
-=head3 regex
+=head3 name
 
-Type regex.
+Return type's name.
+
+By default will be returned last string after after C<::>.
+If you want customize variable name you can redefine C<name> subroutine.
+
+    sub name { 'FancyTypeName' }
 
 =head3 check
 
@@ -78,6 +75,6 @@ Check value.
 
 =head3 in
 
-Apply some actions on the value.
+Modify value here.
 
 =cut

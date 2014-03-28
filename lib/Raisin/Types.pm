@@ -7,29 +7,36 @@ no warnings 'redefine';
 
 package Raisin::Types::Integer;
 use base 'Raisin::Types::Base';
-sub regex { qr/^\d+$/ }
+sub check {
+    my ($self, $v) = @_;
+    $v =~ /^\d+$/;
+}
 
 # ->
 
 package Raisin::Types::Float;
 use base 'Raisin::Types::Base';
-sub regex { qr/^\d+(?:\.\d+)$/ }
-sub in {
+sub check {
     my ($self, $v) = @_;
-    $$v = sprintf '%.4f', $$v;
+    $v =~ /^\d+(?:\.\d+)$/;
+}
+sub in {
+    my ($self, $rv) = @_;
+    $$rv = sprintf '%.4f', $$rv;
 }
 
 # ->
 
 package Raisin::Types::String;
-
 use base 'Raisin::Types::Base';
-sub regex { qr/^[\t\r\n\p{IsPrint}]{0,32766}/ }
+sub check {
+    my ($self, $v) = @_;
+    $v =~ /^[\t\r\n\p{IsPrint}]{0,32766}/;
+}
 
 # ->
 
 package Raisin::Types::Scalar;
-
 use base 'Raisin::Types::Base';
 sub check {
     my ($self, $v) = @_;
