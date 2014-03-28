@@ -53,7 +53,6 @@ while (my @param = splice @types, 0, 2) {
     is $param->default, $options->[2], 'default';
     is $param->name, $options->[0], 'name';
     is $param->named, $key eq 'named' ? 1 : 0, 'named';
-    is $param->regex, $options->[3], 'regex';
     is $param->required, $required, 'required';
     is $param->type, $options->[1], 'type';
 

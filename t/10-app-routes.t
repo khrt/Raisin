@@ -119,6 +119,18 @@ test_psgi $app, sub {
 
 test_psgi $app, sub {
     my $cb  = shift;
+    my $res = $cb->(GET '/user/path');
+
+    subtest 'GET /user/path' => sub {
+        is $res->code, 200;
+        ok my $c = $res->content, 'content';
+        ok my $o = Load($c), 'decode';
+        is $o->{data}, 'path param', 'data';
+    };
+};
+
+test_psgi $app, sub {
+    my $cb  = shift;
     my $res = $cb->(GET '/failed');
 
     subtest 'GET /failed' => sub {
