@@ -1,11 +1,13 @@
-0.23.0 Refactor types in Endpoint.pm
+0.24 Refactor params
+    - Refactor types and routes;
+    - Update types;
+    - Fix version numbering;
 
 0.22 Refactor params & types
     - Update params to match *Refactor Types* TODO section;
 
 0.21 Refactor params
-    - Param.pm
-    - Routes.pm
+    - Refactor types and routes;
 
 0.20 Fixes & Improvments
     - Accept both keywords `required` and `requires` in Param.pm;

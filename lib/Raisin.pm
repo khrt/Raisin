@@ -10,7 +10,7 @@ use Raisin::Request;
 use Raisin::Response;
 use Raisin::Routes;
 
-our $VERSION = '0.23.0';
+our $VERSION = '0.24';
 
 sub new {
     my ($class, %args) = @_;
