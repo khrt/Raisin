@@ -27,7 +27,9 @@ sub add {
     }
 
     # @args:
-    #   * [optional] params => {}
+    #   * [optional] named => []
+    #   * [optional] params => []
+    #   * [optional] path
     #   * [required] code ref
 
     my $code = pop @args;
@@ -39,7 +41,7 @@ sub add {
 
     # Named route params
     if (scalar @args == 1 || scalar @args == 3) {
-        $path = $path . '/' . shift(@args);
+        $path = $path . '/' . pop(@args);
     }
 
     my @params;
@@ -94,8 +96,6 @@ sub find {
     my @found
     #   = sort { $b->bridge <=> $a->bridge || $a->pattern cmp $b->pattern }
         = grep { $_->match($method, $path) } @$routes;
-#use DDP;
-#p @found;
 
     $self->cache->{$cache_key} = \@found;
     \@found;
