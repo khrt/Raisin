@@ -17,8 +17,8 @@ our @EXPORT = qw(
     before before_validation
     after_validation after
 
-    namespace route_param
-    req res params session
+    namespace route_param params
+    req res param session
     delete get head options patch post put
 );
 
@@ -98,12 +98,29 @@ sub patch   { $app->add_route('PATCH',   namespace(), %SETTINGS, @_) }
 sub post    { $app->add_route('POST',    namespace(), %SETTINGS, @_) }
 sub put     { $app->add_route('PUT',     namespace(), %SETTINGS, @_) }
 
+sub params {
+    my ($params, $method, @other) = @_;
+    my $code = pop @other;
+
+    my @args;
+    if (scalar @other == 1) {
+        push @args, shift @other;
+    }
+    push @args, $code;
+
+    $app->add_route(uc($method), namespace(), %SETTINGS, params => $params, @args);
+}
+
 #
 # Request and Response shortcuts
 #
 sub req { $app->req }
 sub res { $app->res }
-sub params { $app->params(@_) }
+sub param {
+    my $name = shift;
+    return $app->req->parameters->mixed->{$name} if $name;
+    $app->req->parameters->mixed;
+}
 sub session { $app->session(@_) }
 
 #

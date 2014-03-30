@@ -41,7 +41,7 @@ sub add {
 
     # Named route params
     if (scalar @args == 1 || scalar @args == 3) {
-        $path = $path . '/' . pop(@args);
+        $path = $path . '/' . pop @args;
     }
 
     my @params;

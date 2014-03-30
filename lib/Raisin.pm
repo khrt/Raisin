@@ -10,7 +10,7 @@ use Raisin::Request;
 use Raisin::Response;
 use Raisin::Routes;
 
-our $VERSION = '0.24';
+our $VERSION = '0.25';
 
 sub new {
     my ($class, %args) = @_;
@@ -211,7 +211,7 @@ sub res {
     $self->{res};
 }
 
-sub params { shift->req->parameters->mixed }
+sub param { shift->req->parameters->mixed }
 
 sub session {
     my $self = shift;
@@ -238,7 +238,7 @@ Raisin - REST-like API micro-framework for Perl.
     my %USERS = (
         1 => {
             name => 'Darth Wader',
-            password => 'death',
+            password => 'deathstar',
             email => 'darth@deathstar.com',
         },
         2 => {
@@ -249,12 +249,12 @@ Raisin - REST-like API micro-framework for Perl.
     );
 
     namespace '/user' => sub {
-        get params => [
+        params [
             #required/optional => [name, type, default, regex]
             optional => ['start', 'Raisin::Types::Integer', 0],
             optional => ['count', 'Raisin::Types::Integer', 10],
         ],
-        sub {
+        get => sub {
             my $params = shift;
             my ($start, $count) = ($params->{start}, $params->{count});
 
@@ -269,12 +269,19 @@ Raisin - REST-like API micro-framework for Perl.
             { data => \@slice }
         };
 
-        post params => [
+        get 'all' => sub {
+            my @users
+                = map { { id => $_, %{ $USERS{$_} } } }
+                  sort { $a <=> $b } keys %USERS;
+            { data => \@users }
+        };
+
+        params [
             required => ['name', 'Raisin::Types::String'],
             required => ['password', 'Raisin::Types::String'],
             optional => ['email', 'Raisin::Types::String', undef, qr/.+\@.+/],
         ],
-        sub {
+        post => sub {
             my $params = shift;
 
             my $id = max(keys %USERS) + 1;
@@ -314,25 +321,19 @@ Define a route parameter as a namespace C<route_param>.
 
     route_param id => 'Raisin::Types::Integer', sub { ... };
 
-=head2 delete, get, post, put
+=head2 params, delete, get, patch, post, put
 
-These are shortcuts to C<route> restricted to the corresponding HTTP method.
+It is are shortcuts to C<route> restricted to the corresponding HTTP method.
 
 Each method could consists of max three parameters:
 
 =over
 
-=item *
+=item * params - optional only if didn't starts from params keyword, required otherwise;
 
-params
+=item * path - optional;
 
-=item *
-
-subroutine
-
-=item *
-
-path
+=item * subroutine - required;
 
 =back
 
@@ -342,18 +343,18 @@ Where only C<subroutine> is required.
 
     delete 'all' => sub { 'OK' };
 
-    get params => [
+    params [
         required => ['id', 'Raisin::Types::Integer'],
         optional => ['key', 'Raisin::Types::String'],
     ],
-    sub { 'GET' };
+    get => sub { 'GET' };
 
-    put params => [
+    params [
         required => ['id', 'Raisin::Types::Integer'],
         optional => ['name', 'Raisin::Types::String'],
     ],
-    'all' => sub {
-        'GET'
+    put => 'all' => sub {
+        'PUT'
     };
 
 =head2 req
@@ -383,7 +384,7 @@ Use C<res> to set up response parameters.
 
 See also L<Plack::Response>.
 
-=head2 params
+=head2 param
 
 An alias for C<$self-E<gt>params> that gets the GET and POST parameters.
 When used with no arguments, it will return an array with the names of all http
@@ -391,7 +392,8 @@ parameters. Otherwise, it will return the value of the requested http parameter.
 
 Returns L<Hash::MultiValue> object.
 
-    say req->params->{name};
+    say param('key'); # -> value
+    say param(); # -> { key => 'value' }
 
 =head2 session
 
