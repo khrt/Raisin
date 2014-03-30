@@ -39,16 +39,6 @@ api_format 'YAML';
 
 # /user
 namespace user => sub {
-    params [
-        required => ['name', 'Raisin::Types::String']
-    ],
-    get => 'suburl' => sub {
-        use DDP;
-        p param('name'); # TODO: rework parms
-        p param;
-        'This is works! Name: `' . params->{name} . '`.';
-    };
-
     # list all users
     params [
         #required/optional => [name, type, default, regex]
@@ -138,7 +128,7 @@ namespace user => sub {
 namespace failed => sub {
     get sub {
         res->status(409);
-        { data => 'BROKEN!' }
+        { data => param('failed') || 'BROKEN!' }
     };
 };
 

@@ -132,13 +132,13 @@ test_psgi $app, sub {
 
 test_psgi $app, sub {
     my $cb  = shift;
-    my $res = $cb->(GET '/failed');
+    my $res = $cb->(GET '/failed?failed=FAILED');
 
     subtest 'GET /failed' => sub {
         is $res->code, 409;
         ok my $c = $res->content, 'content';
         ok my $o = Load($c), 'decode';
-        is $o->{data}, 'BROKEN!', 'data';
+        is $o->{data}, 'FAILED', 'data';
     };
 };
 
@@ -147,7 +147,7 @@ test_psgi $app, sub {
     my $res = $cb->(GET '/404');
 
     subtest 'GET /404' => sub {
-        note explain $res->content;
+        #note explain $res->content;
         is $res->code, 404;
     };
 };
