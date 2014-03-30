@@ -7,7 +7,7 @@ no warnings 'redefine';
 
 package Raisin::Types::Integer;
 use base 'Raisin::Types::Base';
-sub check {
+sub constraint {
     my ($self, $v) = @_;
     $v =~ /^\d+$/;
 }
@@ -16,11 +16,11 @@ sub check {
 
 package Raisin::Types::Float;
 use base 'Raisin::Types::Base';
-sub check {
+sub constraint {
     my ($self, $v) = @_;
     $v =~ /^\d+(?:\.\d+)$/;
 }
-sub in {
+sub coercion {
     my ($self, $rv) = @_;
     $$rv = sprintf '%.4f', $$rv;
 }
@@ -29,7 +29,7 @@ sub in {
 
 package Raisin::Types::String;
 use base 'Raisin::Types::Base';
-sub check {
+sub constraint {
     my ($self, $v) = @_;
     $v =~ /^[\t\r\n\p{IsPrint}]{0,32766}/;
 }
@@ -38,7 +38,7 @@ sub check {
 
 package Raisin::Types::Scalar;
 use base 'Raisin::Types::Base';
-sub check {
+sub constraint {
     my ($self, $v) = @_;
     ref \$v eq 'SCALAR';
 }
