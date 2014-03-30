@@ -9,7 +9,7 @@ Raisin - REST-like API micro-framework for Perl.
     my %USERS = (
         1 => {
             name => 'Darth Wader',
-            password => 'death',
+            password => 'deathstar',
             email => 'darth@deathstar.com',
         },
         2 => {
@@ -20,12 +20,12 @@ Raisin - REST-like API micro-framework for Perl.
     );
 
     namespace '/user' => sub {
-        get params => [
+        params [
             #required/optional => [name, type, default, regex]
             optional => ['start', 'Raisin::Types::Integer', 0],
             optional => ['count', 'Raisin::Types::Integer', 10],
         ],
-        sub {
+        get => sub {
             my $params = shift;
             my ($start, $count) = ($params->{start}, $params->{count});
 
@@ -40,12 +40,19 @@ Raisin - REST-like API micro-framework for Perl.
             { data => \@slice }
         };
 
-        post params => [
+        get 'all' => sub {
+            my @users
+                = map { { id => $_, %{ $USERS{$_} } } }
+                  sort { $a <=> $b } keys %USERS;
+            { data => \@users }
+        };
+
+        params [
             required => ['name', 'Raisin::Types::String'],
             required => ['password', 'Raisin::Types::String'],
             optional => ['email', 'Raisin::Types::String', undef, qr/.+\@.+/],
         ],
-        sub {
+        post => sub {
             my $params = shift;
 
             my $id = max(keys %USERS) + 1;
@@ -85,15 +92,15 @@ Define a route parameter as a namespace `route_param`.
 
     route_param id => 'Raisin::Types::Integer', sub { ... };
 
-## delete, get, post, put
+## params, delete, get, patch, post, put
 
-These are shortcuts to `route` restricted to the corresponding HTTP method.
+It is are shortcuts to `route` restricted to the corresponding HTTP method.
 
 Each method could consists of max three parameters:
 
-- params
-- subroutine
-- path
+- params - optional only if didn't starts from params keyword, required otherwise;
+- path - optional;
+- subroutine - required;
 
 Where only `subroutine` is required.
 
@@ -101,18 +108,18 @@ Where only `subroutine` is required.
 
     delete 'all' => sub { 'OK' };
 
-    get params => [
+    params [
         required => ['id', 'Raisin::Types::Integer'],
         optional => ['key', 'Raisin::Types::String'],
     ],
-    sub { 'GET' };
+    get => sub { 'GET' };
 
-    put params => [
+    params [
         required => ['id', 'Raisin::Types::Integer'],
         optional => ['name', 'Raisin::Types::String'],
     ],
-    'all' => sub {
-        'GET'
+    put => 'all' => sub {
+        'PUT'
     };
 
 ## req
@@ -142,7 +149,7 @@ Use `res` to set up response parameters.
 
 See also [Plack::Response](https://metacpan.org/pod/Plack::Response).
 
-## params
+## param
 
 An alias for `$self->params` that gets the GET and POST parameters.
 When used with no arguments, it will return an array with the names of all http
@@ -150,7 +157,8 @@ parameters. Otherwise, it will return the value of the requested http parameter.
 
 Returns [Hash::MultiValue](https://metacpan.org/pod/Hash::MultiValue) object.
 
-    say req->params->{name};
+    say param('key'); # -> value
+    say param(); # -> { key => 'value' }
 
 ## session
 
