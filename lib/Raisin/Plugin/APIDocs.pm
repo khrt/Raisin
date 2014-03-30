@@ -68,7 +68,7 @@ sub build_api_docs {
                 name => $p->name,
                 paramType => $param_type,
                 required => $p->required ? JSON::true : JSON::false,
-                type => 'string',
+                type => $p->type->name,
             );
             push @parameters, \%p;
         }
