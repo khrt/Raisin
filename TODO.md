@@ -1,12 +1,6 @@
-FIX params keyword
-==================
-1) rename to param (singular);
-2) w/o argument return hash ref of all values;
-3) w/ argrument return param by argument name or undef if not exists;
-
-    my $first_name = params('first_name'); # 'John'
-    my $all_params = params(); # { first_name => 'John', last_name => 'Smith' }
-
+Declared keyword
+===============
+TO DO OR NOT TO DO
 
 Token auth
 ==========
@@ -32,6 +26,17 @@ Customizible errors pages with default tempaltes
 
 DONE
 ====
+
+FIX params keyword
+------------------
+1) rename to param (singular);
+2) w/o argument return hash ref of all values;
+3) w/ argrument return param by argument name or undef if not exists;
+
+    my $first_name = params('first_name'); # 'John'
+    my $all_params = params(); # { first_name => 'John', last_name => 'Smith' }
+
+
 
 Refactor Types
 --------------

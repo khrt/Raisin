@@ -1,3 +1,8 @@
+0.25 Fixes
+    - Fix named route params;
+    - New keyword params (similar to Grape);
+    - Rename params to param and change behaviour;
+
 0.24 Refactor params
     - Refactor types and routes;
     - Update types;
