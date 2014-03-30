@@ -1,22 +1,11 @@
-Params as a main word
-=====================
-Start route definition with the `params` keyword like in Grape:
+FIX params keyword
+==================
+1) rename to param (singular);
+2) w/o argument return hash ref of all values;
+3) w/ argrument return param by argument name or undef if not exists;
 
-    params [
-      requires => ['name', $Raisin::Types::String],
-    ],
-    get '/suburl' => sub {
-        'ok'
-    };
-
----
-
-    params [
-      requires => ['name', $Raisin::Types::String],
-    ],
-    post sub {
-        'ok'
-    };
+    my $first_name = params('first_name'); # 'John'
+    my $all_params = params(); # { first_name => 'John', last_name => 'Smith' }
 
 
 Token auth
@@ -34,21 +23,29 @@ Output format
 Path extension should have more priority rather accept header.
 
 
-DONE: Refactor Types
-==============
+Customizible errors pages with default tempaltes
+================================================
+* 404
+* 500
+* any???
+
+
+DONE
+====
+
+Refactor Types
+--------------
 Types should be a class with a `Raisin::Types::Base` parent.
 Example of an Integer type:
 
     package Raisin::Types::Integer;
     use base 'Raisin::Types::Base';
 
-    has regex => qr/^\d+$/;
-
-    has check => sub {
+    has constraint => sub {
       length($v) <= 10 ? 1 : 0
     };
 
-    has in => sub {
+    has coercion => sub {
       my $v = shift;
       $$v = sprintf 'INT:%d', $$v;
     };
@@ -92,12 +89,33 @@ Base class `Raisin::Types::Base` should be something like this:
 Do not forget to update DOCS!!!
 
 
-DONE: Path params
-===========
+Path params
+-----------
 _get/post/put/delete/..._ etc. should take path params;
 Don't forget to update DOCS!!!
 
     get '/suburl' => sub {
       'ok';
+    };
+
+
+Params as a main word
+--------------------
+Start route definition with the `params` keyword like in Grape:
+
+    params [
+      requires => ['name', $Raisin::Types::String],
+    ],
+    get '/suburl' => sub {
+        'ok'
+    };
+
+- - -
+
+    params [
+      requires => ['name', $Raisin::Types::String],
+    ],
+    post sub {
+        'ok'
     };
 
