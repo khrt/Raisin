@@ -84,6 +84,7 @@ sub namespace {
 
 sub route_param {
     my ($param, $type, $block) = @_;
+                                # TODO: FIXME: named => [...]
     namespace(":$param", $block, named => [required => [$param, $type]]);
 }
 

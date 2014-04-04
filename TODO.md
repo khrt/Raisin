@@ -1,19 +1,41 @@
+FIX nested route\_param
+=======================
+FIX!
+
+
+Raisin script
+=============
+  * version
+  * list routes [simple]
+
+    GET  /users
+    GET  /users/all
+    POST /users
+
+  * list routes [detailed]
+
+    GET /users
+      optional: id, Type::Integer
+      optional: start, Type::Integer, default: 0
+      optional: count, Type::Integer, default: 10
+
+
 Declared keyword
 ===============
 TO DO OR NOT TO DO
 
 Token auth
 ==========
-    * Plack middleware;
-    * Raisin plugin;
+  * Plack middleware;
+  * Raisin plugin;
 
 See Plack::Middleware::Auth::AccessToken.
 
 
 Output format
 =============
-    * based on accept content type header;
-    * based on path extension;
+  * based on accept content type header;
+  * based on path extension;
 Path extension should have more priority rather accept header.
 
 

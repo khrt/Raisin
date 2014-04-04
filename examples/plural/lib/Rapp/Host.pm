@@ -28,12 +28,12 @@ my %HOSTS = (
 # /host
 namespace host => sub {
     # list all hosts
-    get params => [
+    params [
         #required/optional => [name, type, default, values]
         optional => ['start', 'Raisin::Types::Integer', 0, qr/^\d+$/],
         optional => ['count', 'Raisin::Types::Integer', 10, qr/^\d+$/],
     ],
-    sub {
+    get => sub {
         my $params = shift;
         my ($start, $count) = ($params->{start}, $params->{count});
 
@@ -49,11 +49,11 @@ namespace host => sub {
     };
 
     # create new host
-    post params => [
+    params [
         required => ['name', 'Raisin::Types::String'],
         required => ['user_id', 'Raisin::Types::Integer'],
     ],
-    sub {
+    post => sub {
         my $params = shift;
 
         my $id = max(keys %HOSTS) + 1;
@@ -72,10 +72,10 @@ namespace host => sub {
         };
 
         # edit host
-        put params => [
+        params [
             required => ['state', 'Raisin::Types::String'],
         ],
-        sub {
+        put => sub {
             my $params = shift;
             $HOSTS{ $params->{id} }{state} = $params->{state};
             { success => 1 }

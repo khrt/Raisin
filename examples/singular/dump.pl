@@ -7,48 +7,31 @@ use DDP;
 use FindBin;
 use List::Util qw(max);
 
-use lib "$FindBin::Bin/../../lib"; # ->Raisin/lib
+use lib "$FindBin::Bin/../../lib";
 
 use Raisin::API;
 use Raisin::Types;
-
-my %USERS = (
-    1 => {
-        name => 'Darth Wader',
-        password => 'death',
-        email => 'darth@deathstar.com',
-    },
-    2 => {
-        name => 'Luke Skywalker',
-        password => 'qwerty',
-        email => 'l.skywalker@jedi.com',
-    },
-);
 
 #middleware '+Plack::Middleware::ContentLength';
 middleware 'Runtime';
 #middleware '+Plack::Middleware::SimpleLogger';
 
-get params => [
+params [
     optional => ['password', 'Raisin::Types::String', undef, qr/qwerty/],
     optional => ['email', 'Raisin::Types::String', 'NA'],
 ],
-sub {
+get => sub {
     my $params = shift;
-    p $params;
-
-    \%USERS
+    $params;
 };
 
-post params => [
+params [
     optional => ['password', 'Raisin::Types::String', undef, qr/ytrewq/],
     optional => ['email', 'Raisin::Types::String', 'AN'],
 ],
-sub {
+post => sub {
     my $params = shift;
-    p $params;
-
-    \%USERS
+    $params;
 };
 
 run;

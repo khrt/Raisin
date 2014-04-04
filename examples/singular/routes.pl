@@ -23,7 +23,7 @@ use Raisin::Types;
 my %USERS = (
     1 => {
         name => 'Darth Wader',
-        password => 'death',
+        password => 'empire',
         email => 'darth@deathstar.com',
     },
     2 => {

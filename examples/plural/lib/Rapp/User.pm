@@ -10,7 +10,7 @@ use Raisin::Types;
 my %USERS = (
     1 => {
         name => 'Darth Wader',
-        password => 'death',
+        password => 'empire',
         email => 'darth@deathstar.com',
     },
     2 => {
@@ -23,12 +23,12 @@ my %USERS = (
 # /user
 namespace user => sub {
     # list all users
-    get params => [
+    params [
         #required/optional => [name, type, default, values]
         optional => ['start', 'Raisin::Types::Integer', 0, qr/^\d+$/],
         optional => ['count', 'Raisin::Types::Integer', 10, qr/^\d+$/],
     ],
-    sub {
+    get => sub {
         my $params = shift;
         my ($start, $count) = ($params->{start}, $params->{count});
 
@@ -44,12 +44,12 @@ namespace user => sub {
     };
 
     # create new user
-    post params => [
+    params [
         required => ['name', 'Raisin::Types::String'],
         required => ['password', 'Raisin::Types::String'],
         optional => ['email', 'Raisin::Types::String', undef, qr/prev-regex/],
     ],
-    sub {
+    post => sub {
         my $params = shift;
 
         my $id = max(keys %USERS) + 1;
@@ -68,11 +68,11 @@ namespace user => sub {
         };
 
         # edit user
-        put params => [
+        params [
             optional => ['password', 'Raisin::Types::String'],
             optional => ['email', 'Raisin::Types::String', undef, qr/next-regex/],
         ],
-        sub {
+        put => sub {
             my $params = shift;
             for (qw(password email)) {
                 $USERS{ $params->{id} }{$_} = $params->{$_};
