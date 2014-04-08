@@ -14,12 +14,12 @@ use Pod::Usage;
 
 use Raisin;
 
-my ($help, $version, $verbose, $routes);
+my ($help, $version, $params, $routes);
 
 GetOptions(
     help    => \$help,
     version => \$version,
-    verbose => \$verbose,
+    params => \$params,
     routes  => \$routes,
 );
 
@@ -58,29 +58,26 @@ sub print_routes {
         my $path = $r->path;
         $path =~ s#:([^/]+)#{$1}#g;
 
-        print _format('  @<<<<<< @*', $r->method, $path) . "\n";
+        printf "  %-7s %s\n", $r->method, $path;
 
-        if ($verbose) {
+        if ($params) {
             for my $p (@{ $r->params }) {
-                printf "\t%s%s: %s\n",
+                printf "    %s: `%s', type: %s",
+                    $p->required ? 'required' : 'optional',
                     $p->name,
-                    $p->required ? '*' : '',
                     $p->type->name;
+
+                if (defined $p->default) {
+                    printf ', default: %s', $p->default;
+                }
+                print "\n";
             }
-            print "\n" if scalar @{ $r->params };
+            print "\n";
         }
     }
 
     print "--END--\n";
 }
-
-sub _format {
-    my $format = shift;
-    $^A = '';
-    formline($format, @_);
-    return $^A;
-}
-
 
 __END__
 
@@ -96,6 +93,7 @@ raisin - Raisin command script
         --help          This help screen
         --version       Display version information
         --routes        Display application routes
+        --params        Display route params (should use with --routes)
 
 =head1 DESCRIPTION
 
