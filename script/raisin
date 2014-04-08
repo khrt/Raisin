@@ -90,13 +90,12 @@ raisin - Raisin command script
 
 =head1 SYNOPSIS
 
-raisin [options] <raisin-app.psgi>
+    raisin [options] <raisin-app>
 
-Options:
-
-    --help          This help screen
-    --version       Display version information
-    --routes        Display application routes
+    Options:
+        --help          This help screen
+        --version       Display version information
+        --routes        Display application routes
 
 =head1 DESCRIPTION
 
