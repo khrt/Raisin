@@ -1,3 +1,8 @@
+0.26 raisin script
+    - First release of raisin script:
+        * help, version and routes options;
+    - Fix path crop regex;
+
 0.25 Fixes
     - Fix named route params;
     - New keyword params (similar to Grape);
