@@ -6,15 +6,15 @@ use warnings;
 use Carp;
 use Raisin::Param;
 use Raisin::Routes::Endpoint;
+use Raisin::Attributes;
+
+has 'cache' => {};
+has 'list' => {};
+has 'routes' => [];
 
 sub new {
     my $class = shift;
     my $self = bless {}, $class;
-
-    $self->{cache} = {};
-    $self->{list} = {};
-    $self->{routes} = [];
-
     $self;
 }
 
@@ -62,7 +62,7 @@ sub add {
     }
 
     if (!ref($path)) {
-        $path =~ s#/$##;
+        $path =~ s{(.+)/$}{$1};
     }
 
     my $ep
@@ -79,10 +79,6 @@ sub add {
     }
     $self->list->{$method}{$path} = scalar @{ $self->{routes} };
 }
-
-sub cache { shift->{cache} }
-sub list { shift->{list} }
-sub routes { shift->{routes} }
 
 sub find {
     my ($self, $method, $path) = @_;
