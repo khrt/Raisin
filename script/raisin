@@ -3,45 +3,104 @@
 use strict;
 use warnings;
 
-use File::Basename;
-use File::Path 'make_path';
-use Getopt::Long;
-
 # DEBUG:
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 # END
+
+use Getopt::Long;
+use Plack::Util;
+use Pod::Usage;
+
 use Raisin;
 
-my $path = '.';
-my ($help, $verbose, $version);
+my ($help, $version, $verbose, $routes);
 
 GetOptions(
-    'help'    => \$help,
-    'path=s'  => \$path,
-    'verbose' => \$verbose,
-    'version' => \$version,
+    help    => \$help,
+    version => \$version,
+    verbose => \$verbose,
+    routes  => \$routes,
 );
+
+my $file = $ARGV[0] || do { $help = 1; '' };
 
 if ($version) {
     print "Raisin v.$Raisin::VERSION\n";
-    exit;
+}
+elsif ($help) {
+    pod2usage(1);
+}
+elsif ($routes) {
+    print_routes();
 }
 
-my $name = $ARGV[0] || do { $help = 1; '' };
 
-if ($help) {
-    print <<HELP_END;
-Usage: raisin [options] <name>
+### Subroutines
+
+sub print_routes {
+    if (!$file || !-e $file) {
+        print "$0: file `$file` doesn't exists\n";
+        exit;
+    }
+
+    my $app_routes;
+    {
+        no warnings 'redefine';
+        *Raisin::run = sub { $app_routes = shift->routes->routes };
+    }
+    my $app = Plack::Util::load_psgi($file);
+
+
+    print "Application routes:\n";
+
+    for my $r (@$app_routes) {
+        my $path = $r->path;
+        $path =~ s#:([^/]+)#{$1}#g;
+
+        print _format('  @<<<<<< @*', $r->method, $path) . "\n";
+
+        if ($verbose) {
+            for my $p (@{ $r->params }) {
+                printf "\t%s%s: %s\n",
+                    $p->name,
+                    $p->required ? '*' : '',
+                    $p->type->name;
+            }
+            print "\n" if scalar @{ $r->params };
+        }
+    }
+
+    print "--END--\n";
+}
+
+sub _format {
+    my $format = shift;
+    $^A = '';
+    formline($format, @_);
+    return $^A;
+}
+
+
+__END__
+
+=head1 NAME
+
+raisin - Raisin command script
+
+=head1 SYNOPSIS
+
+raisin [options] <raisin-app.psgi>
 
 Options:
+
     --help          This help screen
-    --path=s        Path where to create the files
-    --verbose       Verbose output
     --version       Display version information
+    --routes        Display application routes
 
-HELP_END
-    exit;
-}
+=head1 DESCRIPTION
 
+List L<Raisin> application routes and show installed L<Raisin> version.
+
+=cut
 
