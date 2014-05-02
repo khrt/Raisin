@@ -309,6 +309,8 @@ Steps 3 and 4 only happen if validation succeeds.
 By default, Raisin supports `YAML`, `JSON`, and `TEXT` content-types.
 The default format is `TEXT`.
 
+Response format can be determined by Accept header.
+
 Serialization takes place automatically. For example, you do not have to call
 `encode_json` in each `JSON` API implementation.
 
@@ -333,6 +335,9 @@ Call `Data::Dumper->Dump` if output data is not a string.
 
 The order for choosing the format is the following.
 
+The order for choosing the format is the following.
+
+- Use the value of ther `Accept` header.
 - Use the `api_format` if specified.
 - Fallback to `TEXT`.
 
