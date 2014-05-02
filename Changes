@@ -1,6 +1,6 @@
 0.26 raisin script
-    - First release of raisin script:
-        * help, version and routes options;
+    - Raisin script: show application API;
+    - Detect format by `Accept' header;
     - Fix path crop regex;
 
 0.25 Fixes
