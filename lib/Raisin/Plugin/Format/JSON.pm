@@ -12,10 +12,13 @@ sub build {
 
     $self->app->{default_content_type} = $args{content_type} || 'application/json';
     $self->register(
-        'deserialize' => sub { decode_json $_[1] },
-        'serialize'   => sub { encode_json $_[1] },
+        'deserialize' => sub { deserialize($_[1]) },
+        'serialize'   => sub { serialize($_[1]) },
     );
 }
+
+sub deserialize { decode_json shift }
+sub serialize   { encode_json shift }
 
 1;
 

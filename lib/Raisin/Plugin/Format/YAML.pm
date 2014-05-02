@@ -12,10 +12,13 @@ sub build {
 
     $self->app->{default_content_type} = $args{content_type} || 'application/yaml';
     $self->register(
-        'deserialize' => sub { Load $_[1] },
-        'serialize'   => sub { Dump $_[1] },
+        'deserialize' => sub { deserialize($_[1]) },
+        'serialize'   => sub { serialize($_[1]) },
     );
 }
+
+sub deserialize { Load shift }
+sub serialize { Dump shift }
 
 1;
 
