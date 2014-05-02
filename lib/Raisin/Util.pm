@@ -12,6 +12,7 @@ my %SERIALIZERS = (
 
 sub detect_serializer {
     my $type = shift;
+    return unless $type;
 
     $type =~ s{^(.+)/}{};
     $type =~ tr{-}{_};
