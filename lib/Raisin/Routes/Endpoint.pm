@@ -7,7 +7,9 @@ use Raisin::Attributes;
 
 has 'check' => {};
 has 'code';
+has 'format';
 has 'method';
+has 'named';
 has 'params';
 has 'path';
 has 'regex';
@@ -42,6 +44,7 @@ sub _build_regex {
     $regex =~ s#$PAT#$self->_rep_regex($1, $2, $3)#eg;
     $regex =~ s/[{}]//g;
     $regex .= '/?' if $regex !~ m#/$#;
+    $regex .= '(?<format>\.\w+)?'; # add optional FORMAT
     $regex .= '$';# unless $self->bridge; # XXX XXX XXX
 
     qr/^$regex/;
@@ -72,7 +75,15 @@ sub match {
     return if !$method || $method ne $self->method;
     return if not (my @matched = $path =~ $self->regex);
 
+    $self->{format} = undef;
+    $self->{named} = undef;
+
     my %named = map { $_ => $+{$_} } keys %+;
+
+    if ($named{format}) {
+        my $format = delete $named{format};
+        $self->format(substr($format, 1));
+    }
 
     foreach my $p (@{ $self->params }) {
         next unless $p->named;
@@ -83,12 +94,6 @@ sub match {
     $self->named(\%named);
 
     1;
-}
-
-sub named {
-    my ($self, $named) = @_;
-    $self->{named} = $named if $named;
-    $self->{named};
 }
 
 1;
