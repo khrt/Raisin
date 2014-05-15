@@ -15,13 +15,13 @@ Input format
 ============
   * accept params in JSON or YAML accoring to format;
 
-Output format
+---
+
+DONE: Output format
 =============
 Path extension should have more priority rather accept header.
   * based on accept content type header;
   * based on path extension;
-
----
 
 DONE: Raisin script
 -------------------
