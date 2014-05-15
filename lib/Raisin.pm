@@ -619,7 +619,7 @@ Steps 3 and 4 only happen if validation succeeds.
 By default, Raisin supports C<YAML>, C<JSON>, and C<TEXT> content-types.
 The default format is C<TEXT>.
 
-Response format can be determined by Accept header.
+Response format can be determined by Accept header or route extension.
 
 Serialization takes place automatically. For example, you do not have to call
 C<encode_json> in each C<JSON> API implementation.
@@ -631,19 +631,21 @@ Your API can declare which types to support by using C<api_format>.
 Custom formatters for existing and additional types can be defined with a
 L<Raisin::Plugin::Format>.
 
-=head2 JSON
+=over
+
+=item JSON
 
 Call C<JSON::encode_json> and C<JSON::decode_json>.
 
-=head2 YAML
+=item YAML
 
 Call C<YAML::Dump> and C<JSON::Load>.
 
-=head2 TEXT
+=item TEXT
 
 Call C<Data::Dumper-E<gt>Dump> if output data is not a string.
 
-The order for choosing the format is the following.
+=back
 
 The order for choosing the format is the following.
 
@@ -651,7 +653,11 @@ The order for choosing the format is the following.
 
 =item *
 
-Use the value of ther C<Accept> header.
+Use the route extension.
+
+=item *
+
+Use the value of the C<Accept> header.
 
 =item *
 
