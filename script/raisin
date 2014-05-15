@@ -51,9 +51,6 @@ sub print_routes {
     }
     my $app = Plack::Util::load_psgi($file);
 
-
-    print "Application routes:\n";
-
     for my $r (@$app_routes) {
         my $path = $r->path;
         $path =~ s#:([^/]+)#{$1}#g;
@@ -75,8 +72,6 @@ sub print_routes {
             print "\n";
         }
     }
-
-    print "--END--\n";
 }
 
 __END__

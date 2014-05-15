@@ -680,11 +680,61 @@ See L<Raisin::Plugin::Logger>.
 
 =head1 API DOCUMENTATION
 
+=head2 Raisin script
+
+You can see application routes with the following command:
+
+    $ raisin --routes examples/singular/routes.pl                                                                                                 ✱ ◼
+      GET     /user
+      GET     /user/all
+      POST    /user
+      GET     /user/{id}
+      PUT     /user/{id}
+      GET     /user/{id}/bump
+      PUT     /user/{id}/bump
+      GET     /failed
+
+Verbose output with route parameters:
+
+    $ raisin --routes --params examples/singular/routes.pl                                                                                        ✱ ◼
+      GET     /user
+        optional: `start', type: Integer, default: 0
+        optional: `count', type: Integer, default: 10
+
+      GET     /user/all
+
+      POST    /user
+        required: `name', type: String
+        required: `password', type: String
+        optional: `email', type: String
+
+      GET     /user/{id}
+        required: `id', type: Integer
+
+      PUT     /user/{id}
+        optional: `password', type: String
+        optional: `email', type: String
+        required: `id', type: Integer
+
+      GET     /user/{id}/bump
+        required: `id', type: Integer
+
+      PUT     /user/{id}/bump
+        required: `id', type: Integer
+
+      GET     /failed
+
+      GET     /params
+
+
+=head2 Swagger
+
 L<Swagger|https://github.com/wordnik/swagger-core> compatible API documentations.
 
     plugin 'APIDocs';
 
-Documentation available on C<http://E<lt>urlE<gt>/api-docs> URL.
+Documentation will be available on C<http://E<lt>urlE<gt>/api-docs> URL.
+So you can use this URL in Swagger UI.
 
 For more see L<Raisin::Plugin::APIDocs>.
 
