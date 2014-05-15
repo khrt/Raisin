@@ -4,10 +4,10 @@ use strict;
 use warnings;
 
 my %SERIALIZERS = (
-    json     => 'Raisin::Plugin::Format::JSON',
-    json_rpc => 'Raisin::Plugin::Format::JSON',
-    yaml     => 'Raisin::Plugin::Format::YAML',
-    yml      => 'Raisin::Plugin::Format::YAML',
+    json     => 'json',
+    json_rpc => 'json',
+    yaml     => 'yaml',
+    yml      => 'yaml',
 );
 
 sub detect_serializer {

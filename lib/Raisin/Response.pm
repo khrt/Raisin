@@ -14,6 +14,9 @@ sub new {
     $self;
 }
 
+sub json { shift->content_type('application/json') }
+sub yaml { shift->content_type('application/yaml') }
+
 sub rendered {
     my ($self, $rendered) = @_;
     $self->{rendered} = $rendered if defined $rendered;

@@ -146,9 +146,15 @@ sub psgi {
                 my $format = $route->format || $req->header('Accept');
 
                 if (my $serializer = Raisin::Util::detect_serializer($format)) {
-                    Plack::Util::load_class($serializer);
-                    no strict 'refs';
-                    $data = "${serializer}::serialize"->($data);
+                    my $class = 'Raisin::Plugin::Format::' . uc($serializer);
+                    Plack::Util::load_class($class);
+
+                    {
+                        no strict 'refs';
+                        $data = "${class}::serialize"->($data);
+                    }
+
+                    $res->$serializer;
                 }
                 else {
                     $data = $self->serialize($data);
@@ -725,7 +731,6 @@ Verbose output with route parameters:
       GET     /failed
 
       GET     /params
-
 
 =head2 Swagger
 
