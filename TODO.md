@@ -1,28 +1,27 @@
-Declared keyword
-===============
-TO DO OR NOT TO DO
 
-Token auth
-==========
+* keyword `declared` applied for `param`;
+* token auth:
   * Plack middleware;
   * Raisin plugin;
-
-See Plack::Middleware::Auth::AccessToken.
-
-
-Output format
-=============
-  * based on accept content type header;
-  * based on path extension;
-Path extension should have more priority rather accept header.
-
+  See Plack::Middleware::Auth::AccessToken.
 
 Customizible errors pages with default tempaltes
 ================================================
-* 404
-* 500
-* any???
+  * 404
+  * 500
+  * any???
 
+Input format
+============
+  * accept params in JSON or YAML accoring to format;
+
+Output format
+=============
+Path extension should have more priority rather accept header.
+  * based on accept content type header;
+  * based on path extension;
+
+---
 
 DONE: Raisin script
 -------------------
@@ -40,8 +39,6 @@ DONE: Raisin script
       optional: start, Type::Integer, default: 0
       optional: count, Type::Integer, default: 10
 
-
-
 DONE: FIX params keyword
 ------------------------
 1) rename to param (singular);
@@ -50,8 +47,6 @@ DONE: FIX params keyword
 
     my $first_name = params('first_name'); # 'John'
     my $all_params = params(); # { first_name => 'John', last_name => 'Smith' }
-
-
 
 DONE: Refactor Types
 --------------------
@@ -69,7 +64,6 @@ Example of an Integer type:
       my $v = shift;
       $$v = sprintf 'INT:%d', $$v;
     };
-
 
 Make changes in `Raisin::Routes::Endpoint` to use a regex from types.
 Implement simple attributes class.
@@ -108,7 +102,6 @@ Base class `Raisin::Types::Base` should be something like this:
 
 Do not forget to update DOCS!!!
 
-
 DONE: Path params
 -----------------
 _get/post/put/delete/..._ etc. should take path params;
@@ -117,7 +110,6 @@ Don't forget to update DOCS!!!
     get '/suburl' => sub {
       'ok';
     };
-
 
 DONE: Params as a main word
 ---------------------------
