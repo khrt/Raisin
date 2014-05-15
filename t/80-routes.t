@@ -13,24 +13,29 @@ use Raisin::Types;
 
 my $r = Raisin::Routes->new;
 
-ok $r->add(POST => '/dump', sub {'DUMP'}), 'add DUMP';
+ok $r->add(POST => '/dump/:id', sub {'DUMP'}), 'add /dump/:id';
+ok $r->add(POST => '/dump', sub {'DUMP'}), 'add /dump';
 ok $r->add(
-        POST   => '/person',
+        POST   => '/person(?<format>\.\w+)?',
         params => [
-            requires => ['name', 'Raisin::Types::String'],
+            requires => ['name',  'Raisin::Types::String'],
             optional => ['email', 'Raisin::Types::String']
         ],
         sub {'PERSON'}
     ),
-    'add PERSON';
+    'add /person(?<format>)';
 
-is $r->list->{POST}{'/person'}, 2, 'list';
+is $r->list->{POST}{'/person(?<format>\.\w+)?'}, 3, 'check order in routes list';
 
-is_deeply $r->cache, {}, 'empty cache';
+is_deeply $r->cache, {}, 'clear cache';
 
-ok my $subs = $r->find('POST', '/person'), 'find';
-is $subs->[0]->code->(), 'PERSON', 'execute';
+my $subs;
+subtest 'find' => sub {
+    ok $subs = $r->find('POST', '/person'), 'without extension';
+    ok $subs = $r->find('POST', '/person.json'), 'with extension';
+};
 
-is ref $r->cache->{'post:/person'}, 'ARRAY', 'cached';
+is $subs->[0]->code->(), 'PERSON', 'execute found route';
+is ref $r->cache->{'post:/person'}, 'ARRAY', 'check cache';
 
 done_testing;

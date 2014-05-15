@@ -32,6 +32,6 @@ Raisin::Utils - Utility subroutine for Raisin.
 
 =head2 detect_serializer
 
-Detect serializer by content type.
+Detect serializer by content type or extension.
 
 =cut

@@ -12,7 +12,7 @@ use Raisin::Routes;
 
 use Raisin::Util;
 
-our $VERSION = '0.26';
+our $VERSION = '0.27';
 
 sub new {
     my ($class, %args) = @_;
@@ -143,9 +143,9 @@ sub psgi {
 
             # Format plugins
             if (ref $data && $self->can('serialize')) {
-                my $accept = $req->header('Accept');
+                my $format = $route->format || $req->header('Accept');
 
-                if (my $serializer = Raisin::Util::detect_serializer($accept)) {
+                if (my $serializer = Raisin::Util::detect_serializer($format)) {
                     Plack::Util::load_class($serializer);
                     no strict 'refs';
                     $data = "${serializer}::serialize"->($data);
