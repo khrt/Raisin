@@ -690,7 +690,7 @@ See L<Raisin::Plugin::Logger>.
 
 You can see application routes with the following command:
 
-    $ raisin --routes examples/singular/routes.pl                                                                                                 ✱ ◼
+    $ raisin --routes examples/singular/routes.pl
       GET     /user
       GET     /user/all
       POST    /user
@@ -702,7 +702,7 @@ You can see application routes with the following command:
 
 Verbose output with route parameters:
 
-    $ raisin --routes --params examples/singular/routes.pl                                                                                        ✱ ◼
+    $ raisin --routes --params examples/singular/routes.pl
       GET     /user
         optional: `start', type: Integer, default: 0
         optional: `count', type: Integer, default: 10
