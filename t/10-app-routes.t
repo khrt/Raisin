@@ -8,6 +8,7 @@ use Plack::Test;
 use Plack::Util;
 use Test::More;
 use YAML 'Load';
+use JSON 'decode_json';
 
 use lib "$Bin/../lib";
 
@@ -29,8 +30,26 @@ test_psgi $app, sub {
             diag $res->content;
             BAIL_OUT 'FAILED!';
         }
+        is $res->content_type, 'application/yaml';
         ok my $c = $res->content, 'content';
         ok my $o = Load($c), 'decode';
+        @USER_IDS = map { $_->{id} } grep { $_ } @{ $o->{data} };
+        ok scalar @USER_IDS, 'data';
+    };
+};
+
+test_psgi $app, sub {
+    my $cb  = shift;
+    my $res = $cb->(GET '/user.json');
+
+    subtest 'GET /user.json' => sub {
+        if (!is $res->code, 200) {
+            diag $res->content;
+            BAIL_OUT 'FAILED!';
+        }
+        is $res->content_type, 'application/json';
+        ok my $c = $res->content, 'content';
+        ok my $o = decode_json($c), 'decode';
         @USER_IDS = map { $_->{id} } grep { $_ } @{ $o->{data} };
         ok scalar @USER_IDS, 'data';
     };
