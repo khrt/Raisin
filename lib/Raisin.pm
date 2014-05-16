@@ -246,7 +246,7 @@ __END__
 
 =head1 NAME
 
-Raisin - REST-like API micro-framework for Perl.
+Raisin - REST-like API web micro-framework for Perl.
 
 =head1 SYNOPSIS
 
@@ -320,7 +320,7 @@ Raisin - REST-like API micro-framework for Perl.
 
 =head1 DESCRIPTION
 
-Raisin is a REST-like API micro-framework for Perl.
+Raisin is a REST-like API web micro-framework for Perl.
 It's designed to run on Plack, providing a simple DSL to easily develop RESTful APIs.
 It was inspired by L<Grape|https://github.com/intridea/grape>.
 

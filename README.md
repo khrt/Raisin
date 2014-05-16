@@ -1,6 +1,6 @@
 # NAME
 
-Raisin - REST-like API micro-framework for Perl.
+Raisin - REST-like API web micro-framework for Perl.
 
 # SYNOPSIS
 
@@ -74,7 +74,7 @@ Raisin - REST-like API micro-framework for Perl.
 
 # DESCRIPTION
 
-Raisin is a REST-like API micro-framework for Perl.
+Raisin is a REST-like API web micro-framework for Perl.
 It's designed to run on Plack, providing a simple DSL to easily develop RESTful APIs.
 It was inspired by [Grape](https://github.com/intridea/grape).
 
