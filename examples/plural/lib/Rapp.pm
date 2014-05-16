@@ -8,7 +8,7 @@ use lib ("$Bin/../lib", "$Bin/../../../lib");
 
 use Raisin::API;
 
-api_format 'JSON';
+api_format 'json';
 plugin 'APIDocs';
 
 before sub {

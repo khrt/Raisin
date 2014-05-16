@@ -35,7 +35,7 @@ my %USERS = (
 
 plugin 'APIDocs';
 plugin 'Logger', outputs => [['Screen', min_level => 'debug']];
-api_format 'YAML';
+api_format 'yaml';
 
 # /user
 namespace user => sub {
