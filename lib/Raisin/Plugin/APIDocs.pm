@@ -114,11 +114,13 @@ sub build_api_docs {
         my $base_path = $app->req ? $app->req->base->as_string : '';
         $base_path =~ s#/$##;
 
+        my $content_type = 'application/yaml'; # TODO: add more?
+
         my %description = (
             %template,
             apis => $apis{$ns},
             basePath => $base_path,
-            produces => [$app->default_content_type],
+            produces => [$content_type],
             resourcePath => $ns,
         );
 
