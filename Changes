@@ -1,3 +1,6 @@
+0.27 Path extension
+    - Detect format by path extenstion;
+
 0.26 raisin script
     - Raisin script: show application API;
     - Detect format by `Accept' header;
