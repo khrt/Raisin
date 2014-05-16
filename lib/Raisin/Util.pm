@@ -8,6 +8,8 @@ my %SERIALIZERS = (
     json_rpc => 'json',
     yaml     => 'yaml',
     yml      => 'yaml',
+    text     => 'text',
+    txt      => 'text',
 );
 
 sub detect_serializer {
