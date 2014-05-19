@@ -3,6 +3,8 @@ package Raisin::Util;
 use strict;
 use warnings;
 
+use Plack::Util;
+
 my %SERIALIZERS = (
     json     => 'json',
     json_rpc => 'json',
