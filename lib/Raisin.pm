@@ -14,7 +14,7 @@ use Raisin::Util;
 
 use constant DEFAULT_SERIALIZER => 'Raisin::Plugin::Format::TEXT';
 
-our $VERSION = '0.27';
+our $VERSION = '0.28';
 
 sub new {
     my ($class, %args) = @_;
@@ -461,7 +461,7 @@ GET, POST and PUT parameters, along with any named parameters you specify in
 your route strings.
 
 Parameters are automatically populated from the request body on POST and PUT
-for form input, JSON and YAML content-types.
+for form input, C<JSON> and C<YAML> content-types.
 
 In the case of conflict between either of:
 

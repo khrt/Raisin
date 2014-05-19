@@ -1,4 +1,4 @@
-0.28 
+0.28 refactoring
     - Refactor format detection mechanism;
     - Update format plugins;
     - Detect input data by `content-type` header;
