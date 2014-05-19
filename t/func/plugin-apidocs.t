@@ -5,7 +5,7 @@ use warnings;
 use FindBin '$Bin';
 use Test::More;
 
-use lib "$Bin/../lib";
+use lib "$Bin/../../lib";
 
 use Raisin::Plugin::APIDocs;
 use Raisin::Routes;

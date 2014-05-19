@@ -11,7 +11,7 @@ use Test::More;
 use YAML;
 use JSON;
 
-use lib "$Bin/../lib";
+use lib "$Bin/../../lib";
 
 my %PARAMS = (
     param0 => 0,

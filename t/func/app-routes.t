@@ -10,7 +10,7 @@ use Test::More;
 use YAML 'Load';
 use JSON 'decode_json';
 
-use lib "$Bin/../lib";
+use lib "$Bin/../../lib";
 
 my %NEW_USER = (
     name     => 'Obi-Wan Kenobi',
@@ -19,7 +19,7 @@ my %NEW_USER = (
 );
 my @USER_IDS;
 
-my $app = Plack::Util::load_psgi("$Bin/../examples/singular/routes.pl");
+my $app = Plack::Util::load_psgi("$Bin/../../examples/singular/routes.pl");
 
 test_psgi $app, sub {
     my $cb  = shift;
