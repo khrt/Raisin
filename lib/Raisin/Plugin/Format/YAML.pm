@@ -10,15 +10,15 @@ use YAML qw(Dump Load);
 sub build {
     my ($self, %args) = @_;
 
-    $self->app->{default_content_type} = $args{content_type} || 'application/yaml';
     $self->register(
-        'deserialize' => sub { deserialize($_[1]) },
-        'serialize'   => sub { serialize($_[1]) },
+        serializer => $self,
     );
 }
 
-sub deserialize { Load shift }
-sub serialize { Dump shift }
+sub content_type { 'application/yaml' }
+
+sub deserialize { Load $_[1] }
+sub serialize { Dump $_[1] }
 
 1;
 
@@ -30,6 +30,6 @@ Raisin::Plugin::Format::YAML - YAML serialization plugin for Raisin.
 
 =head1 DESCRIPTION
 
-Provides C<deserialize> and C<serialize> methods for Raisin.
+Provides C<content_type>, C<deserialize> and C<serialize> methods for Raisin.
 
 =cut
