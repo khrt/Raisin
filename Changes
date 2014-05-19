@@ -1,3 +1,9 @@
+0.28 
+    - Refactor format detection mechanism;
+    - Update format plugins;
+    - Detect input data by `content-type` header;
+    - Detect output data by `content-type` or `path extension`;
+
 0.27 Path extension
     - Detect format by path extenstion;
 

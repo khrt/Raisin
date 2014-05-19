@@ -14,6 +14,25 @@ sub new {
 
 sub app { shift->{app} }
 
+sub deserialize {
+    my ($self, $data) = @_;
+
+    my $serializer = do {
+        if (my $c = Raisin::Util::detect_serializer($self->content_type)) {
+            Plack::Util::load_class('Raisin::Plugin::Format::' . uc($c));
+        }
+        elsif ($self->app->can('serializer')) {
+            $self->app->serializer;
+        }
+    };
+
+    if ($serializer) {
+        $data = $serializer->deserialize($data);
+    }
+
+    $data;
+}
+
 sub declared_params { shift->{'raisin.params'} }
 
 sub set_declared_params {
@@ -26,8 +45,8 @@ sub set_named_params {
     $self->{'raisin.params.named'} = $named;
 }
 
-sub populate_params {
-    my $self = shift;
+sub prepare_params {
+    my ($self, $format) = @_;
 
     my $declared = $self->{'raisin.params.declared'};
     my $named = $self->{'raisin.params.named'};
@@ -35,13 +54,11 @@ sub populate_params {
     # Serialization / Deserialization
     my $params = do {
         if ($self->method =~ /POST|PUT/ && (my $content = $self->content)) {
-            if ($self->app->can('deserialize')
-                && ($self->content_type eq $self->app->default_content_type))
-            {
-                $self->app->deserialize($content);
-            }
-            elsif ($self->content_type eq 'application/x-www-form-urlencoded') {
+            if ($self->content_type eq 'application/x-www-form-urlencoded') {
                 $self->body_parameters->mixed;
+            }
+            else {
+                $self->deserialize($content);
             }
         }
         else {

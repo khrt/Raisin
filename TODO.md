@@ -5,6 +5,12 @@
   * Raisin plugin;
   See Plack::Middleware::Auth::AccessToken.
 
+Make tests for all output/input formats
+=======================================
+Test: YAML, JSON, TEXT in/out params.
+
+
+
 Customizible errors pages with default tempaltes
 ================================================
   * 404

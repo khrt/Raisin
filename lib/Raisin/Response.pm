@@ -9,13 +9,36 @@ use Carp;
 use Encode 'encode';
 
 sub new {
-    my $class = shift;
+    my ($class, $app) = @_;
     my $self = $class->SUPER::new();
+    $self->{app} = $app;
     $self;
 }
 
-sub json { shift->content_type('application/json') }
-sub yaml { shift->content_type('application/yaml') }
+sub app { shift->{app} }
+
+sub serialize {
+    my ($self, $format, $data) = @_;
+
+    my $serializer = do {
+        if (my $c = Raisin::Util::detect_serializer($format)) {
+            Plack::Util::load_class('Raisin::Plugin::Format::' . uc($c));
+        }
+        elsif ($self->app->can('serializer')) {
+            $self->app->serializer;
+        }
+        elsif (ref $data) {
+            Plack::Util::load_class($self->app->DEFAULT_SERIALIZER);
+        }
+    };
+
+    if ($serializer) {
+        $data = $serializer->serialize($data);
+        $self->content_type($serializer->content_type) if not $self->content_type;
+    }
+
+    $data;
+}
 
 sub rendered {
     my ($self, $rendered) = @_;
@@ -24,17 +47,15 @@ sub rendered {
 }
 
 sub render {
-    my ($self, $body) = @_;
+    my ($self, $format, $body) = @_;
     $body ||= '';
     $self->status(200) if not $self->status;
-    $self->content_type('text/plain') if not $self->content_type;
 
     if (ref $body) {
-        require Data::Dumper;
-        $body = Data::Dumper->new([$body], ['body'])
-            ->Purity(1)->Terse(1)->Deepcopy(1)->Dump;
+        $body = $self->serialize($format, $body);
     }
 
+    $self->content_type('text/plain') if not $self->content_type;
     $self->body(encode 'UTF-8', $body);
     $self->rendered(1);
 
@@ -50,7 +71,7 @@ sub render_error {
 
     $self->status($code);
     # TODO __DATA__ templates
-    $self->render("$code - $message");
+    $self->render(undef, "$code - $message");
 }
 
 1;
@@ -70,6 +91,8 @@ Raisin::Response - Response class for Raisin.
 Extends L<Plack::Response>.
 
 =head1 METHODS
+
+=head3 serialize
 
 =head3 rendered
 

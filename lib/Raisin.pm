@@ -12,6 +12,8 @@ use Raisin::Routes;
 
 use Raisin::Util;
 
+use constant DEFAULT_SERIALIZER => 'Raisin::Plugin::Format::TEXT';
+
 our $VERSION = '0.27';
 
 sub new {
@@ -84,7 +86,7 @@ sub psgi {
 
     # Diffrent for each response
     my $req = $self->req(Raisin::Request->new($self, $env));
-    my $res = $self->res(Raisin::Response->new);
+    my $res = $self->res(Raisin::Response->new($self));
 
     # Build API docs if needed
     if ($self->can('build_api_docs')) {
@@ -104,8 +106,8 @@ sub psgi {
 
     eval {
         foreach my $route (@$routes) {
+            # Validate code variable
             my $code = $route->code;
-
             if (!$code || (ref($code) && ref($code) ne 'CODE')) {
                 croak 'Invalid endpoint for ' . $req->path;
             }
@@ -126,7 +128,7 @@ sub psgi {
             $req->set_named_params($route->named);
 
             # Populate and validate declared params
-            if (not $req->populate_params) {
+            if (not $req->prepare_params) {
                 carp '* ' . 'INVALID PARAMS! ' x 5;
                 $res->render_error(400, 'Invalid params!');
                 last;
@@ -135,36 +137,16 @@ sub psgi {
             # HOOK After validation
             $self->hook('after_validation')->($self);
 
-            # Set default content type
-            $res->content_type($self->default_content_type);
-
             # Eval code
             my $data = $code->($req->declared_params);
-
-            # Format plugins
-            if (ref $data && $self->can('serialize')) {
-                my $format = $route->format || $req->header('Accept');
-
-                if (my $serializer = Raisin::Util::detect_serializer($format)) {
-                    my $class = 'Raisin::Plugin::Format::' . uc($serializer);
-                    Plack::Util::load_class($class);
-
-                    {
-                        no strict 'refs';
-                        $data = "${class}::serialize"->($data);
-                    }
-
-                    $res->$serializer;
-                }
-                else {
-                    $data = $self->serialize($data);
-                }
-            }
 
             if (defined $data) {
                 # Handle delayed response
                 return $data if ref($data) eq 'CODE'; # TODO check delayed responses
-                $res->render($data) if not $res->rendered;
+
+                # Detect output format
+                my $format = $route->format || $req->header('Accept');
+                $res->render($format, $data) if not $res->rendered;
             }
 
             # HOOK After
@@ -209,11 +191,9 @@ sub api_version {
 
 sub api_format {
     my ($self, $name) = @_;
-    $name = $name =~ /\+/x ? $name : "Format::$name";
+    $name = $name =~ /\+/x ? $name : "Format::${\uc($name)}";
     $self->load_plugin($name);
 }
-
-sub default_content_type { shift->{default_content_type} || 'text/plain' }
 
 # Request and Response and shortcuts
 sub req {
@@ -435,7 +415,7 @@ Loads a plugin from C<Raisin::Plugin::Format> namespace.
 
 Already exists L<Raisin::Plugin::Format::JSON> and L<Raisin::Plugin::Format::YAML>.
 
-    api_format 'JSON';
+    api_format 'json';
 
 =head2 plugin
 
@@ -463,7 +443,7 @@ In C<RaisinApp.pm>:
 
     use Raisin::API;
 
-    api_format 'JSON';
+    api_format 'json';
 
     mount 'RaisinApp::User';
     mount 'RaisinApp::Host';
@@ -626,7 +606,7 @@ C<encode_json> in each C<JSON> API implementation.
 
 Your API can declare which types to support by using C<api_format>.
 
-    api_format 'JSON';
+    api_format 'json';
 
 Custom formatters for existing and additional types can be defined with a
 L<Raisin::Plugin::Format>.
