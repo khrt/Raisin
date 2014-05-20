@@ -19,7 +19,7 @@ Raisin - REST-like API web micro-framework for Perl.
         },
     );
 
-    namespace '/user' => sub {
+    namespace user => sub {
         params [
             #required/optional => [name, type, default, regex]
             optional => ['start', 'Raisin::Types::Integer', 0],
@@ -65,7 +65,7 @@ Raisin - REST-like API web micro-framework for Perl.
         sub {
             get sub {
                 my $params = shift;
-                %USERS{ $params->{id} };
+                $USERS{ $params->{id} };
             };
         };
     };
@@ -183,7 +183,7 @@ Loads a plugin from `Raisin::Plugin::Format` namespace.
 
 Already exists [Raisin::Plugin::Format::JSON](https://metacpan.org/pod/Raisin::Plugin::Format::JSON) and [Raisin::Plugin::Format::YAML](https://metacpan.org/pod/Raisin::Plugin::Format::YAML).
 
-    api_format 'JSON';
+    api_format 'json';
 
 ## plugin
 
@@ -211,7 +211,7 @@ In `RaisinApp.pm`:
 
     use Raisin::API;
 
-    api_format 'JSON';
+    api_format 'json';
 
     mount 'RaisinApp::User';
     mount 'RaisinApp::Host';
@@ -229,7 +229,7 @@ GET, POST and PUT parameters, along with any named parameters you specify in
 your route strings.
 
 Parameters are automatically populated from the request body on POST and PUT
-for form input, JSON and YAML content-types.
+for form input, `JSON` and `YAML` content-types.
 
 In the case of conflict between either of:
 
@@ -316,7 +316,7 @@ Serialization takes place automatically. For example, you do not have to call
 
 Your API can declare which types to support by using `api_format`.
 
-    api_format 'JSON';
+    api_format 'json';
 
 Custom formatters for existing and additional types can be defined with a
 [Raisin::Plugin::Format](https://metacpan.org/pod/Raisin::Plugin::Format).

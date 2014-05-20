@@ -1,5 +1,5 @@
 
-* keyword `declared` applied for `param`;
+* keyword `declared` applicable to `param`;
 * token auth:
   * Plack middleware;
   * Raisin plugin;
@@ -9,19 +9,17 @@ Make tests for all output/input formats
 =======================================
 Test: YAML, JSON, TEXT in/out params.
 
-
-
 Customizible errors pages with default tempaltes
 ================================================
   * 404
   * 500
   * any???
 
-Input format
+---
+
+DONE: Input format
 ============
   * accept params in JSON or YAML accoring to format;
-
----
 
 DONE: Output format
 =============

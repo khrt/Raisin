@@ -1,3 +1,9 @@
+0.29 Bug fixes
+    - Clean up `psgi' subroutine in Raisin;
+    - FIX #1
+        * fix examples;
+        * fix namespace subroutine;
+
 0.28 refactoring
     - Refactor format detection mechanism;
     - Update format plugins;
