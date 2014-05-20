@@ -66,6 +66,8 @@ sub namespace {
     my ($name, $block, %args) = @_;
 
     if ($name) {
+        $name =~ s{^/}{}msx;
+
         my %prev_settings = %SETTINGS;
 
         push @NS, $name;
