@@ -120,15 +120,8 @@ sub psgi {
             # HOOK Before validation
             $self->hook('before_validation')->($self);
 
-            # Load params
-            my $params = $req->parameters->mixed;
-            my $named = $route->named;
-
-            $req->set_declared_params($route->params);
-            $req->set_named_params($route->named);
-
             # Populate and validate declared params
-            if (not $req->prepare_params) {
+            if (not $req->prepare_params($route->params, $route->named)) {
                 carp '* ' . 'INVALID PARAMS! ' x 5;
                 $res->render_error(400, 'Invalid params!');
                 last;
@@ -142,7 +135,7 @@ sub psgi {
 
             if (defined $data) {
                 # Handle delayed response
-                return $data if ref($data) eq 'CODE'; # TODO check delayed responses
+                return $data if ref($data) eq 'CODE'; # TODO: check delayed responses
 
                 # Detect output format
                 my $format = $route->format || $req->header('Accept');
@@ -245,7 +238,7 @@ Raisin - REST-like API web micro-framework for Perl.
         },
     );
 
-    namespace '/user' => sub {
+    namespace user => sub {
         params [
             #required/optional => [name, type, default, regex]
             optional => ['start', 'Raisin::Types::Integer', 0],
@@ -291,7 +284,7 @@ Raisin - REST-like API web micro-framework for Perl.
         sub {
             get sub {
                 my $params = shift;
-                %USERS{ $params->{id} };
+                $USERS{ $params->{id} };
             };
         };
     };
