@@ -35,21 +35,8 @@ sub deserialize {
 
 sub declared_params { shift->{'raisin.params'} }
 
-sub set_declared_params {
-    my ($self, $declared) = @_;
-    $self->{'raisin.params.declared'} = $declared;
-}
-
-sub set_named_params {
-    my ($self, $named) = @_;
-    $self->{'raisin.params.named'} = $named;
-}
-
 sub prepare_params {
-    my ($self, $format) = @_;
-
-    my $declared = $self->{'raisin.params.declared'};
-    my $named = $self->{'raisin.params.named'};
+    my ($self, $declared, $named) = @_;
 
     # Serialization / Deserialization
     my $params = do {
