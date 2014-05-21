@@ -3,6 +3,8 @@
     - FIX #1
         * fix examples;
         * fix namespace subroutine;
+    - FIX #2
+        * update docs;
 
 0.28 refactoring
     - Refactor format detection mechanism;
