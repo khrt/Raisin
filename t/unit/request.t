@@ -9,4 +9,6 @@ use lib "$Bin/../../lib";
 
 use Raisin::Request;
 
+ok 1;
+
 done_testing;

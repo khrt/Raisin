@@ -5,6 +5,7 @@ Raisin - REST-like API web micro-framework for Perl.
 # SYNOPSIS
 
     use Raisin::API;
+    use Raisin::Types;
 
     my %USERS = (
         1 => {
