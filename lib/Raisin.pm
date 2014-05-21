@@ -14,7 +14,7 @@ use Raisin::Util;
 
 use constant DEFAULT_SERIALIZER => 'Raisin::Plugin::Format::TEXT';
 
-our $VERSION = '0.28';
+our $VERSION = '0.29';
 
 sub new {
     my ($class, %args) = @_;
@@ -224,6 +224,7 @@ Raisin - REST-like API web micro-framework for Perl.
 =head1 SYNOPSIS
 
     use Raisin::API;
+    use Raisin::Types;
 
     my %USERS = (
         1 => {
