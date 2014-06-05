@@ -14,7 +14,7 @@ use Raisin::Util;
 
 use constant DEFAULT_SERIALIZER => 'Raisin::Plugin::Format::TEXT';
 
-our $VERSION = '0.29';
+our $VERSION = '0.30';
 
 sub new {
     my ($class, %args) = @_;
