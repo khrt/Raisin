@@ -71,7 +71,7 @@ sub render_error {
 
     $self->status($code);
     # TODO __DATA__ templates
-    $self->render(undef, "$code - $message");
+    $self->render(undef, $message);
 }
 
 1;
