@@ -84,6 +84,9 @@ sub run {
 sub psgi {
     my ($self, $env) = @_;
 
+    # load fallback logger (Raisin::Logger)
+    $self->load_plugin('Logger', fallback => 1);
+
     # Diffrent for each response
     my $req = $self->req(Raisin::Request->new($self, $env));
     my $res = $self->res(Raisin::Response->new($self));
@@ -113,16 +116,14 @@ sub psgi {
             }
 
             # Log
-            if ($self->can('logger')) {
-                $self->logger(info => $req->method . q{ } . $route->path);
-            }
+            $self->log(info => $req->method . q{ } . $route->path);
 
             # HOOK Before validation
             $self->hook('before_validation')->($self);
 
             # Populate and validate declared params
             if (not $req->prepare_params($route->params, $route->named)) {
-                carp '* ' . 'INVALID PARAMS! ' x 5;
+                $self->log(error => '* ' . 'INVALID PARAMS! ' x 5);
                 $res->render_error(400, 'Invalid params!');
                 last;
             }
@@ -147,7 +148,7 @@ sub psgi {
         }
 
         if (!$res->rendered) {
-            croak 'Nothing rendered!';
+            $self->log(error => 'Nothing rendered');
         }
 
         1;
@@ -416,7 +417,7 @@ Already exists L<Raisin::Plugin::Format::JSON> and L<Raisin::Plugin::Format::YAM
 Loads a Raisin module. The module options may be specified after the module name.
 Compatible with L<Kelp> modules.
 
-    plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
+    plugin 'Logger', params => [outputs => [['Screen', min_level => 'debug']]];
 
 =head2 middleware
 
@@ -613,7 +614,7 @@ Call C<JSON::encode_json> and C<JSON::decode_json>.
 
 =item YAML
 
-Call C<YAML::Dump> and C<JSON::Load>.
+Call C<YAML::Dump> and C<YAML::Load>.
 
 =item TEXT
 
@@ -652,15 +653,20 @@ L<Raisin::Plugin::Auth::Token>
 
 =head1 LOGGING
 
-Raisin has a built-in logger based on C<Log::Dispatch>. You can enable it by
+Raisin has a built-in logger and support for C<Log::Dispatch>.
+You can enable it by:
 
-    plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
+    plugin 'Logger', outputs => [['Screen', min_level => 'debug']];
 
-Exports C<logger> subroutine.
+Or use L<Raisin::Logger> with a C<fallback> option:
 
-    logger(debug => 'Debug!');
-    logger(warn => 'Warn!');
-    logger(error => 'Error!');
+    plugin 'Logger', fallback => 1;
+
+Exports C<log> subroutine.
+
+    log(debug => 'Debug!');
+    log(warn => 'Warn!');
+    log(error => 'Error!');
 
 See L<Raisin::Plugin::Logger>.
 

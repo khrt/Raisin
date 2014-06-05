@@ -5,31 +5,24 @@ use warnings;
 
 use base 'Raisin::Plugin';
 
-use Log::Dispatch;
 use POSIX qw(strftime);
+use Plack::Util;
 use Time::HiRes qw(time);
 
 sub build {
-    my ($self, @args) = @_;
-    my $logger = $self->{logger} = Log::Dispatch->new(@args);
+    my ($self, %args) = @_;
 
-#    # Register a few levels
-#    my @levels_to_register = qw/debug info error/;
-#
-#    # Build the registration hash
-#    my %LEVELS = map {
-#        my $level = $_;
-#        $level => sub {
-#            shift if ref($_[0]);
-#            $self->message($level, @_);
-#        };
-#    } @levels_to_register;
-#
-#    # Register the log levels
-#    $self->register(%LEVELS);
+    my $module = 'Log::Dispatch';
 
-    # Also register the message method as 'logger'
-    $self->register(logger => sub {
+    if (delete $args{fallback}) {
+        $module = qw(Raisin::Logger);
+    }
+
+    my $class = Plack::Util::load_class($module);
+
+    $self->{logger} = $class->new(%args);
+
+    $self->register(log => sub {
         shift if ref($_[0]);
         $self->message(@_);
     });
@@ -40,13 +33,14 @@ sub message {
 
     for (@messages) {
         my $t = time;
-        my $date = strftime "%Y-%m-%d %H:%M:%S", localtime $t;
-        $date .= sprintf ".%03d", ($t - int($t)) * 1000;
+        my $ts = strftime "%d/%b/%Y %H:%M:%S", localtime $t;
+        $ts .= sprintf ".%03d", ($t - int($t)) * 1000;
+
+        my $str = ref($_) ? Dumper($_) : $_;
 
         $self->{logger}->log(
             level   => $level,
-            message => sprintf("%s - %s - %s\n",
-                $date, $level, ref($_) ? Dumper($_) : $_)
+            message => "$ts: $str\n",
         );
     }
 }
@@ -66,14 +60,12 @@ Raisin::Plugin::Logger - Logger plugin for Raisin.
 
 =head1 DESCRIPTION
 
-Borrowed from L<Kelp::Module::Logger>.
-
-Provides C<logger> method which is an alias for L<Log::Dispatch> C<log> method.
+Provides C<log> method which is an alias for L<Log::Dispatch>
+or L<Raisin::Logger> C<log> method.
 
     $self->{logger}->log(
         level   => $level,
-        message => sprintf("%s - %s - %s\n",
-            $date, $level, ref($_) ? Dumper($_) : $_)
+        message => "$ts: $str\n",
     );
 
 =cut
