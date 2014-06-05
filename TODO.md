@@ -5,6 +5,10 @@
   * Raisin plugin;
   See Plack::Middleware::Auth::AccessToken.
 
+Types
+=====
+Use Type::Tiny instead of my own type system.
+
 Make tests for all output/input formats
 =======================================
 Test: YAML, JSON, TEXT in/out params.
@@ -16,6 +20,10 @@ Customizible errors pages with default tempaltes
   * any???
 
 ---
+
+DONE: Default logger
+==============
+Default logger: -> STDERR
 
 DONE: Input format
 ============
