@@ -1,3 +1,11 @@
+0.30 Logger
+    - Default logger;
+    - NEW more complex tests;
+    - Small fixes:
+        * Plugin cleanup;
+        * Response cleanup;
+        * Request cleanup;
+
 0.29 Bug fixes
     - Clean up `psgi' subroutine in Raisin;
     - FIX #1
