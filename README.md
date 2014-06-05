@@ -191,7 +191,7 @@ Already exists [Raisin::Plugin::Format::JSON](https://metacpan.org/pod/Raisin::P
 Loads a Raisin module. The module options may be specified after the module name.
 Compatible with [Kelp](https://metacpan.org/pod/Kelp) modules.
 
-    plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
+    plugin 'Logger', params => [outputs => [['Screen', min_level => 'debug']]];
 
 ## middleware
 
@@ -328,7 +328,7 @@ Custom formatters for existing and additional types can be defined with a
 
 - YAML
 
-    Call `YAML::Dump` and `JSON::Load`.
+    Call `YAML::Dump` and `YAML::Load`.
 
 - TEXT
 
@@ -350,15 +350,20 @@ TODO
 
 # LOGGING
 
-Raisin has a built-in logger based on `Log::Dispatch`. You can enable it by
+Raisin has a built-in logger and support for `Log::Dispatch`.
+You can enable it by:
 
-    plugin 'Logger' => outputs => [['Screen', min_level => 'debug']];
+    plugin 'Logger', outputs => [['Screen', min_level => 'debug']];
 
-Exports `logger` subroutine.
+Or use [Raisin::Logger](https://metacpan.org/pod/Raisin::Logger) with a `fallback` option:
 
-    logger(debug => 'Debug!');
-    logger(warn => 'Warn!');
-    logger(error => 'Error!');
+    plugin 'Logger', fallback => 1;
+
+Exports `log` subroutine.
+
+    log(debug => 'Debug!');
+    log(warn => 'Warn!');
+    log(error => 'Error!');
 
 See [Raisin::Plugin::Logger](https://metacpan.org/pod/Raisin::Plugin::Logger).
 
