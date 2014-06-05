@@ -29,7 +29,7 @@ sub register {
         my $caller = $self->app->{caller};
 
         my $glob = "${class}::${name}";
-        my $app_glob = "${caller}::${name}";
+        my $app_glob = $caller ? "${caller}::${name}" : undef;
 
         if ($self->app->can($name)) {
             croak "Redefining of $glob not allowed";
@@ -37,7 +37,7 @@ sub register {
 
         if (ref $item eq 'CODE') {
             *{$glob} = $item;
-            *{$app_glob} = $item;
+            *{$app_glob} = $item if $app_glob;
         }
         else {
             $self->app->{$name} = $item;
