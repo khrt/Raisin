@@ -9,6 +9,16 @@ use lib "$Bin/../../lib";
 
 use Raisin::API;
 
-ok 1;
+subtest 'namespace' => sub {
+    ok 1;
+};
+
+subtest 'route_param' => sub {
+    ok 1;
+};
+
+subtest 'params' => sub {
+    ok 1;
+};
 
 done_testing;
