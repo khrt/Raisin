@@ -11,6 +11,7 @@ requires 'perl', '5.010001';
 #requires 'Time::HiRes' => '1.9724';
 
 # External
+#requires 'Hash::MultiValue';
 requires 'JSON' => '2.90';
 requires 'Log::Dispatch' => '2.39';
 requires 'Plack' => '1.0030';
