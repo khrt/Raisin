@@ -1,23 +1,23 @@
 
+Types
+=====
+Use Type::Tiny instead of my own type system.
+
+Tests
+=====
+Parameters coercion:
+  in: `Content-type`, `extension` -> JSON, YAML, form/data;
+  out: `Accept`, `extension` -> JSON, YAML, TEXT;
+
+Make test application and store it in `t/`.
+
+Backlog
+=======
 * keyword `declared` applicable to `param`;
 * token auth:
   * Plack middleware;
   * Raisin plugin;
   See Plack::Middleware::Auth::AccessToken.
-
-Types
-=====
-Use Type::Tiny instead of my own type system.
-
-Make tests for all output/input formats
-=======================================
-Test: YAML, JSON, TEXT in/out params.
-
-Customizible errors pages with default tempaltes
-================================================
-  * 404
-  * 500
-  * any???
 
 ---
 
