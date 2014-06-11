@@ -341,13 +341,6 @@ The order for choosing the format is the following.
 - Use the `api_format` if specified.
 - Fallback to `TEXT`.
 
-# AUTHENTICATION
-
-TODO
-[Raisin::Plugin::Auth](https://metacpan.org/pod/Raisin::Plugin::Auth)
-[Raisin::Plugin::Auth::Basic](https://metacpan.org/pod/Raisin::Plugin::Auth::Basic)
-[Raisin::Plugin::Auth::Token](https://metacpan.org/pod/Raisin::Plugin::Auth::Token)
-
 # LOGGING
 
 Raisin has a built-in logger and support for `Log::Dispatch`.

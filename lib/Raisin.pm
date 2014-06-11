@@ -644,13 +644,6 @@ Fallback to C<TEXT>.
 
 =back
 
-=head1 AUTHENTICATION
-
-TODO
-L<Raisin::Plugin::Auth>
-L<Raisin::Plugin::Auth::Basic>
-L<Raisin::Plugin::Auth::Token>
-
 =head1 LOGGING
 
 Raisin has a built-in logger and support for C<Log::Dispatch>.
