@@ -16,6 +16,7 @@ requires 'JSON' => '2.90';
 requires 'Log::Dispatch' => '2.39';
 requires 'Plack' => '1.0030';
 requires 'Plack::Middleware::CrossOrigin' => '0.009';
+requires 'Type::Tiny' => '0.044';
 requires 'YAML' => '0.90';
 
 on test => sub {
