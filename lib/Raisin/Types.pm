@@ -2,47 +2,29 @@ package Raisin::Types;
 
 use strict;
 use warnings;
-no warnings 'redefine';
 
+use Type::Tiny;
+use Types::Standard;
 
-package Raisin::Types::Integer;
-use base 'Raisin::Types::Base';
-sub constraint {
-    my ($self, $v) = @_;
-    $v =~ /^\d+$/;
-}
+our $Any = Types::Standard::Any->create_child_type;
+our $Bool = Types::Standard::Bool->create_child_type;
+our $Defined = Types::Standard::Defined->create_child_type;
+our $Integer = Types::Standard::Int->create_child_type;
+our $Numeric = Types::Standard::Num->create_child_type;
+our $String = Types::Standard::Str->create_child_type;
+our $Undef = Types::Standard::Undef->create_child_type;
+our $Value = Types::Standard::Value->create_child_type;
 
-# ->
-
-package Raisin::Types::Float;
-use base 'Raisin::Types::Base';
-sub constraint {
-    my ($self, $v) = @_;
-    $v =~ /^\d+(?:\.\d+)$/;
-}
-sub coercion {
-    my ($self, $rv) = @_;
-    $$rv = sprintf '%.4f', $$rv;
-}
-
-# ->
-
-package Raisin::Types::String;
-use base 'Raisin::Types::Base';
-sub constraint {
-    my ($self, $v) = @_;
-    $v =~ /^[\t\r\n\p{IsPrint}]{0,32766}/;
-}
-
-# ->
-
-package Raisin::Types::Scalar;
-use base 'Raisin::Types::Base';
-sub constraint {
-    my ($self, $v) = @_;
-    ref \$v eq 'SCALAR';
-}
-
+#use DDP;
+#my $num = Type::Tiny->new(
+#   constraint => sub { looks_like_number($_) },
+#   message    => sub { "$_ ain't a number" },
+#   name       => "Number",
+#);
+#p $num;
+#p $num->(1);
+#p $num->(1.23);
+#p $num->('string');
 
 1;
 
@@ -54,30 +36,46 @@ Raisin::Types - Default parameter types for Raisin.
 
 =head1 DESCRIPTION
 
-Built-in Raisin parameters types.
+Built-in Raisin parameters types. See L<Types::Standard>.
 
 =over
 
 =item *
 
-C<Raisin::Types::Integer>
+C<Any>
 
 =item *
 
-C<Raisin::Types::Float>
+C<Bool>
 
 =item *
 
-C<Raisin::Types::String>
+C<Defined>
 
 =item *
 
-C<Raisin::Types::Scalar>
+C<Integer>
+
+=item *
+
+C<Numeric>
+
+=item *
+
+C<String>
+
+=item *
+
+C<Undef>
+
+=item *
+
+C<Value>
 
 =back
 
 =head1 MAKE YOUR OWN
 
-See L<Raisin::Types::Base>.
+See L<Type::Tiny::Manual>.
 
 =cut

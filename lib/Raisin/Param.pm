@@ -53,11 +53,18 @@ sub validate {
     }
 
     for my $v (@$$ref_value) {
-        unless ($self->type->new(\$v)) {
-            carp "CHECK: `$self->{name}` has invalid value `$v`!" unless $quiet;
+        # Type check
+        eval { $v = $self->type->($v) } || do {
+            my $e = $@;
+            unless ($quiet) {
+                #TODO: $self->app->log($e);
+                carp "CHECK: `$self->{name}` has invalid value `$v`!";
+                carp $e;
+            }
             return;
-        }
+        };
 
+        # Param check
         if ($self->regex && $v !~ $self->regex) {
             carp "REGEX: `$self->{name}` has invalid value `$v`!" unless $quiet;
             return;
