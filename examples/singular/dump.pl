@@ -10,15 +10,16 @@ use List::Util qw(max);
 use lib "$FindBin::Bin/../../lib";
 
 use Raisin::API;
-use Raisin::Types;
+use Types::Standard qw(Int Str);
 
 #middleware '+Plack::Middleware::ContentLength';
 middleware 'Runtime';
 #middleware '+Plack::Middleware::SimpleLogger';
 
 params [
-    optional => ['password', 'Raisin::Types::String', undef, qr/qwerty/],
-    optional => ['email', 'Raisin::Types::String', 'NA'],
+    optional => ['password', Str, undef, qr/qwerty/],
+    optional => ['email', Str, 'NA'],
+    optional => ['phone', Int, 'NA'],
 ],
 get => sub {
     my $params = shift;
@@ -26,8 +27,9 @@ get => sub {
 };
 
 params [
-    optional => ['password', 'Raisin::Types::String', undef, qr/ytrewq/],
-    optional => ['email', 'Raisin::Types::String', 'AN'],
+    optional => ['password', Str, undef, qr/ytrewq/],
+    optional => ['email', Str, 'AN'],
+    optional => ['phone', Int, 'NA'],
 ],
 post => sub {
     my $params = shift;

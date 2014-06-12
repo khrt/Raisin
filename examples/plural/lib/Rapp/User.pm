@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Raisin::API;
-use Raisin::Types;
+use Types::Standard qw(Str Int);
 
 # USERS
 my %USERS = (
@@ -25,8 +25,8 @@ namespace user => sub {
     # list all users
     params [
         #required/optional => [name, type, default, values]
-        optional => ['start', 'Raisin::Types::Integer', 0, qr/^\d+$/],
-        optional => ['count', 'Raisin::Types::Integer', 10, qr/^\d+$/],
+        optional => ['start', Int, 0, qr/^\d+$/],
+        optional => ['count', Int, 10, qr/^\d+$/],
     ],
     get => sub {
         my $params = shift;
@@ -45,9 +45,9 @@ namespace user => sub {
 
     # create new user
     params [
-        required => ['name', 'Raisin::Types::String'],
-        required => ['password', 'Raisin::Types::String'],
-        optional => ['email', 'Raisin::Types::String', undef, qr/prev-regex/],
+        required => ['name', Str],
+        required => ['password', Str],
+        optional => ['email', Str, undef, qr/prev-regex/],
     ],
     post => sub {
         my $params = shift;
@@ -59,7 +59,7 @@ namespace user => sub {
     };
 
     # /user/<id>
-    route_param id => 'Raisin::Types::Integer',
+    route_param id => Int,
     sub {
         # get user
         get sub {
@@ -69,8 +69,8 @@ namespace user => sub {
 
         # edit user
         params [
-            optional => ['password', 'Raisin::Types::String'],
-            optional => ['email', 'Raisin::Types::String', undef, qr/next-regex/],
+            optional => ['password', Str],
+            optional => ['email', Str, undef, qr/next-regex/],
         ],
         put => sub {
             my $params = shift;

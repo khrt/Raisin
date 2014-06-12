@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Raisin::API;
-use Raisin::Types;
+use Types::Standard qw(Int Str);
 
 # USERS
 my %HOSTS = (
@@ -30,8 +30,8 @@ namespace host => sub {
     # list all hosts
     params [
         #required/optional => [name, type, default, values]
-        optional => ['start', 'Raisin::Types::Integer', 0, qr/^\d+$/],
-        optional => ['count', 'Raisin::Types::Integer', 10, qr/^\d+$/],
+        optional => ['start', Int, 0, qr/^\d+$/],
+        optional => ['count', Int, 10, qr/^\d+$/],
     ],
     get => sub {
         my $params = shift;
@@ -50,8 +50,8 @@ namespace host => sub {
 
     # create new host
     params [
-        required => ['name', 'Raisin::Types::String'],
-        required => ['user_id', 'Raisin::Types::Integer'],
+        required => ['name', Str],
+        required => ['user_id', Int],
     ],
     post => sub {
         my $params = shift;
@@ -63,7 +63,7 @@ namespace host => sub {
     };
 
     # /host/<id>
-    route_param id => 'Raisin::Types::Integer',
+    route_param id => Int,
     sub {
         # get host
         get sub {
@@ -73,7 +73,7 @@ namespace host => sub {
 
         # edit host
         params [
-            required => ['state', 'Raisin::Types::String'],
+            required => ['state', Str],
         ],
         put => sub {
             my $params = shift;

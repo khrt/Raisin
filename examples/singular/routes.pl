@@ -10,7 +10,7 @@ use List::Util qw(max);
 use lib "$FindBin::Bin/../../lib"; # ->Raisin/lib
 
 use Raisin::API;
-use Raisin::Types;
+use Types::Standard qw(Int Str);
 
 # GET  /user
 # POST /user
@@ -42,8 +42,8 @@ namespace user => sub {
     # list all users
     params [
         #required/optional => [name, type, default, regex]
-        optional => ['start', 'Raisin::Types::Integer', 0],
-        optional => ['count', 'Raisin::Types::Integer', 10],
+        optional => ['start', Int, 0],
+        optional => ['count', Int, 10],
     ],
     get => sub {
         my $params = shift;
@@ -69,9 +69,9 @@ namespace user => sub {
 
     # create new user
     params [
-        required => ['name', 'Raisin::Types::String'],
-        required => ['password', 'Raisin::Types::String'],
-        optional => ['email', 'Raisin::Types::String', undef, qr/[^@]@[^.].\w+/],
+        required => ['name', Str],
+        required => ['password', Str],
+        optional => ['email', Str, undef, qr/[^@]@[^.].\w+/],
     ],
     post => sub {
         my $params = shift;
@@ -83,7 +83,7 @@ namespace user => sub {
     };
 
     # /user/<id>
-    route_param id => 'Raisin::Types::Integer',
+    route_param id => Int,
     sub {
         # get user
         get sub {
@@ -93,8 +93,8 @@ namespace user => sub {
 
         # edit user
         params [
-            optional => ['password', 'Raisin::Types::String'],
-            optional => ['email', 'Raisin::Types::String', undef, qr/[^@]@[^.].\w+/],
+            optional => ['password', Str],
+            optional => ['email', Str, undef, qr/[^@]@[^.].\w+/],
         ],
         put => sub {
             my $params = shift;
