@@ -22,13 +22,13 @@ my %PARAMS = (
 
 my $json_app = eval {
     use Raisin::API;
-    use Raisin::Types;
+    use Types::Standard qw(Int);
 
-    route_param 'id' => 'Raisin::Types::Integer', sub {
+    route_param 'id' => Int, sub {
         get sub { 'Level 1' };
-        route_param 'subid' => 'Raisin::Types::Integer', sub {
+        route_param 'subid' => Int, sub {
             get sub { 'Level 2' };
-            route_param 'subsubid' => 'Raisin::Types::Integer', sub {
+            route_param 'subsubid' => Int, sub {
                 get sub { 'Level 3' };
             };
         };

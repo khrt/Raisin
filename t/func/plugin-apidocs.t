@@ -9,7 +9,7 @@ use lib "$Bin/../../lib";
 
 use Raisin::Plugin::APIDocs;
 use Raisin::Routes;
-use Raisin::Types;
+use Types::Standard qw(Int Str);
 use Raisin;
 
 my $a = Raisin->new;
@@ -20,15 +20,15 @@ my $r = $a->{routes};
 $r->add(
     GET => '/person/:id',
     params => [
-        required => ['name', 'Raisin::Types::String'],
-        optional => ['zip', 'Raisin::Types::Integer'],
+        required => ['name', Str],
+        optional => ['zip', Int],
     ],
     sub { 'GET' }
 );
 $r->add(
     POST => '/person',
     params => [
-        optional => ['email', 'Raisin::Types::String'],
+        optional => ['email', Str],
     ],
     sub { 'POST' }
 );
@@ -36,17 +36,17 @@ $r->add(
 $r->add(
     GET => '/address',
     params => [
-        required => ['street', 'Raisin::Types::String'],
-        required => ['house_num', 'Raisin::Types::String'],
+        required => ['street', Str],
+        required => ['house_num', Str],
     ],
     sub { 'POST' }
 );
 $r->add(
     POST => '/address',
     params => [
-        required => ['street', 'Raisin::Types::String'],
-        required => ['house_num', 'Raisin::Types::String'],
-        required => ['apartment', 'Raisin::Types::String'],
+        required => ['street', Str],
+        required => ['house_num', Str],
+        required => ['apartment', Str],
     ],
     sub { 'POST' }
 );

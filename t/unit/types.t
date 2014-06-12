@@ -9,38 +9,42 @@ use lib "$Bin/../../lib";
 
 use Raisin::Types;
 
-subtest 'int' => sub {
-    my $value = 1;
+subtest 'Bool' => sub {
+    my $bool = $Raisin::Types::Bool->(1);
+    is $bool, 1, 'true';
 
-    my $int = Raisin::Types::Integer->new(\$value);
-    is ref $int, 'Raisin::Types::Integer', 'valid';
+    $bool = $Raisin::Types::Bool->(0);
+    is $bool, 0, 'false';
 
-    $int = Raisin::Types::Integer->new(\1.23);
-    is $int, undef, 'invalid';
+    my $e;
+    eval { $Raisin::Types::Bool->(2) } || do { $e = $@ };
+    like $e, qr/did not pass type constraint/, 'invalid';
 };
 
-subtest 'float' => sub {
-    my $value = 1.23;
+subtest 'Integer' => sub {
+    my $Int = $Raisin::Types::Integer->(1);
+    is $Int, 1, 'valid';
 
-    my $float = Raisin::Types::Float->new(\$value);
-    is ref $float, 'Raisin::Types::Float', 'valid';
-
-    $float = Raisin::Types::Float->new(\'string');
-    is $float, undef, 'invalid';
+    my $e;
+    eval { $Raisin::Types::Integer->(1.23) } || do { $e = $@ };
+    like $e, qr/did not pass type constraint/, 'invalid';
 };
 
-subtest 'string' => sub {
-    my $value = 'string';
+subtest 'Numeric' => sub {
+    my $Numeric = $Raisin::Types::Numeric->(1);
+    is $Numeric, 1, 'integer';
 
-    my $string = Raisin::Types::String->new(\$value);
-    is ref $string, 'Raisin::Types::String', 'valid';
+    $Numeric = $Raisin::Types::Numeric->(1.23);
+    is $Numeric, 1.23, 'float';
+
+    my $e;
+    eval { $Raisin::Types::Numeric->('string') } || do { $e = $@ };
+    like $e, qr/did not pass type constraint/, 'invalid';
 };
 
-subtest 'scalar' => sub {
-    my $value = 'scalar';
-
-    my $scalar = Raisin::Types::Scalar->new(\$value);
-    is ref $scalar, 'Raisin::Types::Scalar', 'valid';
+subtest 'String' => sub {
+    my $String = $Raisin::Types::String->('string');
+    is $String, 'string', 'true';
 };
 
 done_testing;

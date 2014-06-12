@@ -9,15 +9,14 @@ use lib "$Bin/../../lib";
 
 use Raisin::Types;
 use Raisin::Param;
+use Types::Standard qw(ScalarRef Any Num Str Int);
 
 my @types = (
-    optional => ['sclr', 'Raisin::Types::Scalar'],
-    optional => ['str', 'Raisin::Types::String', undef, qr/regex/],
-    required => ['float', 'Raisin::Types::Float', 0, qr/^\d\.\d+$/],
-    requires => ['int', 'Raisin::Types::Integer'],
+    optional => ['str', Str, undef, qr/regex/],
+    required => ['float', Num, 0, qr/^\d\.\d+$/],
+    requires => ['int', Int],
 );
 my @values = (
-    [[['array']], 'scalar'],
     [qw(invalid regex)],
     [12, '1.2000'],
     [qw(digit 123)]
@@ -45,8 +44,7 @@ while (my @param = splice @types, 0, 2) {
 
     my @expected = (undef, 1);
     for my $v (@{ $values[$index] }) {
-        is $param->validate(\$v), shift @expected,
-            $param->type->name . ': ' . $param->name . " [$v]";
+        is $param->validate(\$v), shift @expected, "validate $v: ${\$param->type->name}";
     }
     $index++;
 }
