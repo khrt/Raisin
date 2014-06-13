@@ -36,16 +36,16 @@ sub new {
 }
 
 sub _build_regex {
-    my ($self, %args) = @_;
+    my $self = shift;
     return $self->path if ref($self->path) eq 'Regexp';
 
     my $PAT = '(.?)([:*?])(\w+)';
     my $regex =  $self->path;
     $regex =~ s#$PAT#$self->_rep_regex($1, $2, $3)#eg;
     $regex =~ s/[{}]//g;
-    $regex .= '/?' if $regex !~ m#/$#;
-    $regex .= '(?<format>\.\w+)?'; # add optional FORMAT
-    $regex .= '$';# unless $self->bridge; # XXX XXX XXX
+    #NOTE: temporarly disabled: $regex .= '/?' if $regex !~ m#/$#;
+    $regex .= '(?<format>\.\w+)?';
+    $regex .= '$';
 
     qr/^$regex/;
 }
@@ -56,7 +56,7 @@ sub _rep_regex {
     my ($a, $b, $r) = ("(?<$token>", ')', undef);
     for ($switch) {
         if ($_ eq ':' || $_ eq '?') {
-            $r = $a . ($self->check->{$token} // '[^\/]+') . $b;
+            $r = $a . ($self->check->{$token} // '[^\/.]+') . $b;
         }
         if ($_ eq '*') {
             $r = $a . '.+' . $b;
@@ -72,13 +72,14 @@ sub _rep_regex {
 sub match {
     my ($self, $method, $path) = @_;
 
-    return if !$method || $method ne $self->method;
-    return if not (my @matched = $path =~ $self->regex);
-
     $self->{format} = undef;
     $self->{named} = undef;
 
-    my %named = map { $_ => $+{$_} } keys %+;
+    return if !$method || $method ne $self->method;
+    return if not (my @matched = $path =~ $self->regex);
+
+    my %captured = %+;
+    my %named = map { $_ => $+{$_} } keys %captured;
 
     if ($named{format}) {
         my $format = delete $named{format};
