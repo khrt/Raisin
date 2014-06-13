@@ -19,7 +19,7 @@ our @EXPORT = qw(
 
     namespace route_param params
     req res param session
-    delete get head options patch post put
+    del get head options patch post put
 );
 
 my $app;
@@ -92,7 +92,7 @@ sub route_param {
 #
 # Actions
 #
-sub delete  { $app->add_route('DELETE',  namespace(), %SETTINGS, @_) }
+sub del     { $app->add_route('DELETE',  namespace(), %SETTINGS, @_) }
 sub get     { $app->add_route('GET',     namespace(), %SETTINGS, @_) }
 sub head    { $app->add_route('HEAD',    namespace(), %SETTINGS, @_) }
 sub options { $app->add_route('OPTIONS', namespace(), %SETTINGS, @_) }
