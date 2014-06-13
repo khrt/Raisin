@@ -14,19 +14,27 @@ use Raisin::Types;
 
 my $VERSION = 1;
 my $NAME = 'Raisin';
-my %VARIABLES = {};
+
+my %VARIABLES = (
+    name => {
+        key => 'iamakey',
+        data => 'somedata',
+        extra => 'someextradata',
+    },
+);
 
 namespace api => sub {
     get grape => sub { 'Grape!' };
+    get raisin => sub {
+        {
+            version => $VERSION,
+            name => $NAME,
+            variables => \%VARIABLES,
+        }
+    };
 
-    namespace raisin => sub {
-        get sub {
-            {
-                version => $VERSION,
-                name => $NAME,
-                variables => \%VARIABLES,
-            }
-        };
+    namespace sample => sub {
+        get sub { \%VARIABLES };
 
         params [
             requires => ['name', 'Raisin::Types::String'],
@@ -42,6 +50,11 @@ namespace api => sub {
 
         route_param name => 'Raisin::Types::String',
         sub {
+            get sub {
+                my $params = shift;
+                { data => $VARIABLES{ $params->{name} } }
+            };
+
             params [
                 optional => ['data', 'Raisin::Types::Scalar'],
                 optional => ['extra', 'Raisin::Types::Scalar'],
@@ -60,3 +73,5 @@ namespace api => sub {
         };
     };
 };
+
+run;
