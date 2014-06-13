@@ -313,7 +313,7 @@ Define a route parameter as a namespace C<route_param>.
 
     route_param id => 'Raisin::Types::Integer', sub { ... };
 
-=head2 params, delete, get, patch, post, put
+=head2 params, del, get, patch, post, put
 
 It is are shortcuts to C<route> restricted to the corresponding HTTP method.
 
@@ -333,7 +333,7 @@ Where only C<subroutine> is required.
 
     get sub { 'GET' };
 
-    delete 'all' => sub { 'OK' };
+    del 'all' => sub { 'OK' };
 
     params [
         required => ['id', 'Raisin::Types::Integer'],

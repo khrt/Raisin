@@ -93,7 +93,7 @@ Define a route parameter as a namespace `route_param`.
 
     route_param id => 'Raisin::Types::Integer', sub { ... };
 
-## params, delete, get, patch, post, put
+## params, del, get, patch, post, put
 
 It is are shortcuts to `route` restricted to the corresponding HTTP method.
 
@@ -107,7 +107,7 @@ Where only `subroutine` is required.
 
     get sub { 'GET' };
 
-    delete 'all' => sub { 'OK' };
+    del 'all' => sub { 'OK' };
 
     params [
         required => ['id', 'Raisin::Types::Integer'],
