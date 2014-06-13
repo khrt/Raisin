@@ -39,7 +39,7 @@ my $json_app = eval {
 
 test_psgi $json_app, sub {
     my $cb  = shift;
-    my $res = $cb->(GET '/1/');
+    my $res = $cb->(GET '/1');
     is($res->content, 'Level 1', 'Level 1');
 };
 
