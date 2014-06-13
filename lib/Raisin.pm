@@ -12,7 +12,7 @@ use Raisin::Routes;
 
 use Raisin::Util;
 
-use constant DEFAULT_SERIALIZER => 'Raisin::Plugin::Format::TEXT';
+use constant DEFAULT_SERIALIZER => 'Raisin::Plugin::Format::YAML';
 
 our $VERSION = '0.30';
 
@@ -91,7 +91,7 @@ sub psgi {
     my $req = $self->req(Raisin::Request->new($self, $env));
     my $res = $self->res(Raisin::Response->new($self));
 
-    # Build API docs if needed
+    # Build API docs if could
     if ($self->can('build_api_docs')) {
         $self->build_api_docs;
     }
