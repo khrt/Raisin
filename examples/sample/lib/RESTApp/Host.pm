@@ -43,7 +43,7 @@ namespace host => sub {
             { data => UseCase::Host::edit($params->{id}, $params) }
         };
 
-        delete => sub {
+        del sub {
             my $params = shift;
             { success => UseCase::Host::delete($params->{id}) }
         }
