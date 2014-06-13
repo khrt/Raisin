@@ -2,30 +2,35 @@ package Raisin::Attributes;
 
 use strict;
 use warnings;
-no warnings 'redefine';
 
 sub import {
+    my $class = shift;
     my $caller = caller;
-    if (not $caller->can('has')) {
-        no strict 'refs';
-        *{"${caller}::has"} = sub { _attr($caller, @_) };
+
+    return if $class ne __PACKAGE__;
+
+    no strict 'refs';
+    no warnings 'redefine';
+
+    *{"${caller}::has"} = sub { __has($caller, @_) };
+    #*{"${caller}::has_many"} = sub { __has_many($caller, @_) };
+}
+
+sub __has_many {
+    my ($class, @names) = @_;
+    for (@names) {
+        __has($class, $_);
     }
 }
 
-sub _attr {
+sub __has {
     my ($class, $name, $default) = @_;
 
-    my $attr;
-    if (ref $default eq 'CODE') {
-        $attr = $default;
-    }
-    else {
-        $attr = sub {
-            my ($self, $value) = @_;
-            $self->{$name} = $value if defined $value;
-            $self->{$name} // $default;
-        };
-    }
+    my $attr = sub {
+        my ($self, $value) = @_;
+        $self->{$name} = $value if defined $value;
+        $self->{$name} // $default;
+    };
 
     no strict 'refs';
     *{"${class}::$name"} = $attr;
@@ -42,9 +47,6 @@ Raisin::Attributes - Simple attributes accessors for Raisin.
 =head1 SYNOPSIS
 
     use Raisin::Attributes;
-
-    has hello => sub { 'hello' };
-    say $self->hello; # -> hello
 
     has 'new';
     say $self->new; # -> undef
