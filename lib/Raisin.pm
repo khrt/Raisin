@@ -225,7 +225,7 @@ Raisin - REST-like API web micro-framework for Perl.
 =head1 SYNOPSIS
 
     use Raisin::API;
-    use Raisin::Types;
+    use Standard::Types qw(Int Str);
 
     my %USERS = (
         1 => {
@@ -243,8 +243,8 @@ Raisin - REST-like API web micro-framework for Perl.
     namespace user => sub {
         params [
             #required/optional => [name, type, default, regex]
-            optional => ['start', 'Raisin::Types::Integer', 0],
-            optional => ['count', 'Raisin::Types::Integer', 10],
+            optional => ['start', Int, 0],
+            optional => ['count', Int, 10],
         ],
         get => sub {
             my $params = shift;
@@ -269,9 +269,9 @@ Raisin - REST-like API web micro-framework for Perl.
         };
 
         params [
-            required => ['name', 'Raisin::Types::String'],
-            required => ['password', 'Raisin::Types::String'],
-            optional => ['email', 'Raisin::Types::String', undef, qr/.+\@.+/],
+            required => ['name', Str],
+            required => ['password', Str],
+            optional => ['email', Str, undef, qr/.+\@.+/],
         ],
         post => sub {
             my $params = shift;
@@ -282,7 +282,7 @@ Raisin - REST-like API web micro-framework for Perl.
             { success => 1 }
         };
 
-        route_param 'id' => 'Raisin::Types::Integer',
+        route_param id => Int,
         sub {
             get sub {
                 my $params = shift;
@@ -311,7 +311,7 @@ Adds a route to application.
 
 Define a route parameter as a namespace C<route_param>.
 
-    route_param id => 'Raisin::Types::Integer', sub { ... };
+    route_param id => Int, sub { ... };
 
 =head2 params, del, get, patch, post, put
 
@@ -336,14 +336,14 @@ Where only C<subroutine> is required.
     del 'all' => sub { 'OK' };
 
     params [
-        required => ['id', 'Raisin::Types::Integer'],
-        optional => ['key', 'Raisin::Types::String'],
+        required => ['id', Int],
+        optional => ['key', Str],
     ],
     get => sub { 'GET' };
 
     params [
-        required => ['id', 'Raisin::Types::Integer'],
-        optional => ['name', 'Raisin::Types::String'],
+        required => ['id', Int],
+        optional => ['name', Str],
     ],
     put => 'all' => sub {
         'PUT'
@@ -488,8 +488,8 @@ Parameters can be C<required> and C<optional>. C<optional> parameters can have a
 default value.
 
     get params => [
-        required => ['name', 'Raisin::Types::String'],
-        optional => ['number', 'Raisin::Types::Integer', 10],
+        required => ['name', Str],
+        optional => ['number', Int, 10],
     ],
     sub {
         my $params = shift;
@@ -523,30 +523,14 @@ Optional parameters can have a default value.
 
 =head2 Types
 
-Here is built-in types
+Raisin supports Moo(se)-compatible type constraint
+so you can any of the L<Moose>, L<Moo> or L<Type::Tiny> type constraints.
 
-=over
+By default L<Raisin> depends on L<Type::Tiny> and it's L<Types::Standard>
+type contraint library.
 
-=item *
-
-L<Raisin::Types::Float>
-
-=item *
-
-L<Raisin::Types::Integer>
-
-=item *
-
-L<Raisin::Types::String>
-
-=item *
-
-L<Raisin::Types::Scalar>
-
-=back
-
-You can create your own types as well. See examples in L<Raisin::Types>.
-Also see L<Raisin::Types::Base>.
+You can create your own types as well.
+See L<Type::Tiny::Manual> and L<Moose::Manual::Types>.
 
 =head1 HOOKS
 

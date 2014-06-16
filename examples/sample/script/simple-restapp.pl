@@ -9,7 +9,7 @@ use lib ("$Bin/../lib", "$Bin/../../../lib");
 use List::Util qw(max);
 
 use Raisin::API;
-use Raisin::Types;
+use Types::Standard qw(Int Str);
 
 use RESTApp;
 use UseCase::Host;
@@ -22,8 +22,8 @@ api_format 'yaml';
 namespace api => sub {
     namespace user => sub {
         params [
-            optional => ['start', 'Raisin::Types::Integer', 0, qr/^\d+$/],
-            optional => ['count', 'Raisin::Types::Integer', 10, qr/^\d+$/],
+            optional => ['start', Int, 0, qr/^\d+$/],
+            optional => ['count', Int, 10, qr/^\d+$/],
         ],
         get => sub {
             my $params = shift;
@@ -32,16 +32,16 @@ namespace api => sub {
         };
 
         params [
-            required => ['name', 'Raisin::Types::String'],
-            required => ['password', 'Raisin::Types::String'],
-            optional => ['email', 'Raisin::Types::String', undef, qr/prev-regex/],
+            required => ['name', Str],
+            required => ['password', Str],
+            optional => ['email', Str, undef, qr/prev-regex/],
         ],
         post => sub {
             my $params = shift;
             { success => UseCase::User::create(%$params) }
         };
 
-        route_param id => 'Raisin::Types::Integer',
+        route_param id => Int,
         sub {
             get sub {
                 my $params = shift;
@@ -49,8 +49,8 @@ namespace api => sub {
             };
 
             params [
-                optional => ['password', 'Raisin::Types::String'],
-                optional => ['email', 'Raisin::Types::String', undef, qr/next-regex/],
+                optional => ['password', Str],
+                optional => ['email', Str, undef, qr/next-regex/],
             ],
             put => sub {
                 my $params = shift;
@@ -73,8 +73,8 @@ namespace api => sub {
 
     namespace host => sub {
         params [
-            optional => ['start', 'Raisin::Types::Integer', 0, qr/^\d+$/],
-            optional => ['count', 'Raisin::Types::Integer', 10, qr/^\d+$/],
+            optional => ['start', Int, 0, qr/^\d+$/],
+            optional => ['count', Int, 10, qr/^\d+$/],
         ],
         get => sub {
             my $params = shift;
@@ -83,16 +83,16 @@ namespace api => sub {
         };
 
         params [
-            required => ['name', 'Raisin::Types::String'],
-            required => ['user_id', 'Raisin::Types::Integer'],
-            optional => ['state', 'Raisin::Types::String']
+            required => ['name', Str],
+            required => ['user_id', Int],
+            optional => ['state', Str]
         ],
         post => sub {
             my $params = shift;
             { success => UseCase::Host::create(%$params) }
         };
 
-        route_param id => 'Raisin::Types::Integer',
+        route_param id => Int,
         sub {
             get sub {
                 my $params = shift;
@@ -100,7 +100,7 @@ namespace api => sub {
             };
 
             params [
-                required => ['state', 'Raisin::Types::String'],
+                required => ['state', Str],
             ],
             put => sub {
                 my $params = shift;

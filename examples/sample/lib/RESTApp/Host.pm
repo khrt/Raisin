@@ -4,13 +4,14 @@ use strict;
 use warnings;
 
 use Raisin::API;
-use Raisin::Types;
 use UseCase::Host;
+
+use Types::Standard qw(Int Str);
 
 namespace host => sub {
     params [
-        optional => ['start', 'Raisin::Types::Integer', 0, qr/^\d+$/],
-        optional => ['count', 'Raisin::Types::Integer', 10, qr/^\d+$/],
+        optional => ['start', Int, 0, qr/^\d+$/],
+        optional => ['count', Int, 10, qr/^\d+$/],
     ],
     get => sub {
         my $params = shift;
@@ -19,16 +20,16 @@ namespace host => sub {
     };
 
     params [
-        required => ['name', 'Raisin::Types::String'],
-        required => ['user_id', 'Raisin::Types::Integer'],
-        optional => ['state', 'Raisin::Types::String']
+        required => ['name', Str],
+        required => ['user_id', Int],
+        optional => ['state', Str]
     ],
     post => sub {
         my $params = shift;
         { success => UseCase::Host::create(%$params) }
     };
 
-    route_param id => 'Raisin::Types::Integer',
+    route_param id => Int,
     sub {
         get sub {
             my $params = shift;
@@ -36,7 +37,7 @@ namespace host => sub {
         };
 
         params [
-            required => ['state', 'Raisin::Types::String'],
+            required => ['state', Str],
         ],
         put => sub {
             my $params = shift;

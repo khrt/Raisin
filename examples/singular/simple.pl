@@ -10,7 +10,7 @@ use List::Util qw(max);
 use lib "$FindBin::Bin/../../lib"; # ->Raisin/lib
 
 use Raisin::API;
-use Raisin::Types;
+use Types::Standard qw(Any Str);
 
 my $VERSION = 1;
 my $NAME = 'Raisin';
@@ -37,10 +37,10 @@ namespace api => sub {
         get sub { \%VARIABLES };
 
         params [
-            requires => ['name', 'Raisin::Types::String'],
-            requires => ['key', 'Raisin::Types::String'],
-            optional => ['data', 'Raisin::Types::Scalar'],
-            optional => ['extra', 'Raisin::Types::Scalar'],
+            requires => ['name', Str],
+            requires => ['key', Str],
+            optional => ['data', Any],
+            optional => ['extra', Any],
         ],
         post => sub {
             my $params = shift;
@@ -48,7 +48,7 @@ namespace api => sub {
             { success => 1 }
         };
 
-        route_param name => 'Raisin::Types::String',
+        route_param name => Str,
         sub {
             get sub {
                 my $params = shift;
@@ -56,8 +56,8 @@ namespace api => sub {
             };
 
             params [
-                optional => ['data', 'Raisin::Types::Scalar'],
-                optional => ['extra', 'Raisin::Types::Scalar'],
+                optional => ['data', Any],
+                optional => ['extra', Any],
             ],
             put => sub {
                 my $params = shift;

@@ -7,7 +7,6 @@ use Test::More;
 
 use lib "$Bin/../../lib";
 
-use Raisin::Types;
 use Raisin::Param;
 use Types::Standard qw(ScalarRef Any Num Str Int);
 

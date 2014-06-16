@@ -9,7 +9,7 @@ use lib "$Bin/../../lib";
 
 use Raisin::Routes;
 use Raisin::Routes::Endpoint;
-use Raisin::Types;
+use Types::Standard qw(Str);
 
 my $r = Raisin::Routes->new;
 
@@ -18,8 +18,8 @@ ok $r->add(POST => '/dump', sub {'DUMP'}), 'add /dump';
 ok $r->add(
         POST   => '/person(?<format>\.\w+)?',
         params => [
-            requires => ['name',  'Raisin::Types::String'],
-            optional => ['email', 'Raisin::Types::String']
+            requires => ['name',  Str],
+            optional => ['email', Str]
         ],
         sub {'PERSON'}
     ),
