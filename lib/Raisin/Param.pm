@@ -56,11 +56,14 @@ sub validate {
         # Type check
         eval { $v = $self->type->($v) } || do {
             my $e = $@;
+            $e || last;
+
             unless ($quiet) {
                 #TODO: $self->app->log($e);
                 carp "CHECK: `$self->{name}` has invalid value `$v`!";
                 carp $e;
             }
+
             return;
         };
 
