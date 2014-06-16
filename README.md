@@ -270,7 +270,7 @@ Optional parameters can have a default value.
 ## Types
 
 Raisin supports Moo(se)-compatible type constraint
-so you can any of the [Moose](https://metacpan.org/pod/Moose), [Moo](https://metacpan.org/pod/Moo) or [Type::Tiny](https://metacpan.org/pod/Type::Tiny) type constraints.
+so you can use any of the [Moose](https://metacpan.org/pod/Moose), [Moo](https://metacpan.org/pod/Moo) or [Type::Tiny](https://metacpan.org/pod/Type::Tiny) type constraints.
 
 By default [Raisin](https://metacpan.org/pod/Raisin) depends on [Type::Tiny](https://metacpan.org/pod/Type::Tiny) and it's [Types::Standard](https://metacpan.org/pod/Types::Standard)
 type contraint library.

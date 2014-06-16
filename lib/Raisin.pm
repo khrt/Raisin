@@ -14,7 +14,7 @@ use Raisin::Util;
 
 use constant DEFAULT_SERIALIZER => 'Raisin::Plugin::Format::YAML';
 
-our $VERSION = '0.30';
+our $VERSION = '0.35';
 
 sub new {
     my ($class, %args) = @_;
@@ -524,7 +524,7 @@ Optional parameters can have a default value.
 =head2 Types
 
 Raisin supports Moo(se)-compatible type constraint
-so you can any of the L<Moose>, L<Moo> or L<Type::Tiny> type constraints.
+so you can use any of the L<Moose>, L<Moo> or L<Type::Tiny> type constraints.
 
 By default L<Raisin> depends on L<Type::Tiny> and it's L<Types::Standard>
 type contraint library.

@@ -1,4 +1,6 @@
-0.31 Example
+0.35 Type::Tiny
+    - NEW Migrate to `Type::Tiny`, `Moo`, `Moose` compatible type contraint;
+    - Some code cleanup & refactoring;
     - NEW example application (see examples/sample);
     - FIX cut path extensions;
 
