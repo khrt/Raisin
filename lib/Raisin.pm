@@ -225,7 +225,7 @@ Raisin - REST-like API web micro-framework for Perl.
 =head1 SYNOPSIS
 
     use Raisin::API;
-    use Standard::Types qw(Int Str);
+    use Types::Standard qw(Int Str);
 
     my %USERS = (
         1 => {
@@ -248,14 +248,14 @@ Raisin - REST-like API web micro-framework for Perl.
         ],
         get => sub {
             my $params = shift;
-            my ($start, $count) = ($params->{start}, $params->{count});
 
             my @users
                 = map { { id => $_, %{ $USERS{$_} } } }
                   sort { $a <=> $b } keys %USERS;
 
-            $start = $start > scalar @users ? scalar @users : $start;
-            $count = $count > scalar @users ? scalar @users : $count;
+            my $max_count = scalar(@users) - 1;
+            my $start = $params->{start} > $max_count ? $max_count : $params->{start};
+            my $count = $params->{count} > $max_count ? $max_count : $params->{count};
 
             my @slice = @users[$start .. $count];
             { data => \@slice }
