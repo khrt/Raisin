@@ -19,7 +19,7 @@ my %NEW_USER = (
 );
 my @USER_IDS;
 
-my $app = Plack::Util::load_psgi("$Bin/../../examples/singular/routes.pl");
+my $app = Plack::Util::load_psgi("$Bin/../../examples/simple/routes.pl");
 
 test_psgi $app, sub {
     my $cb  = shift;
