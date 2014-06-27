@@ -14,7 +14,7 @@ use Raisin::Util;
 
 use constant DEFAULT_SERIALIZER => 'Raisin::Plugin::Format::YAML';
 
-our $VERSION = '0.35';
+our $VERSION = '0.36';
 
 sub new {
     my ($class, %args) = @_;
@@ -81,11 +81,6 @@ sub run {
     # load fallback logger (Raisin::Logger)
     $self->load_plugin('Logger', fallback => 1);
 
-    # Build API docs if could
-    if ($self->can('build_api_docs')) {
-        $self->build_api_docs;
-    }
-
     return $app;
 }
 
@@ -95,6 +90,11 @@ sub psgi {
     # Diffrent for each response
     my $req = $self->req(Raisin::Request->new($self, $env));
     my $res = $self->res(Raisin::Response->new($self));
+
+    # Build API docs
+    if ($self->can('build_api_docs')) {
+        $self->build_api_docs;
+    }
 
     # HOOK Before
     $self->hook('before')->($self);
