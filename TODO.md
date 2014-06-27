@@ -1,8 +1,4 @@
 
-Types
-=====
-Use Type::Tiny instead of my own type system.
-
 Tests
 =====
 Parameters coercion:
@@ -20,6 +16,10 @@ Backlog
   See Plack::Middleware::Auth::AccessToken.
 
 ---
+
+DONE: Types
+===========
+Use Type::Tiny instead of my own type system.
 
 DONE: Default logger
 ==============
