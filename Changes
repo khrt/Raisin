@@ -1,3 +1,6 @@
+0.36 Bug fixes
+    - Fix broken `basePath` in `APIDocs` plugin;
+
 0.35 Type::Tiny
     - NEW Migrate to `Type::Tiny`, `Moo`, `Moose` compatible type contraint;
     - Some code cleanup & refactoring;
