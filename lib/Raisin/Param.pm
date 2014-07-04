@@ -19,10 +19,17 @@ sub new {
     my $self = bless {}, $class;
 
     $self->{named} = $args{named};
-    $self->{required} = $args{param}[0] =~ /^require(s|d)$/ ? 1 : 0;
+    $self->{required} = $args{type} =~ /^require(s|d)$/ ? 1 : 0;
 
-    @$self{qw(name type default regex)} = @{ $args{param}[1] };
+    #$self->_parse($args{param});
+
+    @$self{qw(name type default regex)} = @{ $args{spec} };
     $self;
+}
+
+sub _parse {
+    my ($self, $param) = @_;
+    # TODO: hashref/arrayref
 }
 
 sub validate {

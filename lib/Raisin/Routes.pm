@@ -4,9 +4,10 @@ use strict;
 use warnings;
 
 use Carp;
+use List::Util 'pairs';
+use Raisin::Attributes;
 use Raisin::Param;
 use Raisin::Routes::Endpoint;
-use Raisin::Attributes;
 
 has 'cache' => {};
 has 'list' => {};
@@ -45,12 +46,13 @@ sub add {
     }
 
     my @params;
-    if (@args && (my %args = @args)) {
-        foreach my $key (qw(params named)) {
-            for (my $i = 0; $i < scalar @{ $args{$key} || [] }; $i += 2) {
+    if (my %args = @args) {
+        for my $key (qw(params named)) {
+            for my $p (pairs @{ $args{$key} }) {
                 push @params, Raisin::Param->new(
-                    named => $key eq 'named' ? 1 : 0,
-                    param => [$args{$key}[$i], $args{$key}[$i + 1]]
+                    named => $key eq 'named',
+                    type => $p->[0], # -> requires/optional
+                    spec => $p->[1], # -> ['name', Int]
                 );
             }
         }
