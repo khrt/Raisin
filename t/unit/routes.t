@@ -13,6 +13,15 @@ use Types::Standard qw(Str);
 
 my $r = Raisin::Routes->new;
 
+#
+# TODO:
+#
+#   get sub {};
+#   get '/foo' => sub {};
+#   params [...], get => sub {};
+#   params [...], get '/bar' => sub {};
+#
+
 ok $r->add(POST => '/dump/:id', sub {'DUMP'}), 'add /dump/:id';
 ok $r->add(POST => '/dump', sub {'DUMP'}), 'add /dump';
 ok $r->add(

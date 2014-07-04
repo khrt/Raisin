@@ -31,7 +31,8 @@ while (my @param = splice @types, 0, 2) {
 
     my $param = Raisin::Param->new(
         named => $key eq 'named' ? 1 : 0,
-        param => \@param
+        type => $param[0],
+        spec => $param[1],
     );
     isa_ok $param, 'Raisin::Param';
 
