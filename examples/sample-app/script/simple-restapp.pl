@@ -19,8 +19,8 @@ plugin 'APIDocs';
 plugin 'Logger', outputs => [['Screen', min_level => 'debug']];
 api_format 'yaml';
 
-namespace api => sub {
-    namespace user => sub {
+resource api => sub {
+    resource user => sub {
         params [
             optional => ['start', Int, 0, qr/^\d+$/],
             optional => ['count', Int, 10, qr/^\d+$/],
@@ -29,6 +29,12 @@ namespace api => sub {
             my $params = shift;
             my @users = UseCase::User::list(%$params);
             { data => RESTApp::paginate(\@users, $params) }
+        };
+
+        get 'all' => sub {
+            my $params = shift;
+            my @users = UseCase::User::list(%$params);
+            { data => \@users }
         };
 
         params [
@@ -57,7 +63,7 @@ namespace api => sub {
                 { data => UseCase::User::edit($params->{id}, $params) }
             };
 
-            namespace bump => sub {
+            resource bump => sub {
                 get sub {
                     my $params = shift;
                     { data => UseCase::User::show($params->{id})->{bumped} }
@@ -71,7 +77,7 @@ namespace api => sub {
         };
     };
 
-    namespace host => sub {
+    resource host => sub {
         params [
             optional => ['start', Int, 0, qr/^\d+$/],
             optional => ['count', Int, 10, qr/^\d+$/],
