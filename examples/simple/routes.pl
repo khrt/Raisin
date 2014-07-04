@@ -13,6 +13,7 @@ use Raisin::API;
 use Types::Standard qw(Int Str);
 
 # GET  /user
+# GET  /user/all
 # POST /user
 # GET  /user/<id>
 # PUT  /user/<id>
