@@ -47,6 +47,7 @@ sub edit {
     my ($id, %params) = @_;
 
     foreach my $p (keys %params) {
+        next unless $params{$p};
         $HOSTS{$id}{$p} = $params{$p};
     }
 

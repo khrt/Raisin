@@ -42,6 +42,7 @@ sub edit {
     my ($id, %params) = @_;
 
     foreach my $p (keys %params) {
+        next unless $params{$p};
         $USERS{$id}{$p} = $params{$p};
     }
 
