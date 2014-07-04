@@ -1,4 +1,9 @@
 
+* `declared` keyword;
+  * applicable to `param`;
+  * include missing keyword;
+
+
 Tests
 =====
 Parameters coercion:
@@ -6,14 +11,6 @@ Parameters coercion:
   out: `Accept`, `extension` -> JSON, YAML, TEXT;
 
 Make test application and store it in `t/`.
-
-Backlog
-=======
-* keyword `declared` applicable to `param`;
-* token auth:
-  * Plack middleware;
-  * Raisin plugin;
-  See Plack::Middleware::Auth::AccessToken.
 
 ---
 
