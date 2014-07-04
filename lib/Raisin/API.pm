@@ -17,7 +17,9 @@ our @EXPORT = qw(
     before before_validation
     after_validation after
 
-    namespace route_param params
+    resource namespace
+    route_param params
+
     req res param session
     del get head options patch post put
 );
@@ -60,9 +62,9 @@ sub after_validation { $app->add_hook('after_validation', shift) }
 sub after { $app->add_hook('after', shift) }
 
 #
-# Namespace DSL
+# Resource DSL
 #
-sub namespace {
+sub resource {
     my ($name, $block, %args) = @_;
 
     if ($name) {
@@ -83,22 +85,23 @@ sub namespace {
 
     (join '/', @NS) || '/';
 }
+sub namespace { resource(@_) }
 
 sub route_param {
     my ($param, $type, $block) = @_;
-    namespace(":$param", $block, named => [required => [$param, $type]]);
+    resource(":$param", $block, named => [required => [$param, $type]]);
 }
 
 #
 # Actions
 #
-sub del     { $app->add_route('DELETE',  namespace(), %SETTINGS, @_) }
-sub get     { $app->add_route('GET',     namespace(), %SETTINGS, @_) }
-sub head    { $app->add_route('HEAD',    namespace(), %SETTINGS, @_) }
-sub options { $app->add_route('OPTIONS', namespace(), %SETTINGS, @_) }
-sub patch   { $app->add_route('PATCH',   namespace(), %SETTINGS, @_) }
-sub post    { $app->add_route('POST',    namespace(), %SETTINGS, @_) }
-sub put     { $app->add_route('PUT',     namespace(), %SETTINGS, @_) }
+sub del     { $app->add_route('DELETE',  resource(), %SETTINGS, @_) }
+sub get     { $app->add_route('GET',     resource(), %SETTINGS, @_) }
+sub head    { $app->add_route('HEAD',    resource(), %SETTINGS, @_) }
+sub options { $app->add_route('OPTIONS', resource(), %SETTINGS, @_) }
+sub patch   { $app->add_route('PATCH',   resource(), %SETTINGS, @_) }
+sub post    { $app->add_route('POST',    resource(), %SETTINGS, @_) }
+sub put     { $app->add_route('PUT',     resource(), %SETTINGS, @_) }
 
 sub params {
     my ($params, $method, @other) = @_;
@@ -110,7 +113,7 @@ sub params {
     }
     push @args, $code;
 
-    $app->add_route(uc($method), namespace(), %SETTINGS, params => $params, @args);
+    $app->add_route(uc($method), resource(), %SETTINGS, params => $params, @args);
 }
 
 #
