@@ -28,7 +28,7 @@ sub create {
     my %params = @_;
 
     my $id = max(keys %USERS) + 1;
-    $USERS{$id} = %params;
+    $USERS{$id} = \%params;
 
     $id;
 }
@@ -56,7 +56,7 @@ sub delete {
 
 sub bump {
     my $id = shift;
-    $USERS{$id}{bumped}++;
+    ++$USERS{$id}{bumped};
 }
 
 1;

@@ -23,7 +23,7 @@ namespace user => sub {
     params [
         required => ['name', Str],
         required => ['password', Str],
-        optional => ['email', Str, undef, qr/prev-regex/],
+        optional => ['email', Str],
     ],
     post => sub {
         my $params = shift;
@@ -39,11 +39,11 @@ namespace user => sub {
 
         params [
             optional => ['password', Str],
-            optional => ['email', Str, undef, qr/next-regex/],
+            optional => ['email', Str],
         ],
         put => sub {
             my $params = shift;
-            { data => UseCase::User::edit($params->{id}, $params) }
+            { data => UseCase::User::edit($params->{id}, %$params) }
         };
 
         namespace bump => sub {

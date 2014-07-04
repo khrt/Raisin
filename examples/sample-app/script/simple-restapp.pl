@@ -11,9 +11,25 @@ use List::Util qw(max);
 use Raisin::API;
 use Types::Standard qw(Int Str);
 
-use RESTApp;
 use UseCase::Host;
 use UseCase::User;
+
+# Utils
+sub paginate {
+    my ($data, $params) = @_;
+
+    my $max_count = scalar(@$data) - 1;
+    my $start = _return_max($params->{start}, $max_count);
+    my $count = _return_max($params->{count}, $max_count);
+
+    my @slice = @$data[$start .. $count];
+    \@slice;
+}
+
+sub _return_max {
+    my ($value, $max) = @_;
+    $value > $max ? $max : $value;
+}
 
 plugin 'APIDocs';
 plugin 'Logger', outputs => [['Screen', min_level => 'debug']];
@@ -28,7 +44,7 @@ resource api => sub {
         get => sub {
             my $params = shift;
             my @users = UseCase::User::list(%$params);
-            { data => RESTApp::paginate(\@users, $params) }
+            { data => paginate(\@users, $params) }
         };
 
         get 'all' => sub {
@@ -40,7 +56,7 @@ resource api => sub {
         params [
             required => ['name', Str],
             required => ['password', Str],
-            optional => ['email', Str, undef, qr/prev-regex/],
+            optional => ['email', Str, undef],
         ],
         post => sub {
             my $params = shift;
@@ -56,11 +72,11 @@ resource api => sub {
 
             params [
                 optional => ['password', Str],
-                optional => ['email', Str, undef, qr/next-regex/],
+                optional => ['email', Str],
             ],
             put => sub {
                 my $params = shift;
-                { data => UseCase::User::edit($params->{id}, $params) }
+                { data => UseCase::User::edit($params->{id}, %$params) }
             };
 
             resource bump => sub {
@@ -85,7 +101,7 @@ resource api => sub {
         get => sub {
             my $params = shift;
             my @hosts = UseCase::Host::list(%$params);
-            { data => RESTApp::paginate(\@hosts, $params) }
+            { data => paginate(\@hosts, $params) }
         };
 
         params [
