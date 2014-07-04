@@ -33,14 +33,14 @@ sub message {
 
     for (@messages) {
         my $t = time;
-        my $ts = strftime "%d/%b/%Y %H:%M:%S", localtime $t;
+        my $ts = strftime "%Y-%m-%dT%H:%M:%S", localtime $t;
         $ts .= sprintf ".%03d", ($t - int($t)) * 1000;
 
         my $str = ref($_) ? Dumper($_) : $_;
 
         $self->{logger}->log(
             level   => $level,
-            message => "$ts: $str\n",
+            message => "$ts $str\n",
         );
     }
 }
