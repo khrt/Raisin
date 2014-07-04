@@ -116,7 +116,7 @@ sub psgi {
             }
 
             # Log
-            $self->log(info => $req->method . q{ } . $route->path);
+            #$self->log(info => $req->method . q{ } . $route->path);
 
             # HOOK Before validation
             $self->hook('before_validation')->($self);
