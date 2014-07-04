@@ -11,8 +11,9 @@ has 'required';
 
 has 'default';
 has 'name';
-has 'regex';
 has 'type';
+has 'regex';
+has 'desc';
 
 sub new {
     my ($class, %args) = @_;
@@ -21,15 +22,22 @@ sub new {
     $self->{named} = $args{named};
     $self->{required} = $args{type} =~ /^require(s|d)$/ ? 1 : 0;
 
-    #$self->_parse($args{param});
+    $self->_parse($args{spec});
 
-    @$self{qw(name type default regex)} = @{ $args{spec} };
     $self;
 }
 
 sub _parse {
-    my ($self, $param) = @_;
-    # TODO: hashref/arrayref
+    my ($self, $spec) = @_;
+
+    my @keys = qw(name type default regex desc);
+
+    if (ref($spec) eq 'ARRAY') {
+        @$self{@keys} = @$spec;
+    }
+    elsif (ref($spec) eq 'HASH') {
+        $self->{$_} = $spec->{$_} for @keys;
+    }
 }
 
 sub validate {
@@ -66,7 +74,7 @@ sub validate {
         if ($e) {
             unless ($quiet) {
                 #TODO: $self->app->log($e);
-                carp "CHECK: `$self->{name}` has invalid value `$v`!";
+                carp "Param: `$self->{name}` has invalid value `$v`!";
                 carp $e;
             }
             return;
@@ -74,7 +82,7 @@ sub validate {
 
         # Param check
         if ($self->regex && $v !~ $self->regex) {
-            carp "REGEX: `$self->{name}` has invalid value `$v`!" unless $quiet;
+            carp "Param: regex failed; `$self->{name}` has invalid value `$v`!" unless $quiet;
             return;
         }
     }
