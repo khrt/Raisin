@@ -6,7 +6,6 @@ use warnings;
 use base 'Exporter';
 
 use Carp;
-use List::Util qw(pairs);
 use Raisin;
 
 my @APP_CONF_METHODS = qw(api_format api_version middleware mount plugin);
@@ -108,13 +107,13 @@ sub route_param {
 #
 # Actions
 #
-sub del     { $app->add_route('DELETE',  resource(), %SETTINGS, @_) }
-sub get     { $app->add_route('GET',     resource(), %SETTINGS, @_) }
-sub head    { $app->add_route('HEAD',    resource(), %SETTINGS, @_) }
-sub options { $app->add_route('OPTIONS', resource(), %SETTINGS, @_) }
-sub patch   { $app->add_route('PATCH',   resource(), %SETTINGS, @_) }
-sub post    { $app->add_route('POST',    resource(), %SETTINGS, @_) }
-sub put     { $app->add_route('PUT',     resource(), %SETTINGS, @_) }
+sub del     { _add_route('del', @_) }
+sub get     { _add_route('get', @_) }
+sub head    { _add_route('head', @_) }
+sub options { _add_route('options', @_) }
+sub patch   { _add_route('patch', @_) }
+sub post    { _add_route('post', @_) }
+sub put     { _add_route('put', @_) }
 
 sub desc { _add_route(desc => @_) }
 sub params { _add_route(params => @_) }
@@ -124,26 +123,27 @@ sub _add_route {
     my $code = pop @params;
 
     my %pp;
-    push(@params, undef) if scalar(@params) % 2;
-
-    for my $p (pairs(@params)) {
-        my ($k, $v) = @$p;
+    my $i = 0;
+    while ($i < scalar(@params)) {
+        my $k = $params[$i];
+        my $v = $params[$i + 1] || undef;
 
         if ($k eq 'desc' || $k eq 'params') {
             $pp{ $k } = $v;
+#            splice @params, $i, 2, '', '';
         }
-        elsif (grep { $k eq $_ } @HTTP_METHODS) {
+        elsif (grep { $k =~ /^$_$/i } @HTTP_METHODS) {
             $pp{method} = uc $k =~ /del/i ? 'delete' : $k;
             $pp{path} = $v || '';
         }
+
+        $i++;
     }
 
     my $method = delete $pp{method};
     my $path = resource();
 
     $path .= "/$pp{path}" if $pp{path};
-
-#use DDP { class => { expand => 0 } };
 
     $app->add_route($method, $path, %SETTINGS, %pp, $code);
 }
