@@ -42,14 +42,17 @@ sub build_api_docs {
                 else                              {'query'}
             };
 
-            push @params, { allowMultiple => JSON::true,
-                            defaultValue  => $p->default // JSON::false,
-                            description   => $p->desc,
-                            format        => $p->type->display_name,
-                            name          => $p->name,
-                            paramType     => $param_type,
-                            required      => $p->required ? JSON::true : JSON::false,
-                            type          => $p->type->name, };
+            push @params,
+                {
+                    allowMultiple => JSON::true,
+                    defaultValue  => $p->default // JSON::false,
+                    description   => $p->desc,
+                    format        => $p->type->display_name,
+                    name          => $p->name,
+                    paramType     => $param_type,
+                    required      => $p->required ? JSON::true : JSON::false,
+                    type          => $p->type->name,
+                };
         }
 
         my $path = $r->path;
@@ -58,23 +61,22 @@ sub build_api_docs {
         $path =~ s#:([^/]+)#{$1}#msxg;
 
         # look for namespace
-        my ($ns) = $path =~ m#^(?:/api)?(/[^/]+)#;
-
-        my %api = (
-            description => $r->desc,
-            path => $path,
-            operations => [{
-                method => $r->method,
-                nickname => $r->method . '_' . $path,
-                notes => '',
-                parameters => \@params,
-                summary => '',
-                type => '',
-            }],
-        );
+        my ($ns) = $path =~ m#^(/[^/]+)#;
 
         # -> { ns => [api, ...] }
-        push @{ $apis{$ns} }, \%api;
+        push @{ $apis{$ns} },
+            {
+                description => '',
+                path        => $path,
+                operations  => [{
+                    method     => $r->method,
+                    nickname   => $r->method . '_' . $path,
+                    notes      => '',
+                    parameters => \@params,
+                    summary    => $r->desc,
+                    type       => '',
+                }],
+            };
     }
 
     my %template = (

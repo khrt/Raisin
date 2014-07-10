@@ -29,6 +29,7 @@ namespace user => sub {
         optional => { name => 'start', type => Int, default => 0, desc => 'Pager (start)' },
         optional => { name => 'count', type => Int, default => 0, desc => 'Pager (count)' },
     ],
+    desc => 'List users',
     get => sub {
         my $params = shift;
 
@@ -44,7 +45,8 @@ namespace user => sub {
         { data => \@slice }
     };
 
-    get 'all' => sub {
+    desc 'List all users at once',
+    get => 'all' => sub {
         my @users
             = map { { id => $_, %{ $USERS{$_} } } }
               sort { $a <=> $b } keys %USERS;
@@ -56,6 +58,7 @@ namespace user => sub {
         requires => { name => 'password', type => Str, desc => 'User password' },
         optional => { name => 'email', type => Str, default => undef, regex => qr/.+\@.+/, desc => 'User email' },
     ],
+    desc => 'Create new user',
     post => sub {
         my $params = shift;
 
@@ -67,7 +70,8 @@ namespace user => sub {
 
     route_param { name => 'id', type => Int, desc => 'User ID' },
     sub {
-        get sub {
+        desc 'Show user',
+        get => sub {
             my $params = shift;
             $USERS{ $params->{id} };
         };

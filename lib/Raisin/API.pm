@@ -11,17 +11,27 @@ use Raisin;
 our @EXPORT = qw(
     run new
 
-    mount middleware
+    mount
 
-    plugin api_format api_version
+    middleware
+    plugin
 
-    before before_validation
-    after_validation after
+    api_version
+
+    api_format
+
+    before
+    before_validation
+    after_validation
+    after
 
     resource namespace
-    route_param params
+    route_param
 
     req res param session
+
+    params
+    desc
     del get head options patch post put
 );
 
@@ -120,17 +130,68 @@ sub post    { $app->add_route('POST',    resource(), %SETTINGS, @_) }
 sub put     { $app->add_route('PUT',     resource(), %SETTINGS, @_) }
 
 sub params {
+    add_route(params => @_);
+
     my ($params, $method, @other) = @_;
-    my $code = pop @other;
 
-    my @args;
-    if (scalar @other == 1) {
-        push @args, shift @other;
-    }
-    push @args, $code;
-
-    $app->add_route(uc($method), resource(), %SETTINGS, params => $params, @args);
+#    my $code = pop @other;
+#
+#    my @args;
+#    if (scalar @other == 1) {
+#        push @args, shift @other;
+#    }
+#    push @args, $code;
+#
+#    $app->add_route(uc($method), resource(), %SETTINGS, params => $params, @args);
 }
+sub desc { add_route(desc => @_) }
+
+sub add_route {
+    my @params = @_;
+
+    my $code = pop @params;
+    if (ref($code) ne 'CODE') {
+        croak 'NO CODE';
+    }
+
+    use feature 'say';
+    use DDP { class => { expand => 0 } };
+    use List::Util qw(pairs);
+
+#    p @params;
+
+    my %parsed;
+
+    push(@params, undef) if scalar(@params) % 2;
+
+    my @HTTP_METHODS = qw(del get head options patch post put);
+
+    for my $p (pairs(@params)) {
+
+        if ($p->[0] eq 'desc' || $p->[0] eq 'params') {
+            $parsed{ $p->[0] } = $p->[1];
+        }
+
+        if (grep { $p->[0] eq $_ } @HTTP_METHODS) {
+            $parsed{method} = uc $p->[0];
+
+            $parsed{additional_path} = $p->[1] || '';
+        }
+    }
+
+
+    #p %parsed;
+
+    print "--- --- ---\n";
+    my $method = delete $parsed{method};
+    my $path = resource();
+    if (my $ap = $parsed{additional_path}) {
+        $path .= '/' . $ap;
+    }
+
+    $app->add_route($method, $path, %SETTINGS, %parsed, $code);
+}
+
 
 #
 # Request and Response shortcuts

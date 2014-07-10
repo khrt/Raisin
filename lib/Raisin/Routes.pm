@@ -19,19 +19,20 @@ sub new {
     $self;
 }
 
+# @args:
+#   * [optional] named => []
+#   * [optional] params => []
+#   * [optional] path
+#   * [required] code ref
 sub add {
     my ($self, $method, $path, @args) = @_;
+#use DDP { class => { expand => 0 } };
+#p @args;
 
     if (!$method || !$path) {
         carp "Method and path are required";
         return;
     }
-
-    # @args:
-    #   * [optional] named => []
-    #   * [optional] params => []
-    #   * [optional] path
-    #   * [required] code ref
 
     my $code = pop @args;
     # Support only code as route destination
@@ -45,8 +46,9 @@ sub add {
         $path = $path . '/' . pop @args;
     }
 
-    my @params;
+    my (@params, $desc);
     if (my %args = @args) {
+        $desc = $args{desc};
         for my $key (qw(params named)) {
             for my $p (pairs @{ $args{$key} }) {
                 push @params, Raisin::Param->new(
@@ -70,8 +72,9 @@ sub add {
     my $ep
         = Raisin::Routes::Endpoint->new(
             code => $code,
-            params => \@params,
+            desc => $desc,
             method => $method,
+            params => \@params,
             path => $path,
         );
     push @{ $self->{routes} }, $ep;
