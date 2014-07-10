@@ -66,8 +66,8 @@ sub build_api_docs {
         # -> { ns => [api, ...] }
         push @{ $apis{$ns} },
             {
+                path => $path,
                 description => '',
-                path        => $path,
                 operations  => [{
                     method     => $r->method,
                     nickname   => $r->method . '_' . $path,

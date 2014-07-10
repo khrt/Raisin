@@ -75,6 +75,14 @@ namespace user => sub {
             my $params = shift;
             $USERS{ $params->{id} };
         };
+
+        desc 'Delete user',
+        del => sub {
+            my $params = shift;
+            { success => delete $USERS{ $params->{id} } };
+        };
+
+        put 'nop' => sub { 'nop' };
     };
 };
 

@@ -6,36 +6,27 @@ use warnings;
 use base 'Exporter';
 
 use Carp;
+use List::Util qw(pairs);
 use Raisin;
 
-our @EXPORT = qw(
-    run new
+my @APP_CONF_METHODS = qw(api_format api_version middleware mount plugin);
+my @APP_EXEC_METHODS = qw(new run);
+my @APP_METHODS = qw(req res param session);
+my @HOOKS_METHODS = qw(before before_validation after_validation after);
+my @HTTP_METHODS = qw(del get head options patch post put);
+my @ROUTES_METHODS = qw(resource namespace route_param desc params);
 
-    mount
-
-    middleware
-    plugin
-
-    api_version
-
-    api_format
-
-    before
-    before_validation
-    after_validation
-    after
-
-    resource namespace
-    route_param
-
-    req res param session
-
-    params
-    desc
-    del get head options patch post put
+our @EXPORT = (
+    @APP_CONF_METHODS,
+    @APP_EXEC_METHODS,
+    @APP_METHODS,
+    @HOOKS_METHODS,
+    @HTTP_METHODS,
+    @ROUTES_METHODS,
 );
 
 my $app;
+
 #my %SETTINGS = (_NS => ['']);
 my %SETTINGS = ();
 my @NS = ('');
@@ -54,8 +45,8 @@ sub import {
 #
 # Execution
 #
-sub run { $app->run }
 sub new { $app->run }
+sub run { $app->run }
 
 #
 # Compile
@@ -100,10 +91,6 @@ sub namespace { resource(@_) }
 
 sub route_param {
     my $code = pop @_;
-    if (ref $code ne 'CODE') {
-        carp 'route_param requires code block as last param!';
-        return;
-    }
 
     my ($param, $spec);
     if (ref $_[0] eq 'HASH') {
@@ -129,67 +116,36 @@ sub patch   { $app->add_route('PATCH',   resource(), %SETTINGS, @_) }
 sub post    { $app->add_route('POST',    resource(), %SETTINGS, @_) }
 sub put     { $app->add_route('PUT',     resource(), %SETTINGS, @_) }
 
-sub params {
-    add_route(params => @_);
+sub desc { _add_route(desc => @_) }
+sub params { _add_route(params => @_) }
 
-    my ($params, $method, @other) = @_;
-
-#    my $code = pop @other;
-#
-#    my @args;
-#    if (scalar @other == 1) {
-#        push @args, shift @other;
-#    }
-#    push @args, $code;
-#
-#    $app->add_route(uc($method), resource(), %SETTINGS, params => $params, @args);
-}
-sub desc { add_route(desc => @_) }
-
-sub add_route {
+sub _add_route {
     my @params = @_;
-
     my $code = pop @params;
-    if (ref($code) ne 'CODE') {
-        croak 'NO CODE';
-    }
 
-    use feature 'say';
-    use DDP { class => { expand => 0 } };
-    use List::Util qw(pairs);
-
-#    p @params;
-
-    my %parsed;
-
+    my %pp;
     push(@params, undef) if scalar(@params) % 2;
 
-    my @HTTP_METHODS = qw(del get head options patch post put);
-
     for my $p (pairs(@params)) {
+        my ($k, $v) = @$p;
 
-        if ($p->[0] eq 'desc' || $p->[0] eq 'params') {
-            $parsed{ $p->[0] } = $p->[1];
+        if ($k eq 'desc' || $k eq 'params') {
+            $pp{ $k } = $v;
         }
-
-        if (grep { $p->[0] eq $_ } @HTTP_METHODS) {
-            $parsed{method} = uc $p->[0];
-
-            $parsed{additional_path} = $p->[1] || '';
+        elsif (grep { $k eq $_ } @HTTP_METHODS) {
+            $pp{method} = uc $k =~ /del/i ? 'delete' : $k;
+            $pp{path} = $v || '';
         }
     }
 
-
-    #p %parsed;
-
-    print "--- --- ---\n";
-    my $method = delete $parsed{method};
+    my $method = delete $pp{method};
     my $path = resource();
-    if (my $ap = $parsed{additional_path}) {
-        $path .= '/' . $ap;
-    }
 
-    $app->add_route($method, $path, %SETTINGS, %parsed, $code);
+    $path .= "/$pp{path}" if $pp{path};
+
+#use DDP { class => { expand => 0 } };
+
+    $app->add_route($method, $path, %SETTINGS, %pp, $code);
 }
 
 

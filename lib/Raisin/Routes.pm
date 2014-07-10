@@ -20,6 +20,7 @@ sub new {
 }
 
 # @args:
+#   * [optional] desc => ''
 #   * [optional] named => []
 #   * [optional] params => []
 #   * [optional] path
