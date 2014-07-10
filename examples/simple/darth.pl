@@ -82,7 +82,8 @@ namespace user => sub {
             { success => delete $USERS{ $params->{id} } };
         };
 
-        put 'nop' => sub { 'nop' };
+        desc 'NOP',
+        put => sub { 'nop' };
     };
 };
 
