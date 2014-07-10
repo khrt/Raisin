@@ -5,6 +5,7 @@ use warnings;
 
 use base 'Exporter';
 
+use Carp;
 use Raisin;
 
 our @EXPORT = qw(
@@ -88,8 +89,23 @@ sub resource {
 sub namespace { resource(@_) }
 
 sub route_param {
-    my ($param, $type, $block) = @_;
-    resource(":$param", $block, named => [required => [$param, $type]]);
+    my $code = pop @_;
+    if (ref $code ne 'CODE') {
+        carp 'route_param requires code block as last param!';
+        return;
+    }
+
+    my ($param, $spec);
+    if (ref $_[0] eq 'HASH') {
+        $spec = $_[0];
+        $param = $spec->{name};
+    }
+    else {
+        $spec = { name => $_[0], type => $_[1], desc => 'ROUTE PARAM' };
+        $param = $_[0];
+    }
+
+    resource(":$param", $code, named => [requires => $spec]);
 }
 
 #

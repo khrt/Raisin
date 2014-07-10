@@ -7,6 +7,7 @@ use Raisin::Attributes;
 
 has 'check' => {};
 has 'code';
+has 'desc';
 has 'format';
 has 'method';
 has 'named';

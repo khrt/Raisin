@@ -33,6 +33,7 @@ sub _parse {
     my @keys = qw(name type default regex desc);
 
     if (ref($spec) eq 'ARRAY') {
+        carp 'Deprecated parameters definition syntax. Use hashref syntax instead.';
         @$self{@keys} = @$spec;
     }
     elsif (ref($spec) eq 'HASH') {

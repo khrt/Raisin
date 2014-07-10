@@ -34,57 +34,46 @@ sub build_api_docs {
 
     # Prepare API data
     for my $r (@{ $app->routes->routes }) {
-        my $path = $r->path;
-        $path =~ s#:([^/]+)#{$1}#g;
-
-        my ($ns) = $path =~ m#^(/[^/]+)#;
-
-        my @parameters;
+        my @params;
         for my $p (@{ $r->params }) {
+            my $param_type = do {
+                if    ($p->named)                 {'path'}
+                elsif ($r->method =~ /post|put/i) {'form'}
+                else                              {'query'}
+            };
 
-            # Types
-            #  - boolean
-            #  - integer, int32
-            #  - integer, int64
-            #  - number, double
-            #  - number, float
-            #  - string
-            #  - string, byte
-            #  - string, date
-            #  - string, date-time
-
-            my $param_type
-                = $p->named
-                ? 'path'
-                : $r->method =~ /POST|PUT/
-                    ? 'form'
-                    : 'query';
-
-            my %p = (
-                allowMultiple => JSON::true,
-                defaultValue => $p->default || JSON::false,
-                description => uc($p->name) . ' DESCRIPTION',
-                format => ref $p->type,
-                name => $p->name,
-                paramType => $param_type,
-                required => $p->required ? JSON::true : JSON::false,
-                type => $p->type->name,
-            );
-            push @parameters, \%p;
+            push @params, { allowMultiple => JSON::true,
+                            defaultValue  => $p->default // JSON::false,
+                            description   => $p->desc,
+                            format        => $p->type->display_name,
+                            name          => $p->name,
+                            paramType     => $param_type,
+                            required      => $p->required ? JSON::true : JSON::false,
+                            type          => $p->type->name, };
         }
 
+        my $path = $r->path;
+
+        # :id -> {id}
+        $path =~ s#:([^/]+)#{$1}#msxg;
+
+        # look for namespace
+        my ($ns) = $path =~ m#^(?:/api)?(/[^/]+)#;
+
         my %api = (
+            description => $r->desc,
             path => $path,
             operations => [{
                 method => $r->method,
                 nickname => $r->method . '_' . $path,
                 notes => '',
-                parameters => \@parameters,
+                parameters => \@params,
                 summary => '',
                 type => '',
             }],
         );
 
+        # -> { ns => [api, ...] }
         push @{ $apis{$ns} }, \%api;
     }
 
