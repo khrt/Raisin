@@ -19,11 +19,9 @@ sub deserialize {
 
     my $serializer = do {
         if (my $c = Raisin::Util::detect_serializer($self->content_type)) {
-            warn 'detected';
             Plack::Util::load_class('Raisin::Plugin::Format::' . uc($c));
         }
         elsif ($self->app->can('serializer')) {
-            warn 'default';
             $self->app->serializer;
         }
     };
