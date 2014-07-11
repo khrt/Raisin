@@ -76,7 +76,7 @@ sub match {
     $self->{format} = undef;
     $self->{named} = undef;
 
-    return if !$method || $method ne $self->method;
+    return if !$method || lc($method) ne lc($self->method);
     return if not (my @matched = $path =~ $self->regex);
 
     my %captured = %+;
