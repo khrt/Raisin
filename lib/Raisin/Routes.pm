@@ -27,6 +27,8 @@ sub new {
 sub add {
     my ($self, $method, $path, @args) = @_;
 
+    $method = uc $method;
+
     if (!$method || !$path) {
         carp "Method and path are required";
         return;
@@ -35,7 +37,7 @@ sub add {
     my $code = pop @args;
     # Support only code as route destination
     if (!$code || !(ref($code) eq 'CODE')) {
-        carp "Invalid route params for ${ uc $method } $path";
+        carp "Invalid route params for $method $path";
         return;
     }
 
