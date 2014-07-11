@@ -19,9 +19,11 @@ sub deserialize {
 
     my $serializer = do {
         if (my $c = Raisin::Util::detect_serializer($self->content_type)) {
+            warn 'detected';
             Plack::Util::load_class('Raisin::Plugin::Format::' . uc($c));
         }
         elsif ($self->app->can('serializer')) {
+            warn 'default';
             $self->app->serializer;
         }
     };
@@ -41,7 +43,7 @@ sub prepare_params {
     # Serialization / Deserialization
     my $params = do {
         if ($self->method =~ /POST|PUT/ && (my $content = $self->content)) {
-            if ($self->content_type eq 'application/x-www-form-urlencoded') {
+            if ($self->content_type =~ m{application/x-www-form-urlencoded}imsx) {
                 $self->body_parameters->mixed;
             }
             else {
