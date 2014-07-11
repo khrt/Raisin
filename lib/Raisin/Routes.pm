@@ -23,12 +23,9 @@ sub new {
 #   * [optional] desc => ''
 #   * [optional] named => []
 #   * [optional] params => []
-#   * [optional] path
 #   * [required] code ref
 sub add {
     my ($self, $method, $path, @args) = @_;
-#use DDP { class => { expand => 0 } };
-#p @args;
 
     if (!$method || !$path) {
         carp "Method and path are required";
@@ -40,11 +37,6 @@ sub add {
     if (!$code || !(ref($code) eq 'CODE')) {
         carp "Invalid route params for ${ uc $method } $path";
         return;
-    }
-
-    # Named route params
-    if (scalar @args == 1 || scalar @args == 3) {
-        $path = $path . '/' . pop @args;
     }
 
     my (@params, $desc);
