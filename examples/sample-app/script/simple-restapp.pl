@@ -126,7 +126,7 @@ resource api => sub {
             ],
             put => sub {
                 my $params = shift;
-                { data => UseCase::Host::edit($params->{id}, $params) }
+                { data => UseCase::Host::edit($params->{id}, %$params) }
             };
 
             del sub {

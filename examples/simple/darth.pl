@@ -24,7 +24,7 @@ my %USERS = (
 
 plugin 'APIDocs';
 
-namespace user => sub {
+resource user => sub {
     params [
         optional => { name => 'start', type => Int, default => 0, desc => 'Pager (start)' },
         optional => { name => 'count', type => Int, default => 0, desc => 'Pager (count)' },

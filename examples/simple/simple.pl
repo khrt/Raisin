@@ -23,6 +23,8 @@ my %VARIABLES = (
     },
 );
 
+plugin 'APIDocs';
+
 namespace api => sub {
     get grape => sub { 'Grape!' };
     get raisin => sub {
