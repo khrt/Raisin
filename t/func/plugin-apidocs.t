@@ -20,15 +20,15 @@ my $r = $a->{routes};
 $r->add(
     GET => '/person/:id',
     params => [
-        required => ['name', Str],
-        optional => ['zip', Int],
+        required => { name => 'name', type => Str },
+        optional => { name => 'zip', type => Int },
     ],
     sub { 'GET' }
 );
 $r->add(
     POST => '/person',
     params => [
-        optional => ['email', Str],
+        optional => { name => 'email', type => Str },
     ],
     sub { 'POST' }
 );
@@ -36,17 +36,17 @@ $r->add(
 $r->add(
     GET => '/address',
     params => [
-        required => ['street', Str],
-        required => ['house_num', Str],
+        required => { name => 'street', type => Str },
+        required => { name => 'house_num', type => Str },
     ],
     sub { 'POST' }
 );
 $r->add(
     POST => '/address',
     params => [
-        required => ['street', Str],
-        required => ['house_num', Str],
-        required => ['apartment', Str],
+        required => { name => 'street', type => Str },
+        required => { name => 'house_num', type => Str },
+        required => { name => 'apartment', type => Str },
     ],
     sub { 'POST' }
 );

@@ -13,12 +13,15 @@ use Raisin::Request;
 my $caller = caller;
 my $app = Raisin->new(caller => $caller);
 
-subtest 'deserialize' => sub {
-    ok 1;
-};
+ok 1, 'skip';
 
-subtest 'prepare_params' => sub {
-    ok 1;
-};
+#subtest 'deserialize' => sub {
+#    #subtest 'body' => sub {};
+#    #subtest 'form' => sub {};
+#    #subtest 'path' => sub {};
+#};
+#
+#subtest 'prepare_params' => sub {
+#};
 
 done_testing;
