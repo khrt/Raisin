@@ -12,6 +12,7 @@ use Time::HiRes qw(time);
 sub build {
     my ($self, %args) = @_;
 
+    # TODO: use Raisin::Logger if couldn't founded Log::Dispatch
     my $module = 'Log::Dispatch';
 
     if (delete $args{fallback}) {
