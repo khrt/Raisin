@@ -52,10 +52,11 @@ test_psgi $app, sub {
     subtest 'post required params JSON' => sub {
         my $req = encode_json({ param0 => 0, param1 => 1 });
         my $res = $cb->(
-            POST '/', Content => $req, Content_Type => 'application/json'
+            POST '/',
+            Content => $req,
+            Content_Type => 'application/json',
+            Accept => 'application/json'
         );
-
-        #note $res->content_type;
 
         my %STANDARD = (
             param0 => 0,
@@ -71,10 +72,11 @@ test_psgi $app, sub {
     subtest 'post all params JSON' => sub {
         my $req = encode_json(\%PARAMS);
         my $res = $cb->(
-            POST '/', Content => $req, Content_Type => 'application/json'
+            POST '/',
+            Content => $req,
+            Content_Type => 'application/json',
+            Accept => 'application/json'
         );
-
-        #note $res->content_type;
 
         my $data = decode_json($res->content);
         is_deeply $data, \%PARAMS, 'POST JSON';
@@ -83,18 +85,18 @@ test_psgi $app, sub {
     subtest 'post all params YAML' => sub {
         my $req = Dump(\%PARAMS);
         my $res = $cb->(
-            POST '/', Content => $req, Content_Type => 'application/yaml'
+            POST '/',
+            Content => $req,
+            Content_Type => 'application/yaml',
+            Accept => 'application/json'
         );
-
-        #note $res->content_type;
-        #note $res->content;
 
         my $data = decode_json($res->content);
         is_deeply $data, \%PARAMS, 'POST YAML';
     };
 
     subtest 'post params as form data' => sub {
-        my $res = $cb->(POST '/', Content => [%PARAMS]);
+        my $res = $cb->(POST '/', Content => [%PARAMS], Accept => 'application/json');
 
         my $data = decode_json($res->content);
         is_deeply $data, \%PARAMS, 'POST Form input';

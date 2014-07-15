@@ -13,12 +13,11 @@ use Raisin::Response;
 use JSON;
 use YAML;
 
-my $caller = caller;
-my $app = Raisin->new(caller => $caller);
-
 #subtest 'serialize' => sub {
 #
 #};
+
+my $caller = caller;
 
 subtest 'render' => sub {
     my $data = {
@@ -28,7 +27,9 @@ subtest 'render' => sub {
     };
 
     subtest 'JSON as default formatter' => sub {
-        $app->api_format('json');
+        my $app = Raisin->new(caller => $caller);
+        $app->api_default_format('json');
+
         my $r = Raisin::Response->new($app);
 
         ok $r->render(undef, $data);
@@ -42,6 +43,9 @@ subtest 'render' => sub {
     };
 
     subtest 'JSON' => sub {
+        my $app = Raisin->new(caller => $caller);
+        $app->api_default_format('json');
+
         my $r = Raisin::Response->new($app);
 
         ok $r->render('json', $data);
@@ -55,6 +59,9 @@ subtest 'render' => sub {
     };
 
     subtest 'YAML' => sub {
+        my $app = Raisin->new(caller => $caller);
+        $app->api_default_format('json');
+
         my $r = Raisin::Response->new($app);
 
         ok $r->render('yaml', $data);
@@ -68,6 +75,9 @@ subtest 'render' => sub {
     };
 
     subtest 'fallback text' => sub {
+        my $app = Raisin->new(caller => $caller);
+        $app->api_default_format('json');
+
         my $r = Raisin::Response->new($app);
         ok $r->render('text', $data);
 
@@ -78,6 +88,9 @@ subtest 'render' => sub {
     };
 
     subtest 'text' => sub {
+        my $app = Raisin->new(caller => $caller);
+        $app->api_default_format('json');
+
         my $r = Raisin::Response->new($app);
         ok $r->render('text', 'text/plain');
         is $r->body, 'text/plain', 'render text';
@@ -91,6 +104,9 @@ subtest 'render' => sub {
 
 subtest 'render error' => sub {
     subtest 'render_500' => sub {
+        my $app = Raisin->new(caller => $caller);
+        $app->api_default_format('json');
+
         my $r = Raisin::Response->new($app);
 
         ok $r->render_500('My internal error');
@@ -102,6 +118,9 @@ subtest 'render error' => sub {
     };
 
     subtest 'render_404' => sub {
+        my $app = Raisin->new(caller => $caller);
+        $app->api_default_format('json');
+
         my $r = Raisin::Response->new($app);
 
         ok $r->render_404('My nothing found');
@@ -113,6 +132,9 @@ subtest 'render error' => sub {
     };
 
     subtest 'render_401' => sub {
+        my $app = Raisin->new(caller => $caller);
+        $app->api_default_format('json');
+
         my $r = Raisin::Response->new($app);
 
         ok $r->render_401('My unauthorized');
