@@ -23,11 +23,11 @@ sub new {
     @$self{keys %args} = values %args;
 
     # Populate params index
-    for (@{ $self->params }) {
-        if ($_->named && (my $re = $_->regex)) {
-            if (my $re = $_->regex) {
+    for my $p (@{ $self->params }) {
+        if ($p->named && (my $re = $p->regex)) {
+            if (my $re = $p->regex) {
                 $re =~ s/[\$^]//g;
-                $self->{check}{ $_->name } = $re;
+                $self->{check}{ $p->name } = $re;
             }
         }
     }
@@ -40,15 +40,15 @@ sub _build_regex {
     my $self = shift;
     return $self->path if ref($self->path) eq 'Regexp';
 
-    my $PAT = '(.?)([:*?])(\w+)';
-    my $regex =  $self->path;
-    $regex =~ s#$PAT#$self->_rep_regex($1, $2, $3)#eg;
-    $regex =~ s/[{}]//g;
-    #NOTE: temporarly disabled: $regex .= '/?' if $regex !~ m#/$#;
-    $regex .= '(?<format>\.\w+)?';
-    $regex .= '$';
+    my $regex = $self->path;
 
-    qr/^$regex/;
+    $regex =~ s#(.?)([:*?])(\w+)#$self->_rep_regex($1, $2, $3)#eg;
+
+    $regex =~ s/[{}]//g;
+
+    $regex .= '(?<format>\.\w+)?';
+
+    qr/^$regex$/;
 }
 
 sub _rep_regex {
@@ -77,23 +77,23 @@ sub match {
     $self->{named} = undef;
 
     return if !$method || lc($method) ne lc($self->method);
-    return if not (my @matched = $path =~ $self->regex);
+    return if $path !~ $self->regex;
 
     my %captured = %+;
-    my %named = map { $_ => $+{$_} } keys %captured;
 
-    if ($named{format}) {
-        my $format = delete $named{format};
+    if ($captured{format}) {
+        my $format = delete $captured{format};
+        # delete prepending full stop
         $self->format(substr($format, 1));
     }
 
     foreach my $p (@{ $self->params }) {
         next unless $p->named;
-        my $copy = $named{$p->name};
-        return unless $p->validate(\$copy, 'shh!');
+        my $copy = $captured{ $p->name };
+        return unless $p->validate(\$copy, 'quite');
     }
 
-    $self->named(\%named);
+    $self->named(\%captured);
 
     1;
 }
