@@ -12,6 +12,7 @@ use constant SWAGGER_VERSION => '1.2';
 sub build {
     my $self = shift;
 
+    # TODO: make configurable
     # Enable CORS
     $self->app->add_middleware(
         'CrossOrigin',
@@ -23,7 +24,7 @@ sub build {
     $self->register(build_api_docs => sub { $self->build_api_docs });
 }
 
-# TODO
+# TODO: simplify
 sub build_api_docs {
     my $self = shift;
     return 1 if $self->{done};
