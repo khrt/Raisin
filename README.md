@@ -20,12 +20,14 @@ Raisin - REST-like API web micro-framework for Perl.
         },
     );
 
-    namespace user => sub {
+    plugin 'APIDocs';
+
+    resource user => sub {
         params [
-            #required/optional => [name, type, default, regex]
-            optional => ['start', Int, 0],
-            optional => ['count', Int, 10],
+            optional => { name => 'start', type => Int, default => 0, desc => 'Pager (start)' },
+            optional => { name => 'count', type => Int, default => 0, desc => 'Pager (count)' },
         ],
+        desc => 'List users',
         get => sub {
             my $params = shift;
 
@@ -41,7 +43,8 @@ Raisin - REST-like API web micro-framework for Perl.
             { data => \@slice }
         };
 
-        get 'all' => sub {
+        desc 'List all users at once',
+        get => 'all' => sub {
             my @users
                 = map { { id => $_, %{ $USERS{$_} } } }
                   sort { $a <=> $b } keys %USERS;
@@ -49,10 +52,11 @@ Raisin - REST-like API web micro-framework for Perl.
         };
 
         params [
-            required => ['name', Str],
-            required => ['password', Str],
-            optional => ['email', Str, undef, qr/.+\@.+/],
+            requires => { name => 'name', type => Str, desc => 'User name' },
+            requires => { name => 'password', type => Str, desc => 'User password' },
+            optional => { name => 'email', type => Str, default => undef, regex => qr/.+\@.+/, desc => 'User email' },
         ],
+        desc => 'Create new user',
         post => sub {
             my $params = shift;
 
@@ -62,12 +66,22 @@ Raisin - REST-like API web micro-framework for Perl.
             { success => 1 }
         };
 
-        route_param id => Int,
+        route_param { name => 'id', type => Int, desc => 'User ID' },
         sub {
-            get sub {
+            desc 'Show user',
+            get => sub {
                 my $params = shift;
                 $USERS{ $params->{id} };
             };
+
+            desc 'Delete user',
+            del => sub {
+                my $params = shift;
+                { success => delete $USERS{ $params->{id} } };
+            };
+
+            desc 'NOP',
+            put => sub { 'nop' };
         };
     };
 
@@ -81,11 +95,11 @@ It was inspired by [Grape](https://github.com/intridea/grape).
 
 # KEYWORDS
 
-## namespace
+## resource
 
 Adds a route to application.
 
-    namespace user => sub { ... };
+    resource user => sub { ... };
 
 ## route\_param
 
@@ -93,13 +107,14 @@ Define a route parameter as a namespace `route_param`.
 
     route_param id => Int, sub { ... };
 
-## params, del, get, patch, post, put
+## desc, params, del, get, patch, post, put
 
-It is are shortcuts to `route` restricted to the corresponding HTTP method.
+It's a shortcuts to `route` restricted to the corresponding HTTP method.
 
-Each method could consists of max three parameters:
+Each method can consists of this parameters:
 
-- params - optional only if didn't starts from params keyword, required otherwise;
+- desc - optional only if didn't starts from `desc` keyword, required otherwise;
+- params - optional only if didn't starts from `params` keyword, required otherwise;
 - path - optional;
 - subroutine - required;
 
@@ -119,16 +134,17 @@ Where only `subroutine` is required.
         required => ['id', Int],
         optional => ['name', Str],
     ],
+    desc => 'Put data',
     put => 'all' => sub {
         'PUT'
     };
 
 ## req
 
-An alias for `$self->req`, this provides quick access to the
+An alias for `$self->req`, which provides quick access to the
 [Raisin::Request](https://metacpan.org/pod/Raisin::Request) object for the current route.
 
-Use `req` to get access to the request headers, params, etc.
+Use `req` to get access to a request headers, params, etc.
 
     use DDP;
     p req->headers;
@@ -140,7 +156,7 @@ See also [Plack::Request](https://metacpan.org/pod/Plack::Request).
 
 ## res
 
-An alias for `$self->res`, this provides quick access to the
+An alias for `$self->res`, which provides quick access to the
 [Raisin::Response](https://metacpan.org/pod/Raisin::Response) object for the current route.
 
 Use `res` to set up response parameters.
@@ -152,19 +168,19 @@ See also [Plack::Response](https://metacpan.org/pod/Plack::Response).
 
 ## param
 
-An alias for `$self->params` that gets the GET and POST parameters.
-When used with no arguments, it will return an array with the names of all http
-parameters. Otherwise, it will return the value of the requested http parameter.
+An alias for `$self->params`, which returns request parameters.
+Without arguments will return an array with request parameters.
+Otherwise it will return the value of the requested parameter.
 
 Returns [Hash::MultiValue](https://metacpan.org/pod/Hash::MultiValue) object.
 
     say param('key'); # -> value
-    say param(); # -> { key => 'value' }
+    say param(); # -> { key => 'value', foo => 'bar' }
 
 ## session
 
-An alias for `$self->session` that returns (optional) psgix.session hash.
-When it exists, you can retrieve and store per-session data from and to this hash.
+An alias for `$self->session`, which returns `psgix.session` hash.
+When it exists, you can retrieve and store per-session data.
 
     # store param
     session->{hello} = 'World!';
@@ -172,30 +188,42 @@ When it exists, you can retrieve and store per-session data from and to this has
     # read param
     say session->{name};
 
-## api\_version
+## api\_default\_format
 
-Set an API version header.
+Specify default API format when formatter doesn't specified.
+Default value: `YAML`.
 
-    api_version 1.23;
+    api_default_format 'json';
+
+See also ["API-FORMATS" in Raisin](https://metacpan.org/pod/Raisin#API-FORMATS).
 
 ## api\_format
 
-Loads a plugin from `Raisin::Plugin::Format` namespace.
+Restricts API to use only specified formatter for serialize and deserialize
+data.
 
 Already exists [Raisin::Plugin::Format::JSON](https://metacpan.org/pod/Raisin::Plugin::Format::JSON) and [Raisin::Plugin::Format::YAML](https://metacpan.org/pod/Raisin::Plugin::Format::YAML).
 
     api_format 'json';
 
+See also ["API-FORMATS" in Raisin](https://metacpan.org/pod/Raisin#API-FORMATS).
+
+## api\_version
+
+Setup an API version header.
+
+    api_version 1.23;
+
 ## plugin
 
-Loads a Raisin module. The module options may be specified after the module name.
+Loads Raisin module. A module options may be specified after a module name.
 Compatible with [Kelp](https://metacpan.org/pod/Kelp) modules.
 
     plugin 'Logger', params => [outputs => [['Screen', min_level => 'debug']]];
 
 ## middleware
 
-Loads middleware to your application.
+Adds middleware to your application.
 
     middleware '+Plack::Middleware::Session' => { store => 'File' };
     middleware '+Plack::Middleware::ContentLength';
@@ -203,8 +231,7 @@ Loads middleware to your application.
 
 ## mount
 
-Mount multiple API implementations inside another one.  These don't have to be
-different versions, but may be components of the same API.
+Mount multiple API implementations inside another one.
 
 In `RaisinApp.pm`:
 
@@ -219,7 +246,7 @@ In `RaisinApp.pm`:
 
     1;
 
-## run, new
+## new, run
 
 Creates and returns a PSGI ready subroutine, and makes the app ready for `Plack`.
 
@@ -230,13 +257,13 @@ GET, POST and PUT parameters, along with any named parameters you specify in
 your route strings.
 
 Parameters are automatically populated from the request body on POST and PUT
-for form input, `JSON` and `YAML` content-types.
+for form input, `JSON` and `YAML` content types.
 
 In the case of conflict between either of:
 
-- route string parameters
-- GET, POST and PUT parameters
-- the contents of the request body on POST and PUT
+- route string parameters;
+- GET, POST and PUT parameters;
+- contents of request body on POST and PUT;
 
 route string parameters will have precedence.
 
@@ -246,23 +273,24 @@ Query string and body parameters will be merged (see ["parameters" in Plack::Req
 
 You can define validations and coercion options for your parameters using a params block.
 
-Parameters can be `required` and `optional`. `optional` parameters can have a
+Parameters can be `requires` and `optional`. `optional` parameters can have a
 default value.
 
-    get params => [
-        required => ['name', Str],
-        optional => ['number', Int, 10],
+    params [
+        requires => { name => 'name', type => Str },
+        optional => { name => 'number', type => Int, default => 10 },
     ],
-    sub {
+    get => sub {
         my $params = shift;
         "$params->{number}: $params->{name}";
     };
 
-Positional arguments:
+Available arguments:
 
 - name
 - type
-- default value
+- default
+- desc
 - regex
 
 Optional parameters can have a default value.
@@ -306,17 +334,15 @@ Steps 3 and 4 only happen if validation succeeds.
 
 # API FORMATS
 
-By default, Raisin supports `YAML`, `JSON`, and `TEXT` content-types.
-The default format is `TEXT`.
+By default, Raisin supports `YAML`, `JSON`, and `TEXT` content types.
+Default format is `YAML`.
 
-Response format can be determined by Accept header or route extension.
+Response format can be determined by `Accept header` or `route extension`.
 
-Serialization takes place automatically. For example, you do not have to call
+Serialization takes place automatically. So, you do not have to call
 `encode_json` in each `JSON` API implementation.
 
-Your API can declare which types to support by using `api_format`.
-
-    api_format 'json';
+Your API can declare to support only one serializator by using ["api\_format" in Raisin](https://metacpan.org/pod/Raisin#api_format).
 
 Custom formatters for existing and additional types can be defined with a
 [Raisin::Plugin::Format](https://metacpan.org/pod/Raisin::Plugin::Format).
@@ -337,8 +363,7 @@ The order for choosing the format is the following.
 
 - Use the route extension.
 - Use the value of the `Accept` header.
-- Use the `api_format` if specified.
-- Fallback to `TEXT`.
+- Fallback to default.
 
 # LOGGING
 
