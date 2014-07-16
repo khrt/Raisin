@@ -55,6 +55,7 @@ sub _rep_regex {
     my ($self, $char, $switch, $token) = @_;
 
     my ($a, $b, $r) = ("(?<$token>", ')', undef);
+
     for ($switch) {
         if ($_ eq ':' || $_ eq '?') {
             $r = $a . ($self->check->{$token} // '[^\/.]+') . $b;
