@@ -24,6 +24,11 @@ sub detect_serializer {
     $SERIALIZERS{$type};
 }
 
+sub make_serializer_class {
+    my $format = shift;
+    'Raisin::Plugin::Format::' . uc($format);
+}
+
 1;
 
 __END__
