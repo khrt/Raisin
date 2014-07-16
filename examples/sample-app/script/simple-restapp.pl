@@ -7,6 +7,7 @@ use FindBin '$Bin';
 use lib ("$Bin/../lib", "$Bin/../../../lib");
 
 use List::Util qw(max);
+use Plack::Builder;
 
 use Raisin::API;
 use Types::Standard qw(Int Str);
@@ -35,106 +36,114 @@ plugin 'APIDocs';
 plugin 'Logger', outputs => [['Screen', min_level => 'debug']];
 api_format 'yaml';
 
-resource api => sub {
-    resource user => sub {
-        params [
-            optional => ['start', Int, 0, qr/^\d+$/],
-            optional => ['count', Int, 10, qr/^\d+$/],
-        ],
-        get => sub {
-            my $params = shift;
-            my @users = UseCase::User::list(%$params);
-            { data => paginate(\@users, $params) }
-        };
-
-        get 'all' => sub {
-            my $params = shift;
-            my @users = UseCase::User::list(%$params);
-            { data => \@users }
-        };
-
-        params [
-            required => ['name', Str],
-            required => ['password', Str],
-            optional => ['email', Str, undef],
-        ],
-        post => sub {
-            my $params = shift;
-            { success => UseCase::User::create(%$params) }
-        };
-
-        route_param id => Int,
-        sub {
-            get sub {
-                my $params = shift;
-                { data => UseCase::User::show($params->{id}) }
-            };
-
-            params [
-                optional => ['password', Str],
-                optional => ['email', Str],
-            ],
-            put => sub {
-                my $params = shift;
-                { data => UseCase::User::edit($params->{id}, %$params) }
-            };
-
-            resource bump => sub {
-                get sub {
-                    my $params = shift;
-                    { data => UseCase::User::show($params->{id})->{bumped} }
-                };
-
-                put sub {
-                    my $params = shift;
-                    { success => UseCase::User::bump($params->{id}) }
-                };
-            };
-        };
+resource user => sub {
+    params [
+        optional => { name => 'start', type => Int, default => 0, desc => 'Pager start' },
+        optional => { name => 'count', type => Int, default => 10, desc => 'Pager count' },
+    ],
+    desc => 'List users',
+    get => sub {
+        my $params = shift;
+        my @users = UseCase::User::list(%$params);
+        { data => paginate(\@users, $params) }
     };
 
-    resource host => sub {
-        params [
-            optional => ['start', Int, 0, qr/^\d+$/],
-            optional => ['count', Int, 10, qr/^\d+$/],
-        ],
+    desc 'List all users',
+    get => 'all' => sub {
+        my $params = shift;
+        my @users = UseCase::User::list(%$params);
+        { data => \@users }
+    };
+
+    params [
+        required => { name => 'name', type => Str, desc => 'User name' },
+        required => { name => 'password', type => Str, desc => 'User password' },
+        optional => { name => 'email', type => Str, default => undef, desc => 'User email' },
+    ],
+    desc => 'Create new user',
+    post => sub {
+        my $params = shift;
+        { success => UseCase::User::create(%$params) }
+    };
+
+    route_param id => Int,
+    sub {
+        desc 'Show user',
         get => sub {
             my $params = shift;
-            my @hosts = UseCase::Host::list(%$params);
-            { data => paginate(\@hosts, $params) }
+            { data => UseCase::User::show($params->{id}) }
         };
 
         params [
-            required => ['name', Str],
-            required => ['user_id', Int],
-            optional => ['state', Str]
+            optional => { name => 'password', type => Str, desc => 'User password' },
+            optional => { name => 'email', type => Str, desc => 'User email' },
         ],
-        post => sub {
+        desc => 'Edit user',
+        put => sub {
             my $params = shift;
-            { success => UseCase::Host::create(%$params) }
+            { data => UseCase::User::edit($params->{id}, %$params) }
         };
 
-        route_param id => Int,
-        sub {
+        resource bump => sub {
             get sub {
                 my $params = shift;
-                { data => UseCase::Host::show($params->{id}) }
+                { data => UseCase::User::show($params->{id})->{bumped} }
             };
 
-            params [
-                required => ['state', Str],
-            ],
-            put => sub {
+            put sub {
                 my $params = shift;
-                { data => UseCase::Host::edit($params->{id}, %$params) }
+                { success => UseCase::User::bump($params->{id}) }
             };
-
-            del sub {
-                my $params = shift;
-                { success => UseCase::Host::delete($params->{id}) }
-            }
         };
     };
 };
 
-run;
+resource host => sub {
+    params [
+        optional => { name => 'start', type => Int, default => 0, desc => 'Pager start' },
+        optional => { name => 'count', type => Int, default => 10, desc => 'Pager count' },
+    ],
+    desc => 'List hosts',
+    get => sub {
+        my $params = shift;
+        my @hosts = UseCase::Host::list(%$params);
+        { data => paginate(\@hosts, $params) }
+    };
+
+    params [
+        required => { name => 'name', type => Str, desc => 'Host name' },
+        required => { name => 'user_id', type => Int, desc => 'Host owner' },
+        optional => { name => 'state', type => Str, desc => 'Host state' }
+    ],
+    desc => 'Create new host',
+    post => sub {
+        my $params = shift;
+        { success => UseCase::Host::create(%$params) }
+    };
+
+    route_param id => Int,
+    sub {
+        desc 'Show host',
+        get => sub {
+            my $params = shift;
+            { data => UseCase::Host::show($params->{id}) }
+        };
+
+        params [
+            required => { name => 'state', type => Str, desc => 'Host state' },
+        ],
+        desc => 'Edit host',
+        put => sub {
+            my $params = shift;
+            { data => UseCase::Host::edit($params->{id}, %$params) }
+        };
+
+        desc 'Delete host',
+        del => sub {
+            my $params = shift;
+            { success => UseCase::Host::delete($params->{id}) }
+        }
+    };
+};
+
+builder { Plack::Builder::mount '/api' => run };
