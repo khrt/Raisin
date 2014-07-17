@@ -201,8 +201,8 @@ sub api_format {
     my ($self, $format) = @_;
 
     if ($format && grep { lc($format) eq $_ } qw(json yaml)) {
-        $self->{api_format} = $format;
-        $self->api_default_format($format);
+        $self->{api_format} = lc $format;
+        $self->api_default_format(lc $format);
     }
     elsif ($format) {
         carp "Can't use specified format. Currently supported only JSON and YAML.";
