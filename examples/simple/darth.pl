@@ -28,7 +28,7 @@ api_format 'json';
 resource user => sub {
     params [
         optional => { name => 'start', type => Int, default => 0, desc => 'Pager (start)' },
-        optional => { name => 'count', type => Int, default => 0, desc => 'Pager (count)' },
+        optional => { name => 'count', type => Int, default => 10, desc => 'Pager (count)' },
     ],
     desc => 'List users',
     get => sub {
