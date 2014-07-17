@@ -13,7 +13,7 @@ requires 'perl', '5.010001';
 # External
 #requires 'Hash::MultiValue';
 requires 'JSON' => '2.90';
-requires 'Log::Dispatch' => '2.39';
+#requires 'Log::Dispatch' => '2.39';
 requires 'Plack' => '1.0030';
 requires 'Plack::Middleware::CrossOrigin' => '0.009';
 requires 'Type::Tiny' => '0.044';

@@ -17,7 +17,7 @@ sub build {
 
     my $obj;
     eval { $obj = Plack::Util::load_class($logger) } || do {
-        carp 'Can\'t load `Log::Dispatch, fallback to `Raisin::Logger`!';
+        carp 'Can\'t load `Log::Dispatch. Fallback to `Raisin::Logger`!';
         $obj = Plack::Util::load_class('Raisin::Logger');
     };
 
