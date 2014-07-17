@@ -107,14 +107,14 @@ Define a route parameter as a namespace `route_param`.
 
     route_param id => Int, sub { ... };
 
-## desc, params, del, get, patch, post, put
+## del, get, patch, post, put
 
 It's a shortcuts to `route` restricted to the corresponding HTTP method.
 
 Each method can consists of this parameters:
 
-- desc - optional only if didn't starts from `desc` keyword, required otherwise;
-- params - optional only if didn't starts from `params` keyword, required otherwise;
+- desc - optional only if didn't start from `desc` keyword, required otherwise;
+- params - optional only if didn't start from `params` keyword, required otherwise;
 - path - optional;
 - subroutine - required;
 
@@ -125,19 +125,42 @@ Where only `subroutine` is required.
     del 'all' => sub { 'OK' };
 
     params [
-        required => ['id', Int],
-        optional => ['key', Str],
+        requires => { name => 'id', type => Int },
+        optional => { name => 'key', type => Str },
     ],
     get => sub { 'GET' };
 
     params [
-        required => ['id', Int],
-        optional => ['name', Str],
+        required => { name => 'id', type => Int },
+        optional => { name => 'name', type => Str },
     ],
     desc => 'Put data',
     put => 'all' => sub {
         'PUT'
     };
+
+## desc
+
+Can be applied to `resource` or any of HTTP method to add description
+for operation or for resource.
+
+    desc 'Some action',
+    put => sub { ... }
+
+    desc 'Some operations group',
+    resource => sub { ... }
+
+## params
+
+Here you can define validations and coercion options for your parameters.
+Can be applied to any HTTP method to describe parameters.
+
+    params => [
+        requires => { name => 'key', type => Str }
+    ],
+    get => sub { ... }
+
+For more see ["Validation-and-coercion" in Raisin](https://metacpan.org/pod/Raisin#Validation-and-coercion).
 
 ## req
 
