@@ -22,7 +22,8 @@ my %USERS = (
     },
 );
 
-plugin 'APIDocs';
+plugin 'APIDocs', enable => 'CORS';
+api_format 'json';
 
 resource user => sub {
     params [
