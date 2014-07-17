@@ -9,10 +9,7 @@ use Plack::Util;
 use Raisin::Request;
 use Raisin::Response;
 use Raisin::Routes;
-
 use Raisin::Util;
-
-use constant DEFAULT_SERIALIZER => 'Raisin::Plugin::Format::YAML';
 
 our $VERSION = '0.36';
 
@@ -50,7 +47,13 @@ sub add_middleware {
 
 # Routes
 sub routes { shift->{routes} }
-sub add_route { shift->routes->add(@_) }
+sub add_route {
+    my ($self, %params) = @_;
+
+    $params{api_format} = $self->api_format if $self->api_format;
+
+    $self->routes->add(%params);
+}
 
 # Hooks
 sub hook {
@@ -109,6 +112,14 @@ sub psgi {
 
     eval {
         foreach my $route (@$routes) {
+            if ($self->api_format && (my $type = $req->accept_format)) {
+                if ($type ne $self->api_format) {
+                    $self->log(error => 'Invalid accept header');
+                    $res->render_error(406, 'Invalid accept header');
+                    last;
+                }
+            }
+
             # Validate code variable
             my $code = $route->code;
             if (!$code || (ref($code) && ref($code) ne 'CODE')) {
@@ -123,7 +134,6 @@ sub psgi {
 
             # Populate and validate declared params
             if (not $req->prepare_params($route->params, $route->named)) {
-                $self->log(error => '* ' . 'INVALID PARAMS! ' x 5);
                 $res->render_error(400, 'Invalid params!');
                 last;
             }
@@ -177,16 +187,31 @@ sub finalize {
 }
 
 # Application defaults
+sub api_default_format {
+    my ($self, $format) = @_;
+
+    if ($format) {
+        $self->{api_default_format} = Raisin::Util::make_serializer_class($format);
+    }
+
+    $self->{api_default_format} || Raisin::Util::make_serializer_class('yaml');
+}
+
+sub api_format {
+    my ($self, $format) = @_;
+
+    if ($format && grep { lc($format) eq $_ } qw(json yaml)) {
+        $self->{api_format} = $format;
+        $self->api_default_format($format);
+    }
+
+    $self->{api_format};
+}
+
 sub api_version {
     my ($self, $version) = @_;
     $self->{version} = $version if $version;
     $self->{version}
-}
-
-sub api_format {
-    my ($self, $name) = @_;
-    $name = $name =~ /\+/x ? $name : "Format::${\uc($name)}";
-    $self->load_plugin($name);
 }
 
 # Request and Response and shortcuts
@@ -240,12 +265,14 @@ Raisin - REST-like API web micro-framework for Perl.
         },
     );
 
-    namespace user => sub {
+    plugin 'APIDocs';
+
+    resource user => sub {
         params [
-            #required/optional => [name, type, default, regex]
-            optional => ['start', Int, 0],
-            optional => ['count', Int, 10],
+            optional => { name => 'start', type => Int, default => 0, desc => 'Pager (start)' },
+            optional => { name => 'count', type => Int, default => 0, desc => 'Pager (count)' },
         ],
+        desc => 'List users',
         get => sub {
             my $params = shift;
 
@@ -261,7 +288,8 @@ Raisin - REST-like API web micro-framework for Perl.
             { data => \@slice }
         };
 
-        get 'all' => sub {
+        desc 'List all users at once',
+        get => 'all' => sub {
             my @users
                 = map { { id => $_, %{ $USERS{$_} } } }
                   sort { $a <=> $b } keys %USERS;
@@ -269,10 +297,11 @@ Raisin - REST-like API web micro-framework for Perl.
         };
 
         params [
-            required => ['name', Str],
-            required => ['password', Str],
-            optional => ['email', Str, undef, qr/.+\@.+/],
+            requires => { name => 'name', type => Str, desc => 'User name' },
+            requires => { name => 'password', type => Str, desc => 'User password' },
+            optional => { name => 'email', type => Str, default => undef, regex => qr/.+\@.+/, desc => 'User email' },
         ],
+        desc => 'Create new user',
         post => sub {
             my $params = shift;
 
@@ -282,12 +311,22 @@ Raisin - REST-like API web micro-framework for Perl.
             { success => 1 }
         };
 
-        route_param id => Int,
+        route_param { name => 'id', type => Int, desc => 'User ID' },
         sub {
-            get sub {
+            desc 'Show user',
+            get => sub {
                 my $params = shift;
                 $USERS{ $params->{id} };
             };
+
+            desc 'Delete user',
+            del => sub {
+                my $params = shift;
+                { success => delete $USERS{ $params->{id} } };
+            };
+
+            desc 'NOP',
+            put => sub { 'nop' };
         };
     };
 
@@ -301,11 +340,11 @@ It was inspired by L<Grape|https://github.com/intridea/grape>.
 
 =head1 KEYWORDS
 
-=head2 namespace
+=head2 resource
 
 Adds a route to application.
 
-    namespace user => sub { ... };
+    resource user => sub { ... };
 
 =head2 route_param
 
@@ -313,15 +352,17 @@ Define a route parameter as a namespace C<route_param>.
 
     route_param id => Int, sub { ... };
 
-=head2 params, del, get, patch, post, put
+=head2 del, get, patch, post, put
 
-It is are shortcuts to C<route> restricted to the corresponding HTTP method.
+It's a shortcuts to C<route> restricted to the corresponding HTTP method.
 
-Each method could consists of max three parameters:
+Each method can consists of this parameters:
 
 =over
 
-=item * params - optional only if didn't starts from params keyword, required otherwise;
+=item * desc - optional only if didn't start from C<desc> keyword, required otherwise;
+
+=item * params - optional only if didn't start from C<params> keyword, required otherwise;
 
 =item * path - optional;
 
@@ -336,25 +377,49 @@ Where only C<subroutine> is required.
     del 'all' => sub { 'OK' };
 
     params [
-        required => ['id', Int],
-        optional => ['key', Str],
+        requires => { name => 'id', type => Int },
+        optional => { name => 'key', type => Str },
     ],
     get => sub { 'GET' };
 
     params [
-        required => ['id', Int],
-        optional => ['name', Str],
+        required => { name => 'id', type => Int },
+        optional => { name => 'name', type => Str },
     ],
+    desc => 'Put data',
     put => 'all' => sub {
         'PUT'
     };
 
+=head2 desc
+
+Can be applied to C<resource> or any of HTTP method to add description
+for operation or for resource.
+
+    desc 'Some action',
+    put => sub { ... }
+
+    desc 'Some operations group',
+    resource => sub { ... }
+
+=head2 params
+
+Here you can define validations and coercion options for your parameters.
+Can be applied to any HTTP method to describe parameters.
+
+    params => [
+        requires => { name => 'key', type => Str }
+    ],
+    get => sub { ... }
+
+For more see L<Raisin/Validation-and-coercion>.
+
 =head2 req
 
-An alias for C<$self-E<gt>req>, this provides quick access to the
+An alias for C<$self-E<gt>req>, which provides quick access to the
 L<Raisin::Request> object for the current route.
 
-Use C<req> to get access to the request headers, params, etc.
+Use C<req> to get access to a request headers, params, etc.
 
     use DDP;
     p req->headers;
@@ -366,7 +431,7 @@ See also L<Plack::Request>.
 
 =head2 res
 
-An alias for C<$self-E<gt>res>, this provides quick access to the
+An alias for C<$self-E<gt>res>, which provides quick access to the
 L<Raisin::Response> object for the current route.
 
 Use C<res> to set up response parameters.
@@ -378,19 +443,19 @@ See also L<Plack::Response>.
 
 =head2 param
 
-An alias for C<$self-E<gt>params> that gets the GET and POST parameters.
-When used with no arguments, it will return an array with the names of all http
-parameters. Otherwise, it will return the value of the requested http parameter.
+An alias for C<$self-E<gt>params>, which returns request parameters.
+Without arguments will return an array with request parameters.
+Otherwise it will return the value of the requested parameter.
 
 Returns L<Hash::MultiValue> object.
 
     say param('key'); # -> value
-    say param(); # -> { key => 'value' }
+    say param(); # -> { key => 'value', foo => 'bar' }
 
 =head2 session
 
-An alias for C<$self-E<gt>session> that returns (optional) psgix.session hash.
-When it exists, you can retrieve and store per-session data from and to this hash.
+An alias for C<$self-E<gt>session>, which returns C<psgix.session> hash.
+When it exists, you can retrieve and store per-session data.
 
     # store param
     session->{hello} = 'World!';
@@ -398,30 +463,42 @@ When it exists, you can retrieve and store per-session data from and to this has
     # read param
     say session->{name};
 
-=head2 api_version
+=head2 api_default_format
 
-Set an API version header.
+Specify default API format when formatter doesn't specified.
+Default value: C<YAML>.
 
-    api_version 1.23;
+    api_default_format 'json';
+
+See also L<Raisin/API-FORMATS>.
 
 =head2 api_format
 
-Loads a plugin from C<Raisin::Plugin::Format> namespace.
+Restricts API to use only specified formatter for serialize and deserialize
+data.
 
 Already exists L<Raisin::Plugin::Format::JSON> and L<Raisin::Plugin::Format::YAML>.
 
     api_format 'json';
 
+See also L<Raisin/API-FORMATS>.
+
+=head2 api_version
+
+Setup an API version header.
+
+    api_version 1.23;
+
 =head2 plugin
 
-Loads a Raisin module. The module options may be specified after the module name.
+Loads Raisin module. A module options may be specified after a module name.
 Compatible with L<Kelp> modules.
 
     plugin 'Logger', params => [outputs => [['Screen', min_level => 'debug']]];
 
 =head2 middleware
 
-Loads middleware to your application.
+Adds middleware to your application.
 
     middleware '+Plack::Middleware::Session' => { store => 'File' };
     middleware '+Plack::Middleware::ContentLength';
@@ -429,8 +506,7 @@ Loads middleware to your application.
 
 =head2 mount
 
-Mount multiple API implementations inside another one.  These don't have to be
-different versions, but may be components of the same API.
+Mount multiple API implementations inside another one.
 
 In C<RaisinApp.pm>:
 
@@ -445,7 +521,7 @@ In C<RaisinApp.pm>:
 
     1;
 
-=head2 run, new
+=head2 new, run
 
 Creates and returns a PSGI ready subroutine, and makes the app ready for C<Plack>.
 
@@ -456,23 +532,17 @@ GET, POST and PUT parameters, along with any named parameters you specify in
 your route strings.
 
 Parameters are automatically populated from the request body on POST and PUT
-for form input, C<JSON> and C<YAML> content-types.
+for form input, C<JSON> and C<YAML> content types.
 
 In the case of conflict between either of:
 
 =over
 
-=item *
+=item * route string parameters;
 
-route string parameters
+=item * GET, POST and PUT parameters;
 
-=item *
-
-GET, POST and PUT parameters
-
-=item *
-
-the contents of the request body on POST and PUT
+=item * contents of request body on POST and PUT;
 
 =back
 
@@ -484,38 +554,32 @@ Query string and body parameters will be merged (see L<Plack::Request/parameters
 
 You can define validations and coercion options for your parameters using a params block.
 
-Parameters can be C<required> and C<optional>. C<optional> parameters can have a
+Parameters can be C<requires> and C<optional>. C<optional> parameters can have a
 default value.
 
-    get params => [
-        required => ['name', Str],
-        optional => ['number', Int, 10],
+    params [
+        requires => { name => 'name', type => Str },
+        optional => { name => 'number', type => Int, default => 10 },
     ],
-    sub {
+    get => sub {
         my $params = shift;
         "$params->{number}: $params->{name}";
     };
 
 
-Positional arguments:
+Available arguments:
 
 =over
 
-=item *
+=item * name
 
-name
+=item * type
 
-=item *
+=item * default
 
-type
+=item * desc
 
-=item *
-
-default value
-
-=item *
-
-regex
+=item * regex
 
 =back
 
@@ -541,21 +605,13 @@ Before and after callbacks execute in the following order:
 
 =over
 
-=item *
+=item * before
 
-before
+=item * before_validation
 
-=item *
+=item * after_validation
 
-before_validation
-
-=item *
-
-after_validation
-
-=item *
-
-after
+=item * after
 
 =back
 
@@ -575,17 +631,15 @@ Steps 3 and 4 only happen if validation succeeds.
 
 =head1 API FORMATS
 
-By default, Raisin supports C<YAML>, C<JSON>, and C<TEXT> content-types.
-The default format is C<TEXT>.
+By default, Raisin supports C<YAML>, C<JSON>, and C<TEXT> content types.
+Default format is C<YAML>.
 
-Response format can be determined by Accept header or route extension.
+Response format can be determined by C<Accept header> or C<route extension>.
 
-Serialization takes place automatically. For example, you do not have to call
+Serialization takes place automatically. So, you do not have to call
 C<encode_json> in each C<JSON> API implementation.
 
-Your API can declare which types to support by using C<api_format>.
-
-    api_format 'json';
+Your API can declare to support only one serializator by using L<Raisin/api_format>.
 
 Custom formatters for existing and additional types can be defined with a
 L<Raisin::Plugin::Format>.
@@ -610,21 +664,11 @@ The order for choosing the format is the following.
 
 =over
 
-=item *
+=item * Use the route extension.
 
-Use the route extension.
+=item * Use the value of the C<Accept> header.
 
-=item *
-
-Use the value of the C<Accept> header.
-
-=item *
-
-Use the C<api_format> if specified.
-
-=item *
-
-Fallback to C<TEXT>.
+=item * Fallback to default.
 
 =back
 

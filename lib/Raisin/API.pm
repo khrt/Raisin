@@ -8,7 +8,7 @@ use base 'Exporter';
 use Carp;
 use Raisin;
 
-my @APP_CONF_METHODS = qw(api_format api_version middleware mount plugin);
+my @APP_CONF_METHODS = qw(api_default_format api_format api_version middleware mount plugin);
 my @APP_EXEC_METHODS = qw(new run);
 my @APP_METHODS = qw(req res param session);
 my @HOOKS_METHODS = qw(before before_validation after_validation after);
@@ -66,7 +66,7 @@ sub after { $app->add_hook('after', shift) }
 # Resource DSL
 #
 sub resource {
-    my ($name, $block, %args) = @_;
+    my ($name, $code, %args) = @_;
 
     if ($name) {
         $name =~ s{^/}{}msx;
@@ -77,7 +77,7 @@ sub resource {
         @SETTINGS{ keys %args } = values %args;
 
         # Going deeper
-        $block->();
+        $code->();
 
         pop @NS;
         %SETTINGS = ();
@@ -97,7 +97,7 @@ sub route_param {
         $param = $spec->{name};
     }
     else {
-        $spec = { name => $_[0], type => $_[1], desc => 'ROUTE PARAM' };
+        $spec = { name => $_[0], type => $_[1], desc => $_[0] };
         $param = $_[0];
     }
 
@@ -115,14 +115,14 @@ sub patch   { _add_route('patch', @_) }
 sub post    { _add_route('post', @_) }
 sub put     { _add_route('put', @_) }
 
-sub desc { _add_route(desc => @_) }
-sub params { _add_route(params => @_) }
+sub desc    { _add_route('desc', @_) }
+sub params  { _add_route('params', @_) }
 
 sub _add_route {
     my @params = @_;
-    my $code = pop @params;
 
-    my %pp;
+    my %pp = (%SETTINGS, code => pop @params);
+
     my $i = 0;
     while ($i < scalar(@params)) {
         my $k = $params[$i];
@@ -133,19 +133,14 @@ sub _add_route {
 #            splice @params, $i, 2, '', '';
         }
         elsif (grep { $k =~ /^$_$/i } @HTTP_METHODS) {
-            $pp{method} = uc $k =~ /del/i ? 'delete' : $k;
-            $pp{path} = $v || '';
+            $pp{method} = $k =~ /del/i ? 'delete' : $k;
+            $pp{path} = resource() . ($v ? "/$v" : '');
         }
 
         $i++;
     }
 
-    my $method = delete $pp{method};
-    my $path = resource();
-
-    $path .= "/$pp{path}" if $pp{path};
-
-    $app->add_route($method, $path, %SETTINGS, %pp, $code);
+    $app->add_route(%pp);
 }
 
 
@@ -166,7 +161,9 @@ sub session { $app->session(@_) }
 #
 sub plugin { $app->load_plugin(@_) }
 
+sub api_default_format { $app->api_default_format(@_) }
 sub api_format { $app->api_format(@_) }
+
 sub api_version { $app->api_version(@_) }
 
 #
