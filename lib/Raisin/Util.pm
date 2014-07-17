@@ -41,6 +41,10 @@ Raisin::Utils - Utility subroutine for Raisin.
 
 =head2 detect_serializer
 
-Detect serializer by content type or extension.
+Detects serializer by content type or extension.
+
+=head2 make_serializer_class
+
+Returns C<Raisin::Plugin::Format::E<lt>NAMEE<gt>> class name.
 
 =cut
