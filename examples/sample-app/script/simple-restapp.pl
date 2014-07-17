@@ -32,7 +32,7 @@ sub _return_max {
     $value > $max ? $max : $value;
 }
 
-plugin 'APIDocs';
+plugin 'APIDocs', enable => 'CORS';
 plugin 'Logger', outputs => [['Screen', min_level => 'debug']];
 api_format 'yaml';
 
@@ -85,12 +85,14 @@ resource user => sub {
         };
 
         resource bump => sub {
-            get sub {
+            desc 'Get bumps count',
+            get => sub {
                 my $params = shift;
                 { data => UseCase::User::show($params->{id})->{bumped} }
             };
 
-            put sub {
+            desc 'Bump user',
+            put => sub {
                 my $params = shift;
                 { success => UseCase::User::bump($params->{id}) }
             };
