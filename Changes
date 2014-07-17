@@ -1,3 +1,11 @@
+0.4000 Description and strict format
+    - Description for resources, operations and parameters;
+    - Rename `namespace` to `resource` and make an alias for `namespace`;
+    - Able to setup strict API formatter via `api_format`;
+    - Able to setup default API formatter via `api_default_format`;
+    - Many internal refactoring:
+        * Routes, Endpoint, API, Raisin, Plugins, Utils;
+
 0.36 Bug fixes
     - Fix broken `basePath` in `APIDocs` plugin;
 
