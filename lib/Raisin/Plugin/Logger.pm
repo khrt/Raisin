@@ -30,20 +30,18 @@ sub build {
 }
 
 sub message {
-    my ($self, $level, @messages) = @_;
+    my ($self, $level, $message, @args) = @_;
 
-    for (@messages) {
-        my $t = time;
-        my $ts = strftime "%Y-%m-%dT%H:%M:%S", localtime $t;
-        $ts .= sprintf ".%03d", ($t - int($t)) * 1000;
+    my $t = time;
+    my $ts = strftime "%Y-%m-%dT%H:%M:%S", localtime $t;
+    $ts .= sprintf ".%03d", ($t - int($t)) * 1000;
 
-        my $str = ref($_) ? Dumper($_) : $_;
+    my $str = ref($message) ? Dumper($message) : $message;
 
-        $self->{logger}->log(
-            level   => $level,
-            message => "$ts $str\n",
-        );
-    }
+    $self->{logger}->log(
+        level   => $level,
+        message => "$ts $str\n",
+    );
 }
 
 1;
