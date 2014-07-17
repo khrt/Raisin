@@ -20,6 +20,7 @@ sub accept_format {
     my $self = shift;
 
     my $accept = $self->header('Accept');
+    return unless $accept;
     return if $accept eq '*/*';
     Raisin::Util::detect_serializer($accept) || $accept;
 }
