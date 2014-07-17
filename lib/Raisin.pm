@@ -204,6 +204,9 @@ sub api_format {
         $self->{api_format} = $format;
         $self->api_default_format($format);
     }
+    elsif ($format) {
+        carp "Can't use specified format. Currently supported only JSON and YAML.";
+    }
 
     $self->{api_format};
 }
