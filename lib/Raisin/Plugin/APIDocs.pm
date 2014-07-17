@@ -10,16 +10,17 @@ use JSON 'encode_json';
 use constant SWAGGER_VERSION => '1.2';
 
 sub build {
-    my $self = shift;
+    my ($self, %args) = @_;
 
-    # TODO: make configurable
     # Enable CORS
-    $self->app->add_middleware(
-        'CrossOrigin',
-        origins => '*',
-        methods => [qw(GET POST DELETE PUT PATCH OPTIONS)],
-        headers => [qw(api_key Authorization Content-Type)]
-    );
+    if (lc($args{enable}) eq 'cors') {
+        $self->app->add_middleware(
+            'CrossOrigin',
+            origins => '*',
+            methods => [qw(GET POST DELETE PUT PATCH OPTIONS)],
+            headers => [qw(api_key Authorization Content-Type)]
+        );
+    }
 
     $self->register(build_api_docs => sub { $self->build_api_docs });
 }
@@ -96,10 +97,10 @@ sub build_api_docs {
         push @{ $index{apis} }, $api;
     }
 
-    # Add routes
     $app->add_route(
-        GET => '/api-docs',
-        sub { encode_json \%index }
+        method => 'GET',
+        path => '/api-docs',
+        code => sub { encode_json \%index }
     );
 
     for my $ns (keys %apis) {
@@ -117,8 +118,9 @@ sub build_api_docs {
         );
 
         $app->add_route(
-            GET => "/api-docs${ns}",
-            sub { encode_json \%description }
+            method => 'GET',
+            path => "/api-docs${ns}",
+            code => sub { encode_json \%description }
         );
     }
 
