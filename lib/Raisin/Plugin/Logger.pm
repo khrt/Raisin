@@ -5,6 +5,7 @@ use warnings;
 
 use base 'Raisin::Plugin';
 
+use Carp qw(carp);
 use POSIX qw(strftime);
 use Plack::Util;
 use Time::HiRes qw(time);
@@ -12,16 +13,15 @@ use Time::HiRes qw(time);
 sub build {
     my ($self, %args) = @_;
 
-    # TODO: use Raisin::Logger if couldn't founded Log::Dispatch
-    my $module = 'Log::Dispatch';
+    my $logger = $args{fallback} ? 'Raisin::Logger' : 'Log::Dispatch';
 
-    if (delete $args{fallback}) {
-        $module = qw(Raisin::Logger);
-    }
+    my $obj;
+    eval { $obj = Plack::Util::load_class($logger) } || do {
+        carp 'Can\'t load `Log::Dispatch, fallback to `Raisin::Logger`!';
+        $obj = Plack::Util::load_class('Raisin::Logger');
+    };
 
-    my $class = Plack::Util::load_class($module);
-
-    $self->{logger} = $class->new(%args);
+    $self->{logger} = $obj->new(%args);
 
     $self->register(log => sub {
         shift if ref($_[0]);
