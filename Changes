@@ -5,6 +5,7 @@
     - Able to setup default API formatter via `api_default_format`;
     - Many internal refactoring:
         * Routes, Endpoint, API, Raisin, Plugins, Utils;
+    - Delete `Log::Dispatch` from dependency list;
 
 0.36 Bug fixes
     - Fix broken `basePath` in `APIDocs` plugin;
