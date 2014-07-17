@@ -8,6 +8,8 @@ use base 'Plack::Response';
 use Carp;
 use Encode 'encode';
 
+use Raisin::Util;
+
 sub new {
     my ($class, $app) = @_;
     my $self = $class->SUPER::new();
@@ -21,14 +23,14 @@ sub serialize {
     my ($self, $format, $data) = @_;
 
     my $serializer = do {
-        if (my $c = Raisin::Util::detect_serializer($format)) {
-            Plack::Util::load_class('Raisin::Plugin::Format::' . uc($c));
+        if (my $f = Raisin::Util::detect_serializer($format)) {
+            Plack::Util::load_class(Raisin::Util::make_serializer_class($f));
         }
         elsif ($self->app->can('serializer')) {
             $self->app->serializer;
         }
         elsif (ref $data) {
-            Plack::Util::load_class($self->app->DEFAULT_SERIALIZER);
+            Plack::Util::load_class($self->app->api_default_format);
         }
     };
 
