@@ -34,7 +34,6 @@ sub _return_max {
 
 plugin 'APIDocs', enable => 'CORS';
 plugin 'Logger', outputs => [['Screen', min_level => 'debug']];
-api_format 'yaml';
 
 resource user => sub {
     params [

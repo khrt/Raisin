@@ -22,15 +22,16 @@ my $r = Raisin::Routes->new;
 #   params [...], get '/bar' => sub {};
 #
 
-ok $r->add(POST => '/dump/:id', sub {'DUMP'}), 'add /dump/:id';
-ok $r->add(POST => '/dump', sub {'DUMP'}), 'add /dump';
+ok $r->add(method => 'POST', path => '/dump/:id', code => sub {'DUMP-ID'}), 'add /dump/:id';
+ok $r->add(method => 'POST', path => '/dump', code => sub {'DUMP'}), 'add /dump';
 ok $r->add(
-        POST   => '/person(?<format>\.\w+)?',
+        method => 'POST',
+        path => '/person(?<format>\.\w+)?',
         params => [
             requires => { name => 'name',  type => Str },
             optional => { name => 'email', type => Str }
         ],
-        sub { 'PERSON' }
+        code => sub { 'PERSON' }
     ),
     'add /person(?<format>)';
 

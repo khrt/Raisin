@@ -18,37 +18,41 @@ $a->api_version('1.23');
 my $r = $a->{routes};
 
 $r->add(
-    GET => '/person/:id',
+    method => 'GET',
+    path => '/person/:id',
     params => [
         required => { name => 'name', type => Str },
         optional => { name => 'zip', type => Int },
     ],
-    sub { 'GET' }
+    code => sub { 'GET' }
 );
 $r->add(
-    POST => '/person',
+    method => 'POST',
+    path => '/person',
     params => [
         optional => { name => 'email', type => Str },
     ],
-    sub { 'POST' }
+    code => sub { 'POST' }
 );
 
 $r->add(
-    GET => '/address',
+    method => 'GET',
+    path => '/address',
     params => [
         required => { name => 'street', type => Str },
         required => { name => 'house_num', type => Str },
     ],
-    sub { 'POST' }
+    code => sub { 'POST' }
 );
 $r->add(
-    POST => '/address',
+    method => 'POST',
+    path => '/address',
     params => [
         required => { name => 'street', type => Str },
         required => { name => 'house_num', type => Str },
         required => { name => 'apartment', type => Str },
     ],
-    sub { 'POST' }
+    code => sub { 'POST' }
 );
 
 my $i = Raisin::Plugin::APIDocs->new($a);
