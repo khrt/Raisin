@@ -63,7 +63,7 @@ sub after_validation { $app->add_hook('after_validation', shift) }
 sub after { $app->add_hook('after', shift) }
 
 #
-# Resource DSL
+# Resource
 #
 sub resource {
     my ($name, $code, %args) = @_;
@@ -132,15 +132,25 @@ sub _add_route {
             $pp{ $k } = $v;
 #            splice @params, $i, 2, '', '';
         }
-        elsif (grep { $k =~ /^$_$/i } @HTTP_METHODS) {
+        elsif (grep { $k =~ /^$_$/imsx } @HTTP_METHODS) {
             $pp{method} = $k =~ /del/i ? 'delete' : $k;
             $pp{path} = resource() . ($v ? "/$v" : '');
         }
+        elsif ($k =~ /^resource|namespace$/msx) {
+            $pp{$k} = $v;
+        }
+        # route_param
 
         $i++;
     }
 
-    $app->add_route(%pp);
+    if ($pp{resource}) {
+        $app->add_resource_desc(%pp);
+        resource($pp{resource}, $pp{code});
+    }
+    else {
+        $app->add_route(%pp);
+    }
 }
 
 

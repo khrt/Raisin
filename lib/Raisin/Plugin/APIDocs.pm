@@ -89,9 +89,11 @@ sub build_api_docs {
     # Prepare index
     my %index = (%template);
     for my $ns (keys %apis) {
+        my $desc = $app->resource_desc($ns) || "Operations about ${ \( $ns =~ m#/(.+)# ) }";
+
         my $api = {
             path => $ns,
-            description => "Operations about ${ \( $ns =~ m#/(.+)# ) }",
+            description => $desc,
         };
 
         push @{ $index{apis} }, $api;
@@ -105,7 +107,7 @@ sub build_api_docs {
 
     for my $ns (keys %apis) {
         my $base_path = $app->req ? $app->req->base->as_string : '';
-        $base_path =~ s#/$##;
+        $base_path =~ s#/$##msx;
 
         my @content_type = do {
             if ($app->api_format) {

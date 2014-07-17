@@ -11,7 +11,7 @@ use Raisin::Response;
 use Raisin::Routes;
 use Raisin::Util;
 
-our $VERSION = '0.36';
+our $VERSION = '0.4000';
 
 sub new {
     my ($class, %args) = @_;
@@ -49,10 +49,20 @@ sub add_middleware {
 sub routes { shift->{routes} }
 sub add_route {
     my ($self, %params) = @_;
-
     $params{api_format} = $self->api_format if $self->api_format;
-
     $self->routes->add(%params);
+}
+
+# Resource description
+sub add_resource_desc {
+    my ($self, %params) = @_;
+    $self->{resource_desc}{ $params{resource} } = $params{desc};
+}
+
+sub resource_desc {
+    my ($self, $resource) = @_;
+    $resource =~ s#^/##msx;
+    $self->{resource_desc}{$resource};
 }
 
 # Hooks
@@ -268,12 +278,14 @@ Raisin - REST-like API web micro-framework for Perl.
         },
     );
 
-    plugin 'APIDocs';
+    plugin 'APIDocs', enable => 'CORS';
+    api_format 'json';
 
-    resource user => sub {
+    desc 'Actions on users',
+    resource => user => sub {
         params [
             optional => { name => 'start', type => Int, default => 0, desc => 'Pager (start)' },
-            optional => { name => 'count', type => Int, default => 0, desc => 'Pager (count)' },
+            optional => { name => 'count', type => Int, default => 10, desc => 'Pager (count)' },
         ],
         desc => 'List users',
         get => sub {
@@ -403,7 +415,7 @@ for operation or for resource.
     put => sub { ... }
 
     desc 'Some operations group',
-    resource => sub { ... }
+    resource => 'user' => sub { ... }
 
 =head2 params
 

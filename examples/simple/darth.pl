@@ -25,7 +25,8 @@ my %USERS = (
 plugin 'APIDocs', enable => 'CORS';
 api_format 'json';
 
-resource user => sub {
+desc 'Actions on users',
+resource => user => sub {
     params [
         optional => { name => 'start', type => Int, default => 0, desc => 'Pager (start)' },
         optional => { name => 'count', type => Int, default => 10, desc => 'Pager (count)' },
