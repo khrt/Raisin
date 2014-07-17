@@ -19,39 +19,46 @@ sub new {
     $self;
 }
 
-# @args:
-#   * [optional] desc => ''
-#   * [optional] named => []
-#   * [optional] params => []
-#   * [required] code ref
+# method* => ''
+# path* => ''
+# code* => sub {}
+#
+# api_format => ''
+# desc => ''
+# named => []
+# params => []
 sub add {
-    my ($self, $method, $path, @args) = @_;
+    #my ($self, $method, $path, @args) = @_;
+    my ($self, %params) = @_;
+#use DDP;
+#p %params;
+#print " \n\n -- \n\n ";
 
-    $method = uc $method;
+    my $method = uc $params{method};
+    my $path = $params{path};
 
     if (!$method || !$path) {
         carp "Method and path are required";
         return;
     }
 
-    my $code = pop @args;
+    my $code = $params{code};
     # Support only code as route destination
     if (!$code || !(ref($code) eq 'CODE')) {
         carp "Invalid route params for $method $path";
         return;
     }
 
-    my (@params, $desc);
-    if (my %args = @args) {
-        $desc = $args{desc};
-        for my $key (qw(params named)) {
-            for my $p (pairs @{ $args{$key} }) {
-                push @params, Raisin::Param->new(
-                    named => $key eq 'named',
-                    type => $p->[0], # -> requires/optional
-                    spec => $p->[1], # -> ['name', Int]
-                );
-            }
+    my $desc = $params{desc};
+
+    my @pp;
+    for my $key (qw(params named)) {
+        for my $p (pairs @{ $params{$key} }) {
+            push @pp, Raisin::Param->new(
+                named => $key eq 'named',
+                type => $p->[0], # -> requires/optional
+                spec => $p->[1], # -> { name => ..., type => ... }
+            );
         }
     }
 
@@ -66,10 +73,11 @@ sub add {
 
     my $ep
         = Raisin::Routes::Endpoint->new(
+            api_format => $params{api_format},
             code => $code,
             desc => $desc,
             method => $method,
-            params => \@params,
+            params => \@pp,
             path => $path,
         );
     push @{ $self->{routes} }, $ep;

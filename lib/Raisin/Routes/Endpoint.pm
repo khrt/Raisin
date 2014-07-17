@@ -5,6 +5,7 @@ use warnings;
 
 use Raisin::Attributes;
 
+has 'api_format';
 has 'check' => {};
 has 'code';
 has 'desc';
@@ -42,11 +43,17 @@ sub _build_regex {
 
     my $regex = $self->path;
 
-    $regex =~ s#(.?)([:*?])(\w+)#$self->_rep_regex($1, $2, $3)#eg;
-
+    $regex =~ s/(.?)([:*?])(\w+)/$self->_rep_regex($1, $2, $3)/eg;
     $regex =~ s/[{}]//g;
 
-    $regex .= '(?<format>\.\w+)?';
+    $regex .= do {
+        if ($self->api_format) {
+            "(?<format>\.${ \$self->api_format })?";
+        }
+        else {
+            '(?<format>\.\w+)?';
+        }
+    };
 
     qr/^$regex$/;
 }

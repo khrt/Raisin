@@ -5,6 +5,8 @@ use warnings;
 
 use base 'Plack::Request';
 
+use Raisin::Util;
+
 sub new {
     my ($class, $app, $env) = @_;
     my $self = $class->SUPER::new($env);
@@ -14,12 +16,20 @@ sub new {
 
 sub app { shift->{app} }
 
+sub accept_format {
+    my $self = shift;
+
+    my $accept = $self->header('Accept');
+    return if $accept eq '*/*';
+    Raisin::Util::detect_serializer($accept) || $accept;
+}
+
 sub deserialize {
     my ($self, $data) = @_;
 
     my $serializer = do {
-        if (my $c = Raisin::Util::detect_serializer($self->content_type)) {
-            Plack::Util::load_class('Raisin::Plugin::Format::' . uc($c));
+        if (my $f = Raisin::Util::detect_serializer($self->content_type)) {
+            Plack::Util::load_class(Raisin::Util::make_serializer_class($f));
         }
         elsif ($self->app->can('serializer')) {
             $self->app->serializer;
