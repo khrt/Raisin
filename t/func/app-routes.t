@@ -2,7 +2,6 @@
 use strict;
 use warnings;
 
-use DDP;
 use FindBin '$Bin';
 use HTTP::Request::Common;
 use Plack::Test;

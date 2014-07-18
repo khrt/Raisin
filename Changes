@@ -1,3 +1,6 @@
+0.4001 Bug fixes
+    - Delete DDP dependency;
+
 0.4000 Description and strict format
     - Description for resources, operations and parameters;
     - Rename `namespace` to `resource` and make an alias for `namespace`;

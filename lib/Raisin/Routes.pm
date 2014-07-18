@@ -30,9 +30,6 @@ sub new {
 sub add {
     #my ($self, $method, $path, @args) = @_;
     my ($self, %params) = @_;
-#use DDP;
-#p %params;
-#print " \n\n -- \n\n ";
 
     my $method = uc $params{method};
     my $path = $params{path};
