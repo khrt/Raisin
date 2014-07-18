@@ -8,22 +8,24 @@ use UseCase::Host;
 
 use Types::Standard qw(Int Str);
 
-namespace host => sub {
+resource host => sub {
     params [
-        optional => ['start', Int, 0, qr/^\d+$/],
-        optional => ['count', Int, 10, qr/^\d+$/],
+        optional => { name => 'start', type => Int, default => 0, desc => 'Pager start' },
+        optional => { name => 'count', type => Int, default => 10, desc => 'Pager count' },
     ],
+    desc => 'List hosts',
     get => sub {
         my $params = shift;
         my @hosts = UseCase::Host::list(%$params);
-        { data => RESTApp::paginate(\@hosts, $params) }
+        { data => paginate(\@hosts, $params) }
     };
 
     params [
-        required => ['name', Str],
-        required => ['user_id', Int],
-        optional => ['state', Str]
+        required => { name => 'name', type => Str, desc => 'Host name' },
+        required => { name => 'user_id', type => Int, desc => 'Host owner' },
+        optional => { name => 'state', type => Str, desc => 'Host state' }
     ],
+    desc => 'Create new host',
     post => sub {
         my $params = shift;
         { success => UseCase::Host::create(%$params) }
@@ -31,20 +33,23 @@ namespace host => sub {
 
     route_param id => Int,
     sub {
-        get sub {
+        desc 'Show host',
+        get => sub {
             my $params = shift;
             { data => UseCase::Host::show($params->{id}) }
         };
 
         params [
-            required => ['state', Str],
+            required => { name => 'state', type => Str, desc => 'Host state' },
         ],
+        desc => 'Edit host',
         put => sub {
             my $params = shift;
-            { data => UseCase::Host::edit($params->{id}, $params) }
+            { data => UseCase::Host::edit($params->{id}, %$params) }
         };
 
-        del sub {
+        desc 'Delete host',
+        del => sub {
             my $params = shift;
             { success => UseCase::Host::delete($params->{id}) }
         }
