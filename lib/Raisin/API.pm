@@ -137,16 +137,24 @@ sub _add_route {
             $pp{path} = resource() . ($v ? "/$v" : '');
         }
         elsif ($k =~ /^resource|namespace$/msx) {
+            $pp{resource} = $v;
+        }
+        elsif ($k eq 'route_param') {
             $pp{$k} = $v;
         }
-        # route_param
 
         $i++;
     }
 
     if ($pp{resource}) {
+        my $path = resource($pp{resource}, $pp{code});
+        #$path .= $pp{resource};
         $app->add_resource_desc(%pp);
-        resource($pp{resource}, $pp{code});
+    }
+    elsif ($pp{route_param}) {
+        my $path = resource(":$pp{route_param}", $pp{code}, named => $pp{params});
+        #$path .= "/:$pp{route_param}";
+        #$app->add_resource_desc(resource => $path, desc => $pp{desc});
     }
     else {
         $app->add_route(%pp);

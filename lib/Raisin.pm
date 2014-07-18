@@ -54,15 +54,15 @@ sub add_route {
 }
 
 # Resource description
-sub add_resource_desc {
-    my ($self, %params) = @_;
-    $self->{resource_desc}{ $params{resource} } = $params{desc};
-}
-
 sub resource_desc {
     my ($self, $resource) = @_;
     $resource =~ s#^/##msx;
     $self->{resource_desc}{$resource};
+}
+
+sub add_resource_desc {
+    my ($self, %params) = @_;
+    $self->{resource_desc}{ $params{resource} } = $params{desc};
 }
 
 # Hooks
