@@ -161,7 +161,6 @@ sub _add_route {
     }
 }
 
-
 #
 # Request and Response shortcuts
 #
