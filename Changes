@@ -1,3 +1,7 @@
+0.4002
+    - Update dependencies:
+        * include: Hash::MultiValue, List::Util;
+
 0.4001 Bug fixes
     - Delete DDP dependency;
 
