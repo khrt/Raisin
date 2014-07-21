@@ -1,3 +1,6 @@
+* Error handler (custom errors):
+  - handle `die`;
+  - regular HTTP errors;
 
 * `declared` keyword;
   * applicable to `param`;
