@@ -3,7 +3,7 @@ package Raisin::Plugin::Format::JSON;
 use strict;
 use warnings;
 
-use base 'Raisin::Plugin';
+use parent 'Raisin::Plugin';
 
 use JSON qw(encode_json decode_json);
 

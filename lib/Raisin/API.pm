@@ -3,7 +3,7 @@ package Raisin::API;
 use strict;
 use warnings;
 
-use base 'Exporter';
+use parent 'Exporter';
 
 use Carp;
 use Raisin;

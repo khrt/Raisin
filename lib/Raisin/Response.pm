@@ -3,7 +3,7 @@ package Raisin::Response;
 use strict;
 use warnings;
 
-use base 'Plack::Response';
+use parent 'Plack::Response';
 
 use Carp;
 use Encode 'encode';

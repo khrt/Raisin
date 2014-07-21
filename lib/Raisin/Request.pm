@@ -3,7 +3,7 @@ package Raisin::Request;
 use strict;
 use warnings;
 
-use base 'Plack::Request';
+use parent 'Plack::Request';
 
 use Raisin::Util;
 

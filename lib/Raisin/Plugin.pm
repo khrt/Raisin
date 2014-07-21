@@ -57,7 +57,7 @@ Raisin::Plugin - Base class for Raisin plugins.
 =head1 SYNOPSIS
 
     package Raisin::Plugin::Hello;
-    use base 'Raisin::Plugin';
+    use parent 'Raisin::Plugin';
 
     sub build {
         my ($self, %args) = @_;

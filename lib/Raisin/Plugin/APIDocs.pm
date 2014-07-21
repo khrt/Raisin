@@ -3,7 +3,7 @@ package Raisin::Plugin::APIDocs;
 use strict;
 use warnings;
 
-use base 'Raisin::Plugin';
+use parent 'Raisin::Plugin';
 
 use JSON 'encode_json';
 

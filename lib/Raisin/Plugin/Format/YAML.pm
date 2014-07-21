@@ -3,7 +3,7 @@ package Raisin::Plugin::Format::YAML;
 use strict;
 use warnings;
 
-use base 'Raisin::Plugin';
+use parent 'Raisin::Plugin';
 
 use YAML qw(Dump Load);
 

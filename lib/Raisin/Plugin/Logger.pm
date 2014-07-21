@@ -3,7 +3,7 @@ package Raisin::Plugin::Logger;
 use strict;
 use warnings;
 
-use base 'Raisin::Plugin';
+use parent 'Raisin::Plugin';
 
 use Carp qw(carp);
 use POSIX qw(strftime);

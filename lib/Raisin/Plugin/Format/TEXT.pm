@@ -3,7 +3,7 @@ package Raisin::Plugin::Format::TEXT;
 use strict;
 use warnings;
 
-use base 'Raisin::Plugin';
+use parent 'Raisin::Plugin';
 
 use Data::Dumper;
 
