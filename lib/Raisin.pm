@@ -174,7 +174,10 @@ sub psgi {
         1;
     } or do {
         my $e = longmess($@);
-        $res->render_500($e);
+        $self->log(error => $e);
+
+        my $msg = $ENV{PLACK_ENV} eq 'deployment' ? 'Internal error' : $e;
+        $res->render_500($msg);
     };
 
     $self->finalize;
