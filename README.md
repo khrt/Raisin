@@ -4,6 +4,28 @@ Raisin - REST-like API web micro-framework for Perl.
 
 # SYNOPSIS
 
+    use strict;
+    use warnings;
+
+    use Raisin::API;
+    use Types::Standard qw(Int Str);
+
+    my %USERS = (
+        1 => {
+            name => 'Darth Wader',
+            password => 'deathstar',
+            email => 'darth@deathstar.com',
+        },
+        2 => {
+            name => 'Luke Skywalker',
+            password => 'qwerty',
+            email => 'l.skywalker@jedi.com',
+        },
+    );
+
+    plugin 'APIDocs', enable => 'CORS';
+    api_format 'json';
+
     desc 'Actions on users',
     resource => user => sub {
         desc 'List users',
