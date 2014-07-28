@@ -5,7 +5,7 @@ use warnings;
 
 use parent 'Raisin::Plugin';
 
-use JSON qw(encode_json decode_json);
+use JSON qw(to_json from_json);
 
 sub build {
     my ($self, %args) = @_;
@@ -17,8 +17,8 @@ sub build {
 
 sub content_type { 'application/json' }
 
-sub deserialize { decode_json $_[1] }
-sub serialize   { encode_json $_[1] }
+sub deserialize { from_json $_[1] }
+sub serialize   { to_json $_[1], { utf8 => 0 } }
 
 1;
 

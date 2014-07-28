@@ -1,7 +1,9 @@
+0.4003 Fixes
     - `use base` -> `use parent`;
     - Don't print debug messages in deployment environment;
+    - Don't encode JSON to utf8;
 
-0.4002
+0.4002 Fixes
     - Update dependencies:
         * include: Hash::MultiValue, List::Util;
 

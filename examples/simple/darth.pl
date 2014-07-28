@@ -7,7 +7,7 @@ use FindBin;
 use lib "$FindBin::Bin/../../lib";
 
 use Raisin::API;
-use Types::Standard qw(Int Str);
+use Types::Standard qw(Any Int Str);
 
 my %USERS = (
     1 => {
@@ -91,6 +91,14 @@ resource => user => sub {
         desc 'NOP',
         put => sub { 'nop' };
     };
+
+};
+
+resource echo => sub {
+    params [
+        requires => { name => 'data', type => Any },
+    ],
+    get => sub { { data => 'ё' } };
 };
 
 run;
