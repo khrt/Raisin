@@ -24,11 +24,11 @@ our @EXPORT = (
     @ROUTES_METHODS,
 );
 
-my $app;
 
-#my %SETTINGS = (_NS => ['']);
 my %SETTINGS = ();
 my @NS = ('');
+
+my $app;
 
 sub import {
     my $class = shift;
@@ -69,6 +69,12 @@ sub resource {
     my ($name, $code, %args) = @_;
 
     if ($name) {
+        if ($SETTINGS{desc}) {
+            my $path = join '/', (@NS, $name);
+            $app->add_resource_desc($path, $SETTINGS{desc});
+            $SETTINGS{desc} = undef;
+        }
+
         $name =~ s{^/}{}msx;
 
         my %prev_settings = %SETTINGS;
@@ -89,19 +95,8 @@ sub resource {
 sub namespace { resource(@_) }
 
 sub route_param {
-    my $code = pop @_;
-
-    my ($param, $spec);
-    if (ref $_[0] eq 'HASH') {
-        $spec = $_[0];
-        $param = $spec->{name};
-    }
-    else {
-        $spec = { name => $_[0], type => $_[1], desc => $_[0] };
-        $param = $_[0];
-    }
-
-    resource(":$param", $code, named => [requires => $spec]);
+    my ($param, $code) = @_;
+    resource(":$param", $code, named => $SETTINGS{params});
 }
 
 #
@@ -115,8 +110,16 @@ sub patch   { _add_route('patch', @_) }
 sub post    { _add_route('post', @_) }
 sub put     { _add_route('put', @_) }
 
-sub desc    { _add_route('desc', @_) }
-sub params  { _add_route('params', @_) }
+sub desc {
+    $SETTINGS{desc} = shift;
+    #_add_route('desc', @_);
+}
+
+sub params {
+    my $params = ref($_[0]) eq 'ARRAY' ? $_[0] : \@_;
+    $SETTINGS{params} = $params;
+    #_add_route('params', @_);
+}
 
 sub _add_route {
     my @params = @_;
@@ -128,37 +131,45 @@ sub _add_route {
         my $k = $params[$i];
         my $v = $params[$i + 1] || undef;
 
-        if ($k eq 'desc' || $k eq 'params') {
-            $pp{ $k } = $v;
-#            splice @params, $i, 2, '', '';
-        }
-        elsif (grep { $k =~ /^$_$/imsx } @HTTP_METHODS) {
+#        if ($k eq 'desc' || $k eq 'params') {
+#            $pp{ $k } = $v;
+##            splice @params, $i, 2, '', '';
+#        }
+#        elsif (grep { $k =~ /^$_$/imsx } @HTTP_METHODS) {
+        if (grep { $k =~ /^$_$/imsx } @HTTP_METHODS) {
             $pp{method} = $k =~ /del/i ? 'delete' : $k;
             $pp{path} = resource() . ($v ? "/$v" : '');
         }
-        elsif ($k =~ /^resource|namespace$/msx) {
-            $pp{resource} = $v;
-        }
-        elsif ($k eq 'route_param') {
-            $pp{$k} = $v;
-        }
+#        elsif ($k =~ /^resource|namespace$/msx) {
+#            $pp{resource} = $v;
+#        }
+#        elsif ($k eq 'route_param') {
+#            $pp{$k} = $v;
+#        }
 
         $i++;
     }
+use feature 'say';
+use DDP;
+#say '~' x 10;
+#say join ',', keys(%pp);
 
-    if ($pp{resource}) {
-        my $path = resource($pp{resource}, $pp{code});
-        #$path .= $pp{resource};
-        $app->add_resource_desc(%pp);
-    }
-    elsif ($pp{route_param}) {
-        my $path = resource(":$pp{route_param}", $pp{code}, named => $pp{params});
-        #$path .= "/:$pp{route_param}";
-        #$app->add_resource_desc(resource => $path, desc => $pp{desc});
-    }
-    else {
+#    if ($pp{resource}) {
+#        my $path = resource($pp{resource}, $pp{code});
+#        #$path .= $pp{resource};
+#        $app->add_resource_desc(%pp);
+#    }
+#    elsif ($pp{route_param}) {
+#        my $path = resource(":$pp{route_param}", $pp{code}, named => $pp{params});
+#        #$path .= "/:$pp{route_param}";
+#        #$app->add_resource_desc(resource => $path, desc => $pp{desc});
+#    }
+#    else {
         $app->add_route(%pp);
-    }
+#    }
+
+    $SETTINGS{desc} = undef;
+    $SETTINGS{params} = undef;
 }
 
 #
