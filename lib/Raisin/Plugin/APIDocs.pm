@@ -1,4 +1,4 @@
-package Raisin::Plugin::APIDocs;
+package Raisin::Plugin::Swagger;
 
 use strict;
 use warnings;
@@ -142,7 +142,7 @@ __END__
 
 =head1 NAME
 
-Raisin::Plugin::APIDocs - Generate API documentation.
+Raisin::Plugin::Swagger - Generate API documentation.
 
 =head1 SYNOPSIS
 
