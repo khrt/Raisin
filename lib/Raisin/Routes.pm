@@ -28,7 +28,6 @@ sub new {
 # named => []
 # params => []
 sub add {
-    #my ($self, $method, $path, @args) = @_;
     my ($self, %params) = @_;
 
     my $method = uc $params{method};
