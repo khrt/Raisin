@@ -24,7 +24,6 @@ our @EXPORT = (
     @ROUTES_METHODS,
 );
 
-
 my %SETTINGS = ();
 my @NS = ('');
 
@@ -69,17 +68,16 @@ sub resource {
     my ($name, $code, %args) = @_;
 
     if ($name) {
+        $name =~ s{^/}{}msx;
+        push @NS, $name;
+
         if ($SETTINGS{desc}) {
-            my $path = join '/', (@NS, $name);
-            $app->add_resource_desc($path, $SETTINGS{desc});
+            my $path = join '/', @NS;
+            $app->resource_desc($path, $SETTINGS{desc});
             $SETTINGS{desc} = undef;
         }
 
-        $name =~ s{^/}{}msx;
-
         my %prev_settings = %SETTINGS;
-
-        push @NS, $name;
         @SETTINGS{ keys %args } = values %args;
 
         # Going deeper
@@ -96,13 +94,17 @@ sub namespace { resource(@_) }
 
 sub route_param {
     my ($param, $code) = @_;
-    resource(":$param", $code, named => $SETTINGS{params});
+
+    my $params = $SETTINGS{params};
+    $SETTINGS{params} = undef;
+
+    resource(":$param", $code, named => $params);
 }
 
 #
 # Actions
 #
-sub del     { _add_route('del', @_) }
+sub del     { _add_route('delete', @_) }
 sub get     { _add_route('get', @_) }
 sub head    { _add_route('head', @_) }
 sub options { _add_route('options', @_) }
@@ -110,63 +112,23 @@ sub patch   { _add_route('patch', @_) }
 sub post    { _add_route('post', @_) }
 sub put     { _add_route('put', @_) }
 
-sub desc {
-    $SETTINGS{desc} = shift;
-    #_add_route('desc', @_);
-}
-
-sub params {
-    my $params = ref($_[0]) eq 'ARRAY' ? $_[0] : \@_;
-    $SETTINGS{params} = $params;
-    #_add_route('params', @_);
-}
+sub desc { $SETTINGS{desc} = shift }
+sub params { $SETTINGS{params} = ref($_[0]) eq 'ARRAY' ? $_[0] : \@_ }
 
 sub _add_route {
     my @params = @_;
 
-    my %pp = (%SETTINGS, code => pop @params);
+    my $code = pop @params;
 
-    my $i = 0;
-    while ($i < scalar(@params)) {
-        my $k = $params[$i];
-        my $v = $params[$i + 1] || undef;
+    my ($method, $path) = @params;
+    $path = resource() . ($path ? "/$path" : '');
 
-#        if ($k eq 'desc' || $k eq 'params') {
-#            $pp{ $k } = $v;
-##            splice @params, $i, 2, '', '';
-#        }
-#        elsif (grep { $k =~ /^$_$/imsx } @HTTP_METHODS) {
-        if (grep { $k =~ /^$_$/imsx } @HTTP_METHODS) {
-            $pp{method} = $k =~ /del/i ? 'delete' : $k;
-            $pp{path} = resource() . ($v ? "/$v" : '');
-        }
-#        elsif ($k =~ /^resource|namespace$/msx) {
-#            $pp{resource} = $v;
-#        }
-#        elsif ($k eq 'route_param') {
-#            $pp{$k} = $v;
-#        }
-
-        $i++;
-    }
-use feature 'say';
-use DDP;
-#say '~' x 10;
-#say join ',', keys(%pp);
-
-#    if ($pp{resource}) {
-#        my $path = resource($pp{resource}, $pp{code});
-#        #$path .= $pp{resource};
-#        $app->add_resource_desc(%pp);
-#    }
-#    elsif ($pp{route_param}) {
-#        my $path = resource(":$pp{route_param}", $pp{code}, named => $pp{params});
-#        #$path .= "/:$pp{route_param}";
-#        #$app->add_resource_desc(resource => $path, desc => $pp{desc});
-#    }
-#    else {
-        $app->add_route(%pp);
-#    }
+    $app->add_route(
+        code => $code,
+        method => $method,
+        path => $path,
+        %SETTINGS,
+    );
 
     $SETTINGS{desc} = undef;
     $SETTINGS{params} = undef;
@@ -192,6 +154,7 @@ sub plugin { $app->load_plugin(@_) }
 sub api_default_format { $app->api_default_format(@_) }
 sub api_format { $app->api_format(@_) }
 
+# TODO: add namespace with version name/number
 sub api_version { $app->api_version(@_) }
 
 #
