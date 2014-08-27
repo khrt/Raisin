@@ -65,7 +65,7 @@ sub build_api_docs {
         # look for namespace
         my ($ns) = $path =~ m#^(/[^/]+)#;
 
-        # -> { ns => [api, ...] }
+        # -> [ $ns => { ... } ]
         push @{ $apis{$ns} },
             {
                 path => $path,
