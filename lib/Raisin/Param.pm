@@ -132,7 +132,7 @@ Returns C<true> if it's required parameter.
 
 =head3 type
 
-Returns paramter type object.
+Returns parameter type object.
 
 =head3 validate
 
