@@ -6,7 +6,7 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../../lib";
 
-use Raisin::API;
+use Raisin::API '+oldsyntax';
 use Types::Standard qw(Any Int Str);
 
 my %USERS = (
@@ -22,7 +22,7 @@ my %USERS = (
     },
 );
 
-plugin 'APIDocs', enable => 'CORS';
+plugin 'Swagger', enable => 'CORS';
 api_format 'json';
 
 desc 'Actions on users',

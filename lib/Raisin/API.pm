@@ -73,8 +73,7 @@ sub resource {
 
         if ($SETTINGS{desc}) {
             my $path = join '/', @NS;
-            $app->resource_desc($path, $SETTINGS{desc});
-            $SETTINGS{desc} = undef;
+            $app->resource_desc($path, delete $SETTINGS{desc});
         }
 
         my %prev_settings = %SETTINGS;
@@ -94,11 +93,7 @@ sub namespace { resource(@_) }
 
 sub route_param {
     my ($param, $code) = @_;
-
-    my $params = $SETTINGS{params};
-    $SETTINGS{params} = undef;
-
-    resource(":$param", $code, named => $params);
+    resource(":$param", $code, named => delete $SETTINGS{params});
 }
 
 #
@@ -127,11 +122,10 @@ sub _add_route {
         code => $code,
         method => $method,
         path => $path,
+        desc => delete $SETTINGS{desc},
+        params => delete $SETTINGS{params},
         %SETTINGS,
     );
-
-    $SETTINGS{desc} = undef;
-    $SETTINGS{params} = undef;
 }
 
 #
