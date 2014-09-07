@@ -7,7 +7,7 @@ use Test::More;
 
 use lib "$Bin/../../lib";
 
-use Raisin::Plugin::APIDocs;
+use Raisin::Plugin::Swagger;
 use Raisin::Routes;
 use Types::Standard qw(Int Str);
 use Raisin;
@@ -55,7 +55,7 @@ $r->add(
     code => sub { 'POST' }
 );
 
-my $i = Raisin::Plugin::APIDocs->new($a);
+my $i = Raisin::Plugin::Swagger->new($a);
 ok $i->build_api_docs;
 
 done_testing;

@@ -23,11 +23,16 @@ my $app = eval {
             };
         };
 
-        route_param 'id' => Int, sub {
+        params requires => { name => 'id', type => Int };
+        route_param 'id' => sub {
             get sub { 'Level 1' };
-            route_param 'subid' => Int, sub {
+
+            params requires => { name => 'subid', type => Int };
+            route_param 'subid' => sub {
                 get sub { 'Level 2' };
-                route_param 'subsubid' => Int, sub {
+
+                params requires => { name => 'subsubid', type => Int };
+                route_param 'subsubid' => sub {
                     get sub { 'Level 3' };
                 };
             };

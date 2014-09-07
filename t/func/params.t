@@ -25,14 +25,14 @@ my $app = eval {
     use Types::Standard qw(Int Str);
 
     api_format 'JSON';
-    params [
+    params(
         requires => { name => 'param0', type => Int },
         required => { name => 'param1', type => Int },
 
         optional => { name => 'param2', type => Str },
         optional => { name => 'param3', type => Str },
-    ],
-    post => sub { shift };
+    );
+    post sub { shift };
     run;
 };
 

@@ -36,8 +36,8 @@ subtest 'route_param' => sub {
         use Types::Standard qw(Int);
 
         resource api => sub {
-            route_param id => Int,
-            sub {
+            params(requires => { name => 'id', type => Int });
+            route_param id => sub {
                 get sub {
                     my $params = shift;
                     "api/$params->{id}/get"
@@ -73,11 +73,11 @@ subtest 'params' => sub {
         use Types::Standard qw(Int);
 
         resource api => sub {
-            params [
+            params(
                 requires => { name => 'foo', type => Int },
                 optional => { name => 'bar', type => Int },
-            ],
-            put => sub { shift };
+            );
+            put sub { shift };
         };
         run;
     };
@@ -105,21 +105,21 @@ subtest 'new route' => sub {
             use Types::Standard qw(Int);
 
             resource desc => sub {
-                desc 'GET action',
-                get => sub { 'get action' };
+                desc 'GET action';
+                get sub { 'get action' };
 
-                desc 'GET `all` action',
-                get => 'all' => sub { 'get all action' };
+                desc 'GET `all` action';
+                get 'all' => sub { 'get all action' };
 
-                route_param id => Int,
-                sub {
-                    desc 'Nested GET action',
-                    params => [optional => { name => 'do', type => Int }],
-                    get => sub { 'nested get action' };
+                params(requires => { name => 'id', type => Int });
+                route_param id => sub {
+                    desc 'Nested GET action';
+                    params(optional => { name => 'do', type => Int });
+                    get sub { 'nested get action' };
 
-                    desc 'Nested GET `all` action',
-                    params => [optional => { name => 'do', type => Int }],
-                    get => 'all' => sub { 'nested get all action' };
+                    desc 'Nested GET `all` action';
+                    params(optional => { name => 'do', type => Int });
+                    get 'all' => sub { 'nested get all action' };
                 };
             };
             run;
@@ -165,21 +165,21 @@ subtest 'new route' => sub {
             use Types::Standard qw(Int);
 
             resource params => sub {
-                params [optional => { name => 'do', type => Int }],
-                get => sub { 'get action' };
+                params(optional => { name => 'do', type => Int });
+                get sub { 'get action' };
 
-                params [optional => { name => 'do', type => Int }],
-                get => 'all' => sub { 'get all action' };
+                params(optional => { name => 'do', type => Int });
+                get 'all' => sub { 'get all action' };
 
-                route_param id => Int,
-                sub {
-                    params [optional => { name => 'do', type => Int }],
-                    desc => 'Nested GET action',
-                    get => sub { 'nested get action' };
+                params(requires => { name => 'id', type => Int });
+                route_param id => sub {
+                    desc 'Nested GET action';
+                    params(optional => { name => 'do', type => Int });
+                    get sub { 'nested get action' };
 
-                    params [optional => { name => 'do', type => Int }],
-                    desc => 'Nested GET `all` action',
-                    get => 'all' => sub { 'nested get all action' };
+                    desc 'Nested GET `all` action';
+                    params(optional => { name => 'do', type => Int });
+                    get 'all' => sub { 'nested get all action' };
                 };
             };
             run;
