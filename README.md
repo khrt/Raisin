@@ -8,7 +8,7 @@ Raisin - REST-like API web micro-framework for Perl.
     use warnings;
 
     use Raisin::API;
-    use Types::Standard qw(Int Str);
+    use Types::Standard qw(Any Int Str);
 
     my %USERS = (
         1 => {
@@ -23,17 +23,17 @@ Raisin - REST-like API web micro-framework for Perl.
         },
     );
 
-    plugin 'APIDocs', enable => 'CORS';
+    plugin 'Swagger', enable => 'CORS';
     api_format 'json';
 
-    desc 'Actions on users',
-    resource => user => sub {
-        desc 'List users',
-        params => [
+    desc 'Actions on users';
+    resource user => sub {
+        desc 'List users';
+        params(
             optional => { name => 'start', type => Int, default => 0, desc => 'Pager (start)' },
             optional => { name => 'count', type => Int, default => 10, desc => 'Pager (count)' },
-        ],
-        get => sub {
+        );
+        get sub {
             my $params = shift;
 
             my @users
@@ -48,21 +48,21 @@ Raisin - REST-like API web micro-framework for Perl.
             { data => \@slice }
         };
 
-        desc 'List all users at once',
-        get => 'all' => sub {
+        desc 'List all users at once';
+        get 'all' => sub {
             my @users
                 = map { { id => $_, %{ $USERS{$_} } } }
                   sort { $a <=> $b } keys %USERS;
             { data => \@users }
         };
 
-        desc 'Create new user',
-        params => [
+        desc 'Create new user';
+        params(
             requires => { name => 'name', type => Str, desc => 'User name' },
             requires => { name => 'password', type => Str, desc => 'User password' },
             optional => { name => 'email', type => Str, default => undef, regex => qr/.+\@.+/, desc => 'User email' },
-        ],
-        post => sub {
+        );
+        post sub {
             my $params = shift;
 
             my $id = max(keys %USERS) + 1;
@@ -71,28 +71,27 @@ Raisin - REST-like API web micro-framework for Perl.
             { success => 1 }
         };
 
-        desc 'Actions on the user',
-        params => [
+        desc 'Actions on the user';
+        params(
             requires => { name => 'id', type => Int, desc => 'User ID' },
-        ],
-        route_param => 'id',
-        sub {
-            desc 'Show user',
-            get => sub {
+        );
+        route_param 'id' => sub {
+            desc 'Show user';
+            get sub {
                 my $params = shift;
                 $USERS{ $params->{id} };
             };
 
-            desc 'Delete user',
-            del => sub {
+            desc 'Delete user';
+            del sub {
                 my $params = shift;
                 { success => delete $USERS{ $params->{id} } };
             };
 
-            desc 'NOP',
-            put => sub { 'nop' };
+            desc 'NOP';
+            put sub { 'nop' };
         };
-    }
+    };
 
     run;
 
@@ -114,37 +113,28 @@ Adds a route to application.
 
 Define a route parameter as a namespace `route_param`.
 
-    route_param id => Int, sub { ... };
+    route_param 'id' => sub { ... };
 
 ## del, get, patch, post, put
 
 It's a shortcuts to `route` restricted to the corresponding HTTP method.
 
-Each method can consists of this parameters:
-
-- desc - optional only if didn't start from `desc` keyword, required otherwise;
-- params - optional only if didn't start from `params` keyword, required otherwise;
-- path - optional;
-- subroutine - required;
-
-Where only `subroutine` is required.
-
     get sub { 'GET' };
 
     del 'all' => sub { 'OK' };
 
-    params [
+    params(
         requires => { name => 'id', type => Int },
         optional => { name => 'key', type => Str },
-    ],
-    get => sub { 'GET' };
+    );
+    get sub { 'GET' };
 
-    params [
+    desc 'Put data';
+    params(
         required => { name => 'id', type => Int },
         optional => { name => 'name', type => Str },
-    ],
-    desc => 'Put data',
-    put => 'all' => sub {
+    );
+    put 'all' => sub {
         'PUT'
     };
 
@@ -153,8 +143,8 @@ Where only `subroutine` is required.
 Can be applied to `resource` or any of HTTP method to add description
 for operation or for resource.
 
-    desc 'Some action',
-    put => sub { ... }
+    desc 'Some action';
+    put sub { ... };
 
     desc 'Some operations group',
     resource => 'user' => sub { ... }
@@ -162,12 +152,17 @@ for operation or for resource.
 ## params
 
 Here you can define validations and coercion options for your parameters.
-Can be applied to any HTTP method to describe parameters.
+Can be applied to any HTTP method and/or `route_param` to describe parameters.
 
-    params => [
+    params(
         requires => { name => 'key', type => Str }
-    ],
-    get => sub { ... }
+    );
+    get sub { ... };
+
+    params(
+        requires => { name => 'id', type => Int, desc => 'User ID' },
+    );
+    route_param 'id' => sub { ... };
 
 For more see ["Validation-and-coercion" in Raisin](https://metacpan.org/pod/Raisin#Validation-and-coercion).
 
@@ -308,11 +303,11 @@ You can define validations and coercion options for your parameters using a para
 Parameters can be `requires` and `optional`. `optional` parameters can have a
 default value.
 
-    params [
+    params(
         requires => { name => 'name', type => Str },
         optional => { name => 'number', type => Int, default => 10 },
-    ],
-    get => sub {
+    );
+    get sub {
         my $params = shift;
         "$params->{number}: $params->{name}";
     };
@@ -468,7 +463,7 @@ Verbose output with route parameters:
 
 [Swagger](https://github.com/wordnik/swagger-core) compatible API documentations.
 
-    plugin 'APIDocs';
+    plugin 'Swagger';
 
 Documentation will be available on `http://<url>/api-docs` URL.
 So you can use this URL in Swagger UI.
