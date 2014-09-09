@@ -1,3 +1,8 @@
+0.5000 New API syntax
+    - New API syntax;
+    - Rename 'APIDocs' plugin to 'Swagger';
+    - Some minor changes/fixes;
+
 0.4003 Fixes
     - `use base` -> `use parent`;
     - Don't print debug messages in deployment environment;
