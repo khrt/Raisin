@@ -101,6 +101,15 @@ Raisin is a REST-like API web micro-framework for Perl.
 It's designed to run on Plack, providing a simple DSL to easily develop RESTful APIs.
 It was inspired by [Grape](https://github.com/intridea/grape).
 
+# BACKWARD COMPATIBILITY
+
+Since version `0.5000` `Raisin` was migrated to the new API syntax.
+
+You could still use an old style API for a while by passing
+an `-old` key to the `Raisin::API`.
+
+    use Raisin::API '-old';
+
 # KEYWORDS
 
 ## resource
@@ -468,7 +477,7 @@ Verbose output with route parameters:
 Documentation will be available on `http://<url>/api-docs` URL.
 So you can use this URL in Swagger UI.
 
-For more see [Raisin::Plugin::APIDocs](https://metacpan.org/pod/Raisin::Plugin::APIDocs).
+For more see [Raisin::Plugin::Swagger](https://metacpan.org/pod/Raisin::Plugin::Swagger).
 
 # MIDDLEWARE
 
@@ -530,8 +539,8 @@ application is deployed:
 
     my $dancer = sub {
         setting appdir => '/home/dotcloud/current';
-        load_app "My::App";
-        Dancer::App->set_running_app("My::App");
+        load_app 'My::App';
+        Dancer::App->set_running_app('My::App');
         my $env = shift;
         Dancer::Handler->init_request_headers($env);
         my $req = Dancer::Request->new(env => $env);
@@ -539,7 +548,7 @@ application is deployed:
     };
 
     builder {
-        mount "/" => $dancer;
+        mount '/' => $dancer;
         mount '/api/rest' => RaisinApp->new;
     };
 
