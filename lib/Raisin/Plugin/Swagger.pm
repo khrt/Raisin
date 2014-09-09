@@ -146,7 +146,7 @@ Raisin::Plugin::Swagger - Generate API documentation.
 
 =head1 SYNOPSIS
 
-    plugin 'APIDocs';
+    plugin 'Swagger';
 
 =head1 DESCRIPTION
 
@@ -155,5 +155,11 @@ compatible API documentaions.
 
 Provides documentation in Swagger compatible format by C</api-docs> URL.
 You can use this url in L<Swagger UI|http://swagger.wordnik.com/>.
+
+=head1 CORS
+
+Cross-origin resource sharing
+
+    plugin 'Swagger', enable => 'CORS';
 
 =cut
