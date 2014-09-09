@@ -366,6 +366,8 @@ an C<-old> key to the C<Raisin::API>.
 
     use Raisin::API '-old';
 
+See examples for more information.
+
 =head1 KEYWORDS
 
 =head2 resource
@@ -378,7 +380,7 @@ Adds a route to application.
 
 Define a route parameter as a namespace C<route_param>.
 
-    route_param 'id' => sub { ... };
+    route_param id => sub { ... };
 
 =head2 del, get, patch, post, put
 

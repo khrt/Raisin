@@ -110,6 +110,8 @@ an `-old` key to the `Raisin::API`.
 
     use Raisin::API '-old';
 
+See examples for more information.
+
 # KEYWORDS
 
 ## resource
@@ -122,7 +124,7 @@ Adds a route to application.
 
 Define a route parameter as a namespace `route_param`.
 
-    route_param 'id' => sub { ... };
+    route_param id => sub { ... };
 
 ## del, get, patch, post, put
 
