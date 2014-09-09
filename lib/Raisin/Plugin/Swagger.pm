@@ -13,7 +13,7 @@ sub build {
     my ($self, %args) = @_;
 
     # Enable CORS
-    if (lc($args{enable}) eq 'cors') {
+    if ($args{enable} && lc($args{enable}) eq 'cors') {
         $self->app->add_middleware(
             'CrossOrigin',
             origins => '*',

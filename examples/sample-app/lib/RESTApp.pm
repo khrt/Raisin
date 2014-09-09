@@ -11,7 +11,7 @@ use lib ("$Bin/../lib", "$Bin/../../../lib");
 use Raisin::API;
 
 api_format 'yaml';
-plugin 'APIDocs';
+plugin 'Swagger';
 
 #before sub {
 #    my $self = shift;
