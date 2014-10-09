@@ -1,0 +1,73 @@
+{
+   "abstract" : "REST-like API web micro-framework for Perl.",
+   "author" : [
+      "Artur Khabibullin - rtkh <at> cpan.org"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Dist::Milla version v1.0.4, Dist::Zilla version 5.013, CPAN::Meta::Converter version 2.133380",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Raisin",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "xt",
+         "inc",
+         "share",
+         "eg",
+         "examples"
+      ]
+   },
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "Module::Build::Tiny" : "0.038"
+         }
+      },
+      "develop" : {
+         "requires" : {
+            "Data::Printer" : "0.35",
+            "Test::Pod" : "1.41"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Hash::MultiValue" : "0",
+            "JSON" : "2.90",
+            "List::Util" : "1.35",
+            "Plack" : "1.0030",
+            "Plack::Middleware::CrossOrigin" : "0.009",
+            "Type::Tiny" : "0.044",
+            "YAML" : "0.90",
+            "perl" : "5.010001"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "Test::More" : "0.88"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/khrt/Raisin/issues"
+      },
+      "homepage" : "https://github.com/khrt/Raisin",
+      "repository" : {
+         "type" : "git",
+         "url" : "https://github.com/khrt/Raisin.git",
+         "web" : "https://github.com/khrt/Raisin"
+      }
+   },
+   "version" : "0.5000",
+   "x_contributors" : [
+      "Artur Kh <khrt@ya.ru>"
+   ]
+}
+
