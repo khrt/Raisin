@@ -1,7 +1,10 @@
 language: perl
 perl:
-    - "5.10"                    # normal pre-installed perl
-    - "blead"                   # install perl from git
+  - "5.10"
+  - "5.12"
+  - "5.14"
+  - "5.16"
+  - "blead"
 before_install:
-    - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
-    - source ~/travis-perl-helpers/init --auto
+  - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
+  - source ~/travis-perl-helpers/init --auto
