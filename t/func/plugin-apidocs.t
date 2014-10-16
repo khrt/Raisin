@@ -56,6 +56,6 @@ $r->add(
 );
 
 my $i = Raisin::Plugin::Swagger->new($a);
-ok $i->build_api_docs;
+ok $i->build_api_spec;
 
 done_testing;

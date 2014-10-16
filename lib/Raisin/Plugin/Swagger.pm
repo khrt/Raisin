@@ -22,11 +22,10 @@ sub build {
         );
     }
 
-    $self->register(build_api_docs => sub { $self->build_api_docs });
+    $self->register(build_api_spec => sub { $self->build_api_spec });
 }
 
-# TODO: simplify
-sub build_api_docs {
+sub build_api_spec {
     my $self = shift;
     return 1 if $self->{done};
 

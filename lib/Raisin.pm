@@ -100,8 +100,8 @@ sub psgi {
     my $res = $self->res(Raisin::Response->new($self));
 
     # Build API docs
-    if ($self->can('build_api_docs')) {
-        $self->build_api_docs;
+    if ($self->can('build_api_spec')) {
+        $self->build_api_spec;
     }
 
     # HOOK Before
