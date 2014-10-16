@@ -1,3 +1,5 @@
+* Upgrade Swagger to 2.0 `https://github.com/wordnik/swagger-spec/blob/master/versions/2.0.md`
+
 * Mount API's in any place of `resource`;
 
 * Endpoint's hooks: `after`, `before`;
