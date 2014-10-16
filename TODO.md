@@ -1,23 +1,20 @@
-* Endpoint's hooks: `after`, `before`;
+* Mount API's in any place of `resource`;
 
-* Error handler (custom errors):
-  - handle `die`;
-  - regular HTTP errors;
+* Endpoint's hooks: `after`, `before`;
 
 * `declared` keyword;
   * applicable to `param`;
   * include missing keyword;
 
+* Make test application and store it in `t/`.
 
-Tests
+---
+
+DONE: Tests
 =====
 Parameters coercion:
   in: `Content-type`, `extension` -> JSON, YAML, form/data;
   out: `Accept`, `extension` -> JSON, YAML, TEXT;
-
-Make test application and store it in `t/`.
-
----
 
 DONE: Types
 ===========
