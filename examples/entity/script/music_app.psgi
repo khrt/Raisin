@@ -17,7 +17,7 @@ use MusicApp::Schema;
 my $schema = MusicApp::Schema->connect("dbi:SQLite:$Bin/../db/music.db");
 
 plugin 'Swagger', enable => 'CORS';
-api_format 'yaml';
+api_default_format 'yaml';
 
 desc 'Artist API';
 resource artists => sub {
@@ -29,6 +29,40 @@ resource artists => sub {
 
         present data => $artists, with => 'MusicApp::Entity::Artist';
         present count => $artists->count;
+    };
+
+    params requires => { name => 'id', type => Int };
+    route_param id => sub {
+        get sub {
+            my $params = shift;
+            my $artist = $schema->resultset('Artist')->find($params->{id});
+            p $artist;
+
+            present data => $artist, with => 'MusicApp::Entity::Artist';
+        };
+    };
+};
+
+desc 'Albums API';
+resource albums => sub {
+    desc 'List';
+    params optional => { name => 'title', type => Str };
+    get sub {
+        my $params = shift;
+        my $albums = $schema->resultset('Album');
+
+        present data => $albums;
+        present count => $albums->count;
+    };
+
+    params requires => { name => 'id', type => Int };
+    route_param id => sub {
+        get sub {
+            my $params = shift;
+            my $album = $schema->resultset('Album')->find($params->{id});
+
+            present data => $album;
+        };
     };
 };
 
