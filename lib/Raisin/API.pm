@@ -7,6 +7,7 @@ use parent 'Exporter';
 
 use Carp;
 use Raisin;
+use Raisin::Entity;
 
 my @APP_CONF_METHODS = qw(api_default_format api_format api_version middleware mount plugin);
 my @APP_EXEC_METHODS = qw(new run);
@@ -221,7 +222,7 @@ sub present {
             $entity->compile($data);
         }
         else {
-            $data;
+            Raisin::Entity->compile($data);
         }
     };
 
