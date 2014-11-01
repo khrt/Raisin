@@ -11,7 +11,7 @@ use Raisin::Response;
 use Raisin::Routes;
 use Raisin::Util;
 
-our $VERSION = '0.5000';
+our $VERSION = '0.5100';
 
 sub new {
     my ($class, %args) = @_;
@@ -149,7 +149,7 @@ sub psgi {
             # Eval code
             my $data = $code->($req->declared_params);
 
-            if (defined $data) {
+            if (defined($data) || $res->body) {
                 # Handle delayed response
                 return $data if ref($data) eq 'CODE'; # TODO: check delayed responses
 
@@ -164,6 +164,7 @@ sub psgi {
 
         if (!$res->rendered) {
             $self->log(error => 'Nothing rendered');
+            # TODO: render something
         }
 
         1;
