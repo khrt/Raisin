@@ -50,7 +50,7 @@ sub rendered {
 
 sub render {
     my ($self, $format, $body) = @_;
-    $body ||= '';
+    $body ||= $self->body;
     $self->status(200) if not $self->status;
 
     if (ref $body) {
