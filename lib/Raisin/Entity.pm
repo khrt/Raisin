@@ -6,141 +6,104 @@ use warnings;
 use parent 'Exporter';
 
 use Carp;
-use DDP;
-use feature 'say';
+use Scalar::Util qw(blessed);
 
-our @EXPORT = qw(present);
+sub expose {
+    my ($class, $name, @params) = @_;
 
-sub import {
-    my $class = shift;
-    $class->export_to_level(1, @_);
-}
+    my $runtime = do {
+        delete $params[-1] if scalar(@params) % 2 && ref($params[-1]) eq 'CODE'
+    };
 
-my %STORAGE;
-
-sub present {
-    my ($name, $data, %params) = @_;
-
-    my $proc_data;
-
-    if ($params{with}) {
-        my $entity = $params{with};
-        $proc_data = $entity->compile($data);
+    my %params = @params;
+    {
+        no strict 'refs';
+        push @{ "${class}::EXPOSE" }, {
+            alias         => $params{as},
+            condition     => $params{if},
+            documentation => $params{documentation},
+            name          => $name,
+            runtime       => $runtime,
+            using         => $params{using},
+        };
     }
-    else {
-        # DBIx::Class
-        if (ref($data) eq 'DBIx::Class::ResultSet') {
-            while (my $i = $data->next) {
-                push @$proc_data, _present_dbix($i);
-            }
-        }
-        else {
-            $proc_data = $data;
-        }
-    }
-
-    $STORAGE{$name} = $proc_data;
-
-    \%STORAGE;
+    undef;
 }
-
-sub _present_dbix {
-    my $rc = shift;
-    my %data = map { $_ => $rc->$_ } keys %{ $rc->columns_info };
-    \%data;
-}
-
-###
 
 sub compile {
     my ($class, $data) = @_;
+    #say "with: $class; data: ", ref($data), ' --';
 
-    say "with: $class --";
-#    p @class::EXPOSE;
-#    p @class::KEYS;
+    my @expose = do {
+        no strict 'refs';
+        @{"${class}::EXPOSE"};
+    };
 
     my $proc;
 
-    if (ref($data) eq 'DBIx::Class::ResultSet') {
-        while (my $i = $data->next) {
+    if (blessed($data) && $data->isa('DBIx::Class')) {
+        @expose = _make_exposition_from_dbix_class($data) unless @expose;
 
-            my %d = map {
-                my $key = $_->{alias} || $_->{name};
-                my $column = $_->{name};
-
-                my $value = do {
-                    if (my $r = $_->{runtime}) {
-                        $r->($i);
-                    }
-                    else {
-                        $i->$column;
-                    }
-                };
-
-                if (my $c = $_->{condition}) {
-                    $c->($i) ? ($key => $value) : ();
-                }
-                else {
-                    ($key => $value);
-                }
-            } @class::EXPOSE;
-
-            push @$proc, \%d;
+        if ($data->isa('DBIx::Class::ResultSet')) {
+            while (my $i = $data->next) {
+                push @$proc, _compile_dbix_class_column($i, \@expose);
+            }
+        }
+        elsif ($data->isa('DBIx::Class::Core')) {
+            $proc = _compile_dbix_class_column($data, \@expose);
         }
     }
     else {
-
+        $proc = $data;
     }
 
     $proc;
 }
 
-sub expose {
-    my ($class, $name, @params) = @_;
+sub _compile_dbix_class_column {
+    my ($data, $settings) = @_;
 
-    # expose 'user_name'
-    #? expose 'text', documentation { ... }
-    # expose 'ip', if { ... }
-    #? expose 'contact_info', sub {
-    #?   expose :phone
-    #?   expose :address, using Entity::Address
-    #? }
-    # expose :digest, sub {
-    #   my $item = shift;
-    #   hexhash($item->name);
-    # }
-    # expose 'user_name', as 'name';
+    my %result = map {
+        my $column = $_->{name};
+        my $key = $_->{alias} || $_->{name};
 
-    #say "*** $name";
-    push(@class::KEYS, $name);
+        my $value = do {
+            if (my $runtime = $_->{runtime}) {
+                $runtime->($data);
+            }
+            elsif (my $entity = $_->{using}) {
+                my $inner_data = $data->$column;
+                $entity->compile($inner_data);
+            }
+            else {
+                $data->$column;
+            }
+        };
 
-    my $runtime;
+        if (my $condition = $_->{condition}) {
+            $condition->($data) ? ($key => $value) : ();
+        }
+        else {
+            ($key => $value);
+        }
+    } @$settings;
 
-    if (scalar(@params) % 2) {
-        $runtime = ref($params[-1]) eq 'CODE' ? delete($params[-1]) : undef;
-    }
+    \%result;
+}
 
-    my %params = @params;
+sub _make_exposition_from_dbix_class {
+    my $data = shift;
 
-    #push(@class::EXPOSE, $name);
-    push @class::EXPOSE, {
-        name => $name,
-        alias => $params{as},
-        documentation => $params{documentation},
-        runtime => $runtime,
-        condition => $params{if},
+    my $columns_info = do {
+        if ($data->isa('DBIx::Class::ResultSet')) {
+            $data->first->columns_info;
+        }
+        elsif ($data->isa('DBIx::Class::Core')) {
+            $data->columns_info;
+        }
     };
 
-    #p $class::EXPOSE[-1];
-    #say '~~~';
-}
-
-sub documentation {
-    my $doc = shift;
-}
-
-sub if {
-    my $sub = shift;
+    map { { name => $_ } } keys %$columns_info;
 }
 
 1;
@@ -149,12 +112,29 @@ __END__
 
 =head1 NAME
 
-Raisin::Entity - simple Facade to use with your API
+Raisin::Entity - simple Facade to use with your API.
 
 =head1 DESCRIPTION
 
-=head1 KEYWORDS
+Supports only L<DBIx::Class>
+and basic Perl data structures like C<SCALAR>, C<ARRAY>, C<HASH>.
+
+=head1 METHODS
 
 =head2 expose
+
+    expose 'user_name'
+    ?expose 'text', documentation => { ... }
+    expose 'ip', if => { ... }
+    ?expose 'contact_info', sub {
+    ?    expose :phone
+    ?    expose :fax
+    ?}
+    expose 'address', using => 'Entity::Address'
+    expose 'digest', sub {
+        my $item = shift;
+        hexhash($item->name);
+    }
+    expose 'user_name', as => 'name';
 
 =cut
