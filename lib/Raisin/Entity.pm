@@ -3,19 +3,19 @@ package Raisin::Entity;
 use strict;
 use warnings;
 
-use parent 'Exporter';
-
 use Carp;
 use Scalar::Util qw(blessed);
 
 sub expose {
     my ($class, $name, @params) = @_;
 
-    my $runtime = do {
-        delete $params[-1] if scalar(@params) % 2 && ref($params[-1]) eq 'CODE'
-    };
+    my $runtime;
+    if (scalar(@params) % 2 && ref($params[-1]) eq 'CODE') {
+        $runtime = delete $params[-1];
+    }
 
     my %params = @params;
+
     {
         no strict 'refs';
         push @{ "${class}::EXPOSE" }, {
@@ -27,37 +27,37 @@ sub expose {
             using         => $params{using},
         };
     }
-    undef;
+
+    return;
 }
 
 sub compile {
     my ($class, $data) = @_;
-    #say "with: $class; data: ", ref($data), ' --';
 
     my @expose = do {
         no strict 'refs';
         @{"${class}::EXPOSE"};
     };
 
-    my $proc;
+    my $result;
 
     if (blessed($data) && $data->isa('DBIx::Class')) {
         @expose = _make_exposition_from_dbix_class($data) unless @expose;
 
         if ($data->isa('DBIx::Class::ResultSet')) {
             while (my $i = $data->next) {
-                push @$proc, _compile_dbix_class_column($i, \@expose);
+                push @$result, _compile_dbix_class_column($i, \@expose);
             }
         }
         elsif ($data->isa('DBIx::Class::Core')) {
-            $proc = _compile_dbix_class_column($data, \@expose);
+            $result = _compile_dbix_class_column($data, \@expose);
         }
     }
     else {
-        $proc = $data;
+        $result = $data;
     }
 
-    $proc;
+    $result;
 }
 
 sub _compile_dbix_class_column {
