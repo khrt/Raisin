@@ -486,6 +486,20 @@ When it exists, you can retrieve and store per-session data.
     # read param
     say session->{name};
 
+=head2 present
+
+As a Grape Raisin support for a range ways to present your data as well.
+Raisin hash a built-in C<present> method, which accepts two arguments: the
+object to be presneted and the options associated with it. The options hash may
+include C<with> key, which defined the entity to expose. See L<Raisin::Entity>.
+
+    my $artists = $schema->resultset('Artist');
+
+    present data => $artists, with => 'MusicApp::Entity::Artist';
+    present count => $artists->count;
+
+See also C<examples/entity>.
+
 =head2 api_default_format
 
 Specify default API format when formatter doesn't specified.
