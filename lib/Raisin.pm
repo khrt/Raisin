@@ -149,6 +149,9 @@ sub psgi {
             # Eval code
             my $data = $code->($req->declared_params);
 
+            # TODO:
+            # set data to the res->body
+            # check only res->body
             if (defined($data) || $res->body) {
                 # Handle delayed response
                 return $data if ref($data) eq 'CODE'; # TODO: check delayed responses
