@@ -36,7 +36,6 @@ resource artists => sub {
         get sub {
             my $params = shift;
             my $artist = $schema->resultset('Artist')->find($params->{id});
-            p $artist;
 
             present data => $artist, with => 'MusicApp::Entity::Artist';
         };

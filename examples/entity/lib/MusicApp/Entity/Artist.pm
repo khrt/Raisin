@@ -12,6 +12,6 @@ __PACKAGE__->expose('hash', sub {
     my $item = shift;
     $item->id * 10;
 });
-#__PACKAGE__->expose('albums', using => 'MusicApp::Entity::Album');
+__PACKAGE__->expose('albums', using => 'MusicApp::Entity::Album');
 
 1;
