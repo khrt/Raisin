@@ -230,7 +230,7 @@ sub present {
     my $representation = { $key => $value, %$body };
     res->body($representation);
 
-    undef;
+    return;
 }
 
 #
