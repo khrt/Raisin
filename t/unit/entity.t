@@ -190,17 +190,31 @@ subtest 'compile native data' => sub {
     };
 };
 
-#subtest 'compile DBIx::Class' => sub {
+subtest 'compile DBIx::Class' => sub {
+    ok 0;
+#    my $schema = TestApp::Schema->connect("dbi:SQLite:$Bin/../testapp/db/music.db");
+#
 #    subtest 'w/ entity' => sub {
-#        ok 0;
-#    };
+#        my $list_res = ArtistEntity->compile($schema->resultset('Artist'));
+#        is_deeply $list_res, \@STANDARD, 'list';
 #
+#        my $single_res = ArtistEntity->compile(
+#            $schema->resultset('Artist')->find(1)
+#        );
+#        is_deeply $single_res, $STANDARD[0], 'single';
+#    };
+
 #    subtest 'w/o entity' => sub {
+#        my $list_res = Raisin::Entity->compile($schema->resultset('Artist'));
+#        is_deeply $list_res, \@list, 'list';
 #
-#        ok 0;
+#        my $single_res = Raisin::Entity->compile(
+#            $schema->resultset('Artist')->find(1)
+#        );
+#        is_deeply $single_res, \%single, 'single';
 #    };
-#};
-#
+};
+
 #subtest 'compile Rose::DB::Object' => sub {
 #    subtest 'w/ entity' => sub {
 #

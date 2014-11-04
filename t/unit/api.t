@@ -247,4 +247,54 @@ subtest 'new route' => sub {
     };
 };
 
+subtest 'present' => sub {
+    my %item0 = (id => 1, name => 'Bruce Wayne');
+    my %item1 = (id => 2, name => 'Batman');
+    my @data = (\%item0, \%item1);
+
+    my $hash_func = sub {
+        my $person = shift;
+        my $hash = 0;
+        for (split //, $person->{name}) {
+            $hash = $hash * ord($_) + 42;
+        }
+        $hash;
+    };
+
+    my @data_with_entity = (
+        { %item0, hash => $hash_func->(\%item0), },
+        { %item1, hash => $hash_func->(\%item1), },
+    );
+
+    my $app = eval {
+        package PersonEntity;
+        use parent 'Raisin::Entity';
+        __PACKAGE__->expose('id');
+        __PACKAGE__->expose('name');
+        __PACKAGE__->expose('hash', $hash_func);
+
+        package main;
+        use Raisin::API;
+        resource 'present' => sub {
+            get sub {
+                present data => \@data;
+                present data_with => \@data, with => 'PersonEntity';
+                present size => scalar @data;
+            };
+        };
+        run;
+    };
+
+    test_psgi $app, sub {
+        my $cb = shift;
+        my $res = $cb->(GET '/present');
+        my $content = Load($res->content);
+        is_deeply $content, {
+            data => \@data,
+            data_with => \@data_with_entity,
+            size => scalar @data,
+        };
+    };
+};
+
 done_testing;
