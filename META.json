@@ -43,6 +43,7 @@
             "List::Util" : "1.35",
             "Plack" : "1.0030",
             "Plack::Middleware::CrossOrigin" : "0.009",
+            "Scalar::Util" : "1.38",
             "Type::Tiny" : "0.044",
             "YAML" : "0.90",
             "perl" : "5.010001"
@@ -66,7 +67,7 @@
          "web" : "https://github.com/khrt/Raisin"
       }
    },
-   "version" : "0.5000",
+   "version" : "0.5100",
    "x_contributors" : [
       "Artur Kh <khrt@ya.ru>"
    ]
