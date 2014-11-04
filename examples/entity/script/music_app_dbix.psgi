@@ -24,7 +24,6 @@ api_default_format 'yaml';
 desc 'Artist API';
 resource artists => sub {
     desc 'List';
-    params optional => { name => 'name', type => Str };
     get sub {
         my $params = shift;
         my $artists = $schema->resultset('Artist');
@@ -47,7 +46,6 @@ resource artists => sub {
 desc 'Albums API';
 resource albums => sub {
     desc 'List';
-    params optional => { name => 'title', type => Str };
     get sub {
         my $params = shift;
         my $albums = $schema->resultset('Album');
