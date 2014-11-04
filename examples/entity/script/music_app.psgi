@@ -12,6 +12,8 @@ use Raisin::Entity;
 use Types::Standard qw(Any Int Str);
 
 use MusicApp::Entity::Artist;
+use MusicApp::Entity::Album;
+
 use MusicApp::Schema;
 
 my $schema = MusicApp::Schema->connect("dbi:SQLite:$Bin/../db/music.db");
