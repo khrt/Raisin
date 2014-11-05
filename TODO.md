@@ -1,6 +1,7 @@
-* Upgrade Swagger to 2.0 `https://github.com/wordnik/swagger-spec/blob/master/versions/2.0.md`
+TODO
+====
 
-* Implement `Entity` plugin (See `Grape::Entity`)
+* Upgrade Swagger to 2.0 `https://github.com/wordnik/swagger-spec/blob/master/versions/2.0.md`
 
 * Mount API's in any place of `resource`;
 
@@ -12,34 +13,37 @@
 
 * Make test application and store it in `t/`.
 
----
+DONE
+====
 
-DONE: Tests
-=====
+* Implement `Entity` plugin (See `Grape::Entity`)
+
+Tests
+-----
 Parameters coercion:
   in: `Content-type`, `extension` -> JSON, YAML, form/data;
   out: `Accept`, `extension` -> JSON, YAML, TEXT;
 
-DONE: Types
-===========
+Types
+-----
 Use Type::Tiny instead of my own type system.
 
-DONE: Default logger
-==============
+Default logger
+--------------
 Default logger: -> STDERR
 
-DONE: Input format
-============
+Input format
+------------
   * accept params in JSON or YAML accoring to format;
 
-DONE: Output format
-=============
+Output format
+-------------
 Path extension should have more priority rather accept header.
   * based on accept content type header;
   * based on path extension;
 
-DONE: Raisin script
--------------------
+Raisin script
+-------------
   * version
   * list routes [simple]
 
@@ -54,8 +58,8 @@ DONE: Raisin script
       optional: start, Type::Integer, default: 0
       optional: count, Type::Integer, default: 10
 
-DONE: FIX params keyword
-------------------------
+FIX params keyword
+------------------
 1) rename to param (singular);
 2) w/o argument return hash ref of all values;
 3) w/ argrument return param by argument name or undef if not exists;
@@ -63,8 +67,8 @@ DONE: FIX params keyword
     my $first_name = params('first_name'); # 'John'
     my $all_params = params(); # { first_name => 'John', last_name => 'Smith' }
 
-DONE: Refactor Types
---------------------
+Refactor Types
+--------------
 Types should be a class with a `Raisin::Types::Base` parent.
 Example of an Integer type:
 
@@ -117,8 +121,8 @@ Base class `Raisin::Types::Base` should be something like this:
 
 Do not forget to update DOCS!!!
 
-DONE: Path params
------------------
+Path params
+-----------
 _get/post/put/delete/..._ etc. should take path params;
 Don't forget to update DOCS!!!
 
@@ -126,8 +130,8 @@ Don't forget to update DOCS!!!
       'ok';
     };
 
-DONE: Params as a main word
----------------------------
+Params as a main word
+---------------------
 Start route definition with the `params` keyword like in Grape:
 
     params [
