@@ -490,7 +490,7 @@ When it exists, you can retrieve and store per-session data.
 
 As a Grape Raisin support for a range ways to present your data as well.
 Raisin hash a built-in C<present> method, which accepts two arguments: the
-object to be presneted and the options associated with it. The options hash may
+object to be presented and the options associated with it. The options hash may
 include C<with> key, which is defined the entity to expose. See L<Raisin::Entity>.
 
     my $artists = $schema->resultset('Artist');
@@ -498,7 +498,9 @@ include C<with> key, which is defined the entity to expose. See L<Raisin::Entity
     present data => $artists, with => 'MusicApp::Entity::Artist';
     present count => $artists->count;
 
-See also C<examples/entity>.
+L<Raisin::Entity> supports L<DBIx::Class> and L<Rose::DB::Object>.
+
+For details see examples in I<examples/entity> and L<Raisin::Entity>.
 
 =head2 api_default_format
 
