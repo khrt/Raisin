@@ -39,39 +39,37 @@ sub compile {
         @{"${class}::EXPOSE"};
     };
 
+    @expose = _make_exposition($data) unless @expose;
+
     my $result;
 
-    if (blessed($data)) {
-        if ($data->isa('DBIx::Class')) {
-            @expose = _make_exposition_from_dbix_class($data) unless @expose;
+    # Rose::DB::Object::Iterator, DBIx::Class::ResultSet
+    # Array
+    #
+    # Hash, Rose::DB::Object, DBIx::Class::Core
+    #
+    # Scalar, everything else
 
-            if ($data->isa('DBIx::Class::ResultSet')) {
-                while (my $i = $data->next) {
-                    push @$result, _compile_dbix_class_column($i, \@expose);
-                }
-            }
-            elsif ($data->isa('DBIx::Class::Core')) {
-                $result = _compile_dbix_class_column($data, \@expose);
-            }
-        }
-        else {
-            croak 'NOT IMPLEMENTED';
+    if (blessed($data) && $data->can('next'))
+    {
+        while (my $i = $data->next) {
+            push @$result, _compile_column($i, \@expose);
         }
     }
+    elsif (ref($data) eq 'ARRAY') {
+        for my $i (@$data) {
+            push @$result, _compile_column($i, \@expose);
+        }
+    }
+    elsif (ref($data) eq 'HASH'
+           || (blessed($data)
+               && (   $data->isa('Rose::DB::Object')
+                   || $data->isa('DBIx::Class::Core'))))
+    {
+        $result = _compile_column($data, \@expose);
+    }
     else {
-        @expose = _make_exposition($data) unless @expose;
-
-        if (ref($data) eq 'ARRAY') {
-            for my $i (@$data) {
-                push @$result, _compile_column($i, \@expose);
-            }
-        }
-        elsif (ref($data) eq 'HASH') {
-            $result = _compile_column($data, \@expose);
-        }
-        else {
-            $result = $data;
-        }
+        $result = $data;
     }
 
     $result;
@@ -89,48 +87,18 @@ sub _compile_column {
                 $runtime->($data);
             }
             elsif (my $entity = $_->{using}) {
-                my $inner_data = $data->{$column};
+                my $inner_data = blessed($data) ? $data->$column : $data->{$column};
                 $entity->compile($inner_data);
             }
             else {
-                $data->{$column};
+                blessed($data) ? $data->$column : $data->{$column};
             }
         };
 
         if (my $condition = $_->{condition}) {
-            # TODO: it has to evaluate value each time despite of condition can be falsy
-            $condition->($data) ? ($key => $value) : ();
-        }
-        else {
-            ($key => $value);
-        }
-    } @$settings;
-
-    \%result;
-}
-
-sub _compile_dbix_class_column {
-    my ($data, $settings) = @_;
-
-    my %result = map {
-        my $column = $_->{name};
-        my $key = $_->{alias} || $_->{name};
-
-        my $value = do {
-            if (my $runtime = $_->{runtime}) {
-                $runtime->($data);
-            }
-            elsif (my $entity = $_->{using}) {
-                my $inner_data = $data->$column;
-                $entity->compile($inner_data);
-            }
-            else {
-                $data->$column;
-            }
-        };
-
-        if (my $condition = $_->{condition}) {
-            # TODO: it has to evaluate value each time despite of condition can be falsy
+            # TODO:
+            # value has to be evaluatead each time
+            # despite of condition which can be false
             $condition->($data) ? ($key => $value) : ();
         }
         else {
@@ -144,31 +112,36 @@ sub _compile_dbix_class_column {
 sub _make_exposition {
     my $data = shift;
 
-    my @columns_info = do {
-        if (ref($data) eq 'ARRAY') {
-            keys $data->[0];
+    my @columns = do {
+        if (blessed($data)) {
+            if ($data->isa('DBIx::Class::ResultSet')) {
+                keys %{ $data->first->columns_info }; # -> HASH
+            }
+            elsif ($data->isa('DBIx::Class::Core')) {
+                keys %{ $data->columns_info }; # -> HASH
+            }
+            elsif ($data->isa('Rose::DB::Object')) {
+                $data->meta->column_names; # -> ARRAY
+            }
+            elsif ($data->isa('Rose::DB::Object::Iterator')) {
+                croak 'Rose::DB::Object::Iterator isn\'t supported';
+            }
+        }
+        elsif (ref($data) eq 'ARRAY') {
+            if (blessed($data->[0]) && $data->[0]->isa('Rose::DB::Object')) {
+                $data->[0]->meta->column_names; # -> ARRAY
+            }
+            else {
+                keys %{ $data->[0] }; # -> HASH
+            }
         }
         elsif (ref($data) eq 'HASH') {
-            keys $data;
+            keys %$data; # -> HASH
         }
     };
 
-    map { { name => $_ } } @columns_info;
-}
-
-sub _make_exposition_from_dbix_class {
-    my $data = shift;
-
-    my $columns_info = do {
-        if ($data->isa('DBIx::Class::ResultSet')) {
-            $data->first->columns_info;
-        }
-        elsif ($data->isa('DBIx::Class::Core')) {
-            $data->columns_info;
-        }
-    };
-
-    map { { name => $_ } } keys %$columns_info;
+    return if not @columns;
+    map { { name => $_ } } @columns;
 }
 
 1;
@@ -190,13 +163,26 @@ Raisin::Entity - simple Facade to use with your API.
 
     __PACKAGE__->expose('id');
     __PACKAGE__->expose('name', as => 'artist');
-    __PACKAGE__->expose('albums', using => 'MusicApp::Entity::Album');
+    __PACKAGE__->expose('website', if => sub {
+        my $artist = shift;
+        $artist->website;
+    });
+    __PACKAGE__->expose('albums', using => 'AlbumEntity');
+    __PACKAGE__->expose('hash', sub {
+        my $artist = shift;
+        my $hash = 0;
+        my $name = blessed($artist) ? $artist->name : $artist->{name};
+        foreach (split //, $name) {
+            $hash = $hash * 42 + ord($_);
+        }
+        $hash;
+    });
 
     1;
 
 =head1 DESCRIPTION
 
-Supports L<DBIx::Class>
+Supports L<DBIx::Class>, L<Rose::DB::Object>
 and basic Perl data structures like C<SCALAR>, C<ARRAY> & C<HASH>.
 
 =head1 METHODS
@@ -209,7 +195,7 @@ The field lookup requests specified name
 
 =over
 
-=item * as an object method if object is a L<DBIx::Class> or a L<Rose::DB::Object>;
+=item * as an object method if it is a L<DBIx::Class> or a L<Rose::DB::Object>;
 
 =item * as a hash key;
 
@@ -255,7 +241,7 @@ Use a subroutine to evaluate exposure at runtime.
         my $artist = shift;
         my $hash;
         foreach (split //, $artist->name) {
-            $hash = $hash * 33 + ord($_);
+            $hash = $hash * 42 + ord($_);
         }
         $hash;
     });
