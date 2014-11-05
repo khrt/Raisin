@@ -191,6 +191,7 @@ subtest 'compile native data' => sub {
 };
 
 subtest 'compile DBIx::Class' => sub {
+    plan(skip_all => 'Requires test application');
     my $installed = eval {
         require DBIx::Class;
         DBIx::Class->import();
@@ -222,6 +223,7 @@ subtest 'compile DBIx::Class' => sub {
 };
 
 subtest 'compile Rose::DB::Object' => sub {
+    plan(skip_all => 'Requires test application');
     my $installed = eval {
         require DBIx::Class;
         DBIx::Class->import();
