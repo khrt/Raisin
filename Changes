@@ -1,6 +1,6 @@
 0.5100 Entities
     - Entities;
-    - New DBIx::Class example;
+    - Entities example with DBIx::Class, Rose::DB::Object;
 
 0.5000 New API syntax
     - New API syntax;
