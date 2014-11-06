@@ -140,4 +140,13 @@ Process and validate parameter. Takes B<reference> as the input paramter.
 
     $p->validate(\$value);
 
+=head1 AUTHOR
+
+Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
+
+=head1 LICENSE
+
+This module and all the modules in this package are governed by the same license
+as Perl itself.
+
 =cut

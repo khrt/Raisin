@@ -150,7 +150,7 @@ __END__
 
 =head1 NAME
 
-Raisin::Entity - simple Facade to use with your API.
+Raisin::Entity - Simple Facade to use with your API.
 
 =head1 SYNOPSIS
 
@@ -167,7 +167,7 @@ Raisin::Entity - simple Facade to use with your API.
         my $artist = shift;
         $artist->website;
     });
-    __PACKAGE__->expose('albums', using => 'AlbumEntity');
+    __PACKAGE__->expose('albums', using => 'MusicApp::Entity::Album');
     __PACKAGE__->expose('hash', sub {
         my $artist = shift;
         my $hash = 0;
@@ -266,5 +266,14 @@ Gets bubbled up when used with L<Raisin::Plugin::Swagger> API documentation syst
 =head2 compile
 
 Compile an entity.
+
+=head1 AUTHOR
+
+Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
+
+=head1 LICENSE
+
+This module and all the modules in this package are governed by the same license
+as Perl itself.
 
 =cut

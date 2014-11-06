@@ -11,7 +11,7 @@ use Raisin::Response;
 use Raisin::Routes;
 use Raisin::Util;
 
-our $VERSION = '0.5100';
+our $VERSION = '0.5101';
 
 sub new {
     my ($class, %args) = @_;
@@ -261,6 +261,8 @@ __END__
 =head1 NAME
 
 Raisin - REST-like API web micro-framework for Perl.
+
+=for HTML <a href="https://travis-ci.org/khrt/Raisin"><img src="https://travis-ci.org/khrt/Raisin.svg?branch=master"></a>
 
 =head1 SYNOPSIS
 
@@ -894,8 +896,6 @@ Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
 
 This module was inspired both by Grape and L<Kelp>,
 which was inspired by L<Dancer>, which in its turn was inspired by Sinatra.
-
-=for HTML <a href="https://travis-ci.org/khrt/Raisin"><img src="https://travis-ci.org/khrt/Raisin.svg?branch=master"></a>
 
 =head1 LICENSE
 
