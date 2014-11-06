@@ -1,8 +1,6 @@
 use strict;
 use warnings;
 
-use DDP;
-
 use FindBin '$Bin';
 use Test::More;
 

@@ -1,3 +1,7 @@
+0.5101 Fixes
+    - POD add AUTHOR section;
+    - Fix `t/unit/entity.t`;
+
 0.5100 Entities
     - Entities;
     - Entities example with DBIx::Class, Rose::DB::Object;
