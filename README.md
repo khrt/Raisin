@@ -240,7 +240,7 @@ include `with` key, which is defined the entity to expose. See [Raisin::Entity](
 
 [Raisin::Entity](https://metacpan.org/pod/Raisin::Entity) supports [DBIx::Class](https://metacpan.org/pod/DBIx::Class) and [Rose::DB::Object](https://metacpan.org/pod/Rose::DB::Object).
 
-For details see examples in _examples/entity_ and [Raisin::Entity](https://metacpan.org/pod/Raisin::Entity).
+For details see examples in _examples/music-app_ and [Raisin::Entity](https://metacpan.org/pod/Raisin::Entity).
 
 ## api\_default\_format
 

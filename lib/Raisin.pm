@@ -502,7 +502,7 @@ include C<with> key, which is defined the entity to expose. See L<Raisin::Entity
 
 L<Raisin::Entity> supports L<DBIx::Class> and L<Rose::DB::Object>.
 
-For details see examples in I<examples/entity> and L<Raisin::Entity>.
+For details see examples in I<examples/music-app> and L<Raisin::Entity>.
 
 =head2 api_default_format
 
