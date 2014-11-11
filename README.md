@@ -1,6 +1,6 @@
 # NAME
 
-Raisin - REST-like API web micro-framework for Perl.
+Raisin - a REST API micro framework for Perl.
 
 # SYNOPSIS
 
@@ -97,38 +97,29 @@ Raisin - REST-like API web micro-framework for Perl.
 
 # DESCRIPTION
 
-Raisin is a REST-like API web micro-framework for Perl.
+Raisin is a REST API micro framework for Perl.
 It's designed to run on Plack, providing a simple DSL to easily develop RESTful APIs.
 It was inspired by [Grape](https://github.com/intridea/grape).
 
-# BACKWARD COMPATIBILITY
+# FUNCTIONS
 
-Since version `0.5000` `Raisin` was migrated to the new API syntax.
+## API DESCRIPTION
 
-You could still use an old style API for a while by passing
-an `-old` key to the `Raisin::API`.
+### resource
 
-    use Raisin::API '-old';
-
-See examples for more information.
-
-# KEYWORDS
-
-## resource
-
-Adds a route to application.
+Adds a route to an application.
 
     resource user => sub { ... };
 
-## route\_param
+### route\_param
 
 Define a route parameter as a namespace `route_param`.
 
     route_param id => sub { ... };
 
-## del, get, patch, post, put
+### del, get, patch, post, put
 
-It's a shortcuts to `route` restricted to the corresponding HTTP method.
+Shortcuts to add a `route` restricted to the corresponding HTTP method.
 
     get sub { 'GET' };
 
@@ -149,10 +140,10 @@ It's a shortcuts to `route` restricted to the corresponding HTTP method.
         'PUT'
     };
 
-## desc
+### desc
 
-Can be applied to `resource` or any of HTTP method to add description
-for operation or for resource.
+Can be applied to `resource` or any of the HTTP method to add a description
+for an operation or for a resource.
 
     desc 'Some action';
     put sub { ... };
@@ -160,13 +151,15 @@ for operation or for resource.
     desc 'Some operations group',
     resource => 'user' => sub { ... }
 
-## params
+### params
 
 Here you can define validations and coercion options for your parameters.
 Can be applied to any HTTP method and/or `route_param` to describe parameters.
 
     params(
-        requires => { name => 'key', type => Str }
+        requires => { name => 'name', type => Str },
+        optional => { name => 'start', type => Int, default => 0 },
+        optional => { name => 'count', type => Int, default => 10 },
     );
     get sub { ... };
 
@@ -177,84 +170,21 @@ Can be applied to any HTTP method and/or `route_param` to describe parameters.
 
 For more see ["Validation-and-coercion" in Raisin](https://metacpan.org/pod/Raisin#Validation-and-coercion).
 
-## req
+### api\_default\_format
 
-An alias for `$self->req`, which provides quick access to the
-[Raisin::Request](https://metacpan.org/pod/Raisin::Request) object for the current route.
+Specifies default API format mode when formatter doesn't specified by API user.
+E.g. URI is asked without an extension (`json`, `yaml`) or `Accept` header
+isn't specified.
 
-Use `req` to get access to a request headers, params, etc.
-
-    use DDP;
-    p req->headers;
-    p req->params;
-
-    say req->header('X-Header');
-
-See also [Plack::Request](https://metacpan.org/pod/Plack::Request).
-
-## res
-
-An alias for `$self->res`, which provides quick access to the
-[Raisin::Response](https://metacpan.org/pod/Raisin::Response) object for the current route.
-
-Use `res` to set up response parameters.
-
-    res->status(403);
-    res->headers(['X-Application' => 'Raisin Application']);
-
-See also [Plack::Response](https://metacpan.org/pod/Plack::Response).
-
-## param
-
-An alias for `$self->params`, which returns request parameters.
-Without arguments will return an array with request parameters.
-Otherwise it will return the value of the requested parameter.
-
-Returns [Hash::MultiValue](https://metacpan.org/pod/Hash::MultiValue) object.
-
-    say param('key'); # -> value
-    say param(); # -> { key => 'value', foo => 'bar' }
-
-## session
-
-An alias for `$self->session`, which returns `psgix.session` hash.
-When it exists, you can retrieve and store per-session data.
-
-    # store param
-    session->{hello} = 'World!';
-
-    # read param
-    say session->{name};
-
-## present
-
-As a Grape Raisin support for a range ways to present your data as well.
-Raisin hash a built-in `present` method, which accepts two arguments: the
-object to be presented and the options associated with it. The options hash may
-include `with` key, which is defined the entity to expose. See [Raisin::Entity](https://metacpan.org/pod/Raisin::Entity).
-
-    my $artists = $schema->resultset('Artist');
-
-    present data => $artists, with => 'MusicApp::Entity::Artist';
-    present count => $artists->count;
-
-[Raisin::Entity](https://metacpan.org/pod/Raisin::Entity) supports [DBIx::Class](https://metacpan.org/pod/DBIx::Class) and [Rose::DB::Object](https://metacpan.org/pod/Rose::DB::Object).
-
-For details see examples in _examples/music-app_ and [Raisin::Entity](https://metacpan.org/pod/Raisin::Entity).
-
-## api\_default\_format
-
-Specify default API format when formatter doesn't specified.
 Default value: `YAML`.
 
     api_default_format 'json';
 
 See also ["API-FORMATS" in Raisin](https://metacpan.org/pod/Raisin#API-FORMATS).
 
-## api\_format
+### api\_format
 
-Restricts API to use only specified formatter for serialize and deserialize
-data.
+Restricts API to use only specified formatter to serialize and deserialize data.
 
 Already exists [Raisin::Plugin::Format::JSON](https://metacpan.org/pod/Raisin::Plugin::Format::JSON) and [Raisin::Plugin::Format::YAML](https://metacpan.org/pod/Raisin::Plugin::Format::YAML).
 
@@ -262,20 +192,20 @@ Already exists [Raisin::Plugin::Format::JSON](https://metacpan.org/pod/Raisin::P
 
 See also ["API-FORMATS" in Raisin](https://metacpan.org/pod/Raisin#API-FORMATS).
 
-## api\_version
+### api\_version
 
-Setup an API version header.
+Sets up an API version header.
 
     api_version 1.23;
 
-## plugin
+### plugin
 
-Loads Raisin module. A module options may be specified after a module name.
+Loads a Raisin module. A module options may be specified after the module name.
 Compatible with [Kelp](https://metacpan.org/pod/Kelp) modules.
 
-    plugin 'Logger', params => [outputs => [['Screen', min_level => 'debug']]];
+    plugin 'Swagger', enable => 'CORS';
 
-## middleware
+### middleware
 
 Adds middleware to your application.
 
@@ -283,9 +213,10 @@ Adds middleware to your application.
     middleware '+Plack::Middleware::ContentLength';
     middleware 'Runtime'; # will be loaded Plack::Middleware::Runtime
 
-## mount
+### mount
 
-Mount multiple API implementations inside another one.
+Mounts multiple API implementations inside another one.
+These don't have to be different versions, but may be components of the same API.
 
 In `RaisinApp.pm`:
 
@@ -300,18 +231,98 @@ In `RaisinApp.pm`:
 
     1;
 
-## new, run
+### run
 
-Creates and returns a PSGI ready subroutine, and makes the app ready for `Plack`.
+Returns the `PSGI` application.
+
+## INSIDE ROUTE
+
+### req
+
+An alias for `$self->req`, which provides quick access to the
+[Raisin::Request](https://metacpan.org/pod/Raisin::Request) object for the current route.
+
+Use `req` to get access to request headers, params, etc.
+
+    use DDP;
+    p req->headers;
+    p req->params;
+
+    say req->header('X-Header');
+
+See also [Plack::Request](https://metacpan.org/pod/Plack::Request).
+
+### res
+
+An alias for `$self->res`, which provides quick access to the
+[Raisin::Response](https://metacpan.org/pod/Raisin::Response) object for the current route.
+
+Use `res` to set up response parameters.
+
+    res->status(403);
+    res->headers(['X-Application' => 'Raisin Application']);
+
+See also [Plack::Response](https://metacpan.org/pod/Plack::Response).
+
+### param
+
+An alias for `$self->params`, which returns request parameters.
+Without an argument will return an array of all input parameters.
+Otherwise it will return the value of the requested parameter.
+
+Returns [Hash::MultiValue](https://metacpan.org/pod/Hash::MultiValue) object.
+
+    say param('key'); # -> value
+    say param(); # -> { key => 'value', foo => 'bar' }
+
+### session
+
+An alias for `$self->session`, which returns `psgix.session` hash.
+When it exists, you can retrieve and store per-session data.
+
+    # store param
+    session->{hello} = 'World!';
+
+    # read param
+    say session->{name};
+
+### present
+
+As Grape Raisin support for a range ways to present your data as well.
+Raisin hash a built-in `present` method, which accepts two arguments: an
+object to be presented and an options associated with it. The options hash may
+include `with` key, which is defined the entity to expose. See [Raisin::Entity](https://metacpan.org/pod/Raisin::Entity).
+
+    my $artists = $schema->resultset('Artist');
+
+    present data => $artists, with => 'MusicApp::Entity::Artist';
+    present count => $artists->count;
+
+[Raisin::Entity](https://metacpan.org/pod/Raisin::Entity) supports [DBIx::Class](https://metacpan.org/pod/DBIx::Class) and [Rose::DB::Object](https://metacpan.org/pod/Rose::DB::Object).
+
+For details see examples in _examples/music-app_ and [Raisin::Entity](https://metacpan.org/pod/Raisin::Entity).
 
 # PARAMETERS
 
-Request parameters are available through the params hash object. This includes
+A request parameters are available through the `params` `HASH`. This includes
 GET, POST and PUT parameters, along with any named parameters you specify in
 your route strings.
 
-Parameters are automatically populated from the request body on POST and PUT
-for form input, `JSON` and `YAML` content types.
+Parameters are automatically populated from the request body
+on `POST` and `PUT` for form input, `JSON` and `YAML` content-types.
+
+The request:
+
+    curl -d '{"id": "14"}' 'http://localhost:5000/data' -H Content-Type:application/json -v
+
+The Raisin endpoint:
+
+    post data => sub {
+        my $params = shift;
+        $params{id}
+    }
+
+Multipart `POST`s and `PUT`s are supported as well.
 
 In the case of conflict between either of:
 
@@ -325,19 +336,23 @@ Query string and body parameters will be merged (see ["parameters" in Plack::Req
 
 ## Validation and coercion
 
-You can define validations and coercion options for your parameters using a params block.
+You can define validations and coercion options for your parameters using a
+["params" in Rasisin](https://metacpan.org/pod/Rasisin#params) block.
 
-Parameters can be `requires` and `optional`. `optional` parameters can have a
-default value.
+Parameters can `requires` a value and can be an `optional`.
+`optional` parameters can have a default value.
 
     params(
         requires => { name => 'name', type => Str },
-        optional => { name => 'number', type => Int, default => 10 },
+        optional => { name => 'count', type => Int, default => 10 },
     );
     get sub {
         my $params = shift;
-        "$params->{number}: $params->{name}";
+        "$params->{count}: $params->{name}";
     };
+
+Note that default values will NOT be passed through to any validation options
+specified.
 
 Available arguments:
 
@@ -347,22 +362,20 @@ Available arguments:
 - desc
 - regex
 
-Optional parameters can have a default value.
-
 ## Types
 
-Raisin supports Moo(se)-compatible type constraint
-so you can use any of the [Moose](https://metacpan.org/pod/Moose), [Moo](https://metacpan.org/pod/Moo) or [Type::Tiny](https://metacpan.org/pod/Type::Tiny) type constraints.
+Raisin supports Moo(se)-compatible type constraint so you can use any of the
+[Moose](https://metacpan.org/pod/Moose), [Moo](https://metacpan.org/pod/Moo) or [Type::Tiny](https://metacpan.org/pod/Type::Tiny) type constraints.
 
-By default [Raisin](https://metacpan.org/pod/Raisin) depends on [Type::Tiny](https://metacpan.org/pod/Type::Tiny) and it's [Types::Standard](https://metacpan.org/pod/Types::Standard)
-type contraint library.
+By default [Raisin](https://metacpan.org/pod/Raisin) depends on [Type::Tiny](https://metacpan.org/pod/Type::Tiny) and it's [Types::Standard](https://metacpan.org/pod/Types::Standard) type
+contraint library.
 
 You can create your own types as well.
 See [Type::Tiny::Manual](https://metacpan.org/pod/Type::Tiny::Manual) and [Moose::Manual::Types](https://metacpan.org/pod/Moose::Manual::Types).
 
 # HOOKS
 
-This blocks can be executed before or after every API call, using
+This blocks can be executed before or/and after every API call, using
 `before`, `after`, `before_validation` and `after_validation`.
 
 Before and after callbacks execute in the following order:
@@ -421,7 +434,7 @@ The order for choosing the format is the following.
 
 # LOGGING
 
-Raisin has a built-in logger and support for `Log::Dispatch`.
+Raisin has a built-in logger and supports for `Log::Dispatch`.
 You can enable it by:
 
     plugin 'Logger', outputs => [['Screen', min_level => 'debug']];
@@ -461,30 +474,7 @@ Verbose output with route parameters:
         optional: `start', type: Integer, default: 0
         optional: `count', type: Integer, default: 10
 
-      GET     /user/all
-
-      POST    /user
-        required: `name', type: String
-        required: `password', type: String
-        optional: `email', type: String
-
-      GET     /user/{id}
-        required: `id', type: Integer
-
-      PUT     /user/{id}
-        optional: `password', type: String
-        optional: `email', type: String
-        required: `id', type: Integer
-
-      GET     /user/{id}/bump
-        required: `id', type: Integer
-
-      PUT     /user/{id}/bump
-        required: `id', type: Integer
-
-      GET     /failed
-
-      GET     /params
+    ...
 
 ## Swagger
 
@@ -495,7 +485,7 @@ Verbose output with route parameters:
 Documentation will be available on `http://<url>/api-docs` URL.
 So you can use this URL in Swagger UI.
 
-For more see [Raisin::Plugin::Swagger](https://metacpan.org/pod/Raisin::Plugin::Swagger).
+See [Raisin::Plugin::Swagger](https://metacpan.org/pod/Raisin::Plugin::Swagger).
 
 # MIDDLEWARE
 
@@ -535,7 +525,7 @@ See [Plack::Test](https://metacpan.org/pod/Plack::Test), [Test::More](https://me
 Deploying a Raisin application is done the same way any other Plack
 application is deployed:
 
-    > plackup -E deployment -s Starman app.psgi
+    $ plackup -E deployment -s Starman app.psgi
 
 ## Kelp
 
@@ -588,20 +578,50 @@ Also see [Plack::Builder](https://metacpan.org/pod/Plack::Builder), [Plack::App:
 
 # EXAMPLES
 
-See examples.
+Raisin comes with three instance in _example_ directory:
+
+- music-app
+
+    Shows the ability of using ["present" in Raisin](https://metacpan.org/pod/Raisin#present) with Perl data structures,
+    [DBIx::Class](https://metacpan.org/pod/DBIx::Class) and [Rose::DB::Object](https://metacpan.org/pod/Rose::DB::Object).
+
+- pod-synopsis-app
+
+    Basic instance which is used in synposis.
+
+- sample-app
+
+    Shows an example of complex application and advantages of using ["mount" in Raisin](https://metacpan.org/pod/Raisin#mount).
+
+# BACKWARD COMPATIBILITY
+
+Since version `0.5000` Raisin was migrated to the new API syntax.
+
+You could still use an old style API for a while by passing an `-old` key
+to the [Raisin::API](https://metacpan.org/pod/Raisin::API).
+
+    use Raisin::API '-old';
+
+# ROADMAP
+
+- Upgrade Swagger to [2.0](https://github.com/wordnik/swagger-spec/blob/master/versions/2.0.md);
+- Mount API's in any place of `resource` block;
+- Endpoint's hooks: `after`, `before`;
+- `declared` keyword which should be applicable to `param` and supports for `missing` keyword;
+- Make test application in _t/_;
 
 # GITHUB
 
 [https://github.com/khrt/Raisin](https://github.com/khrt/Raisin)
 
-# AUTHOR
-
-Artur Khabibullin - rtkh <at> cpan.org
-
 # ACKNOWLEDGEMENTS
 
 This module was inspired both by Grape and [Kelp](https://metacpan.org/pod/Kelp),
 which was inspired by [Dancer](https://metacpan.org/pod/Dancer), which in its turn was inspired by Sinatra.
+
+# AUTHOR
+
+Artur Khabibullin - rtkh <at> cpan.org
 
 # LICENSE
 
