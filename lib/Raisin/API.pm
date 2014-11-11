@@ -126,7 +126,7 @@ sub route_param_OLD {
 #
 # Actions
 #
-sub del     { _add_route('delete', @_) } # `del` in previous API
+sub del     { _add_route('delete', @_) }
 sub get     { _add_route('get', @_) }
 sub head    { _add_route('head', @_) }
 sub options { _add_route('options', @_) }
