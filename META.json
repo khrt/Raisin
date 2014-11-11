@@ -1,5 +1,5 @@
 {
-   "abstract" : "REST-like API web micro-framework for Perl.",
+   "abstract" : "a REST API micro framework for Perl.",
    "author" : [
       "Artur Khabibullin - rtkh <at> cpan.org"
    ],
