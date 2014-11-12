@@ -19,6 +19,14 @@ sub new {
 
 sub app { shift->{app} }
 
+sub format {
+    my ($self, $format) = @_;
+    if ($format) {
+        $self->{_format} = $format;
+    }
+    $self->{_format};
+}
+
 sub serialize {
     my ($self, $format, $data) = @_;
 
@@ -49,12 +57,13 @@ sub rendered {
 }
 
 sub render {
-    my ($self, $format, $body) = @_;
-    $body ||= $self->body;
+    my $self = shift;
+
+    my $body = $self->body;
     $self->status(200) if not $self->status;
 
     if (ref $body) {
-        $body = $self->serialize($format, $body);
+        $body = $self->serialize($self->format, $body);
     }
 
     $self->content_type('text/plain') if not $self->content_type;
@@ -70,10 +79,9 @@ sub render_500 { shift->render_error(500, shift || 'Internal error') }
 
 sub render_error {
     my ($self, $code, $message) = @_;
-
     $self->status($code);
-    # TODO __DATA__ templates
-    $self->render(undef, $message);
+    $self->body($message);
+    $self->render;
 }
 
 1;
