@@ -35,7 +35,7 @@ __END__
 
 =head1 NAME
 
-Raisin::Utils - Utility subroutine for Raisin.
+Raisin::Util - Utility subroutine for Raisin.
 
 =head1 FUNCTIONS
 

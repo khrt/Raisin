@@ -28,7 +28,7 @@ __END__
 
 =head1 NAME
 
-Raisin::Plugin::Format::Text - Data::Dumper serialization plugin for Raisin.
+Raisin::Plugin::Format::TEXT - Data::Dumper serialization plugin for Raisin.
 
 =head1 DESCRIPTION
 
