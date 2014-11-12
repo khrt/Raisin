@@ -604,11 +604,12 @@ to the [Raisin::API](https://metacpan.org/pod/Raisin::API).
 
 # ROADMAP
 
-- Upgrade Swagger to [2.0](https://github.com/wordnik/swagger-spec/blob/master/versions/2.0.md);
-- Mount API's in any place of `resource` block;
-- Endpoint's hooks: `after`, `before`;
-- `declared` keyword which should be applicable to `param` and supports for `missing` keyword;
 - Make test application in _t/_;
+- Improve [Raisin::Entity](https://metacpan.org/pod/Raisin::Entity);
+- Upgrade Swagger to [2.0](https://github.com/wordnik/swagger-spec/blob/master/versions/2.0.md);
+- Endpoint's hooks: `after`, `before`;
+- Mount API's in any place of `resource` block;
+- `declared` keyword which should be applicable to `param` and supports for `missing` keyword;
 
 # GITHUB
 

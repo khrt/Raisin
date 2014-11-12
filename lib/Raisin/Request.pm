@@ -103,15 +103,13 @@ Extends L<Plack::Request>.
 
 =head1 METHODS
 
-=head3 app
+=head3 accept_format
+
+=head3 deserialize
 
 =head3 declared_params
 
-=head3 set_declared_params
-
-=head3 set_named_params
-
-=head3 populate_params
+=head3 prepare_params
 
 =head1 AUTHOR
 

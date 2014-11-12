@@ -102,6 +102,8 @@ Extends L<Plack::Response>.
 
 =head1 METHODS
 
+=head3 format
+
 =head3 serialize
 
 =head3 rendered

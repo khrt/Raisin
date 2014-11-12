@@ -898,15 +898,17 @@ to the L<Raisin::API>.
 
 =over
 
-=item * Upgrade Swagger to L<2.0|https://github.com/wordnik/swagger-spec/blob/master/versions/2.0.md>;
+=item * Make test application in I<t/>;
 
-=item * Mount API's in any place of C<resource> block;
+=item * Improve L<Raisin::Entity>;
+
+=item * Upgrade Swagger to L<2.0|https://github.com/wordnik/swagger-spec/blob/master/versions/2.0.md>;
 
 =item * Endpoint's hooks: C<after>, C<before>;
 
-=item * C<declared> keyword which should be applicable to C<param> and supports for C<missing> keyword;
+=item * Mount API's in any place of C<resource> block;
 
-=item * Make test application in I<t/>;
+=item * C<declared> keyword which should be applicable to C<param> and supports for C<missing> keyword;
 
 =back
 
