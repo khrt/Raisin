@@ -223,8 +223,8 @@ subtest 'compile DBIx::Class' => sub {
 subtest 'compile Rose::DB::Object' => sub {
     plan(skip_all => 'Requires test application');
     my $installed = eval {
-        require DBIx::Class;
-        DBIx::Class->import();
+        require Rose::DB::Object;
+        Rose::DB::Object->import();
         1;
     };
     plan(skip_all => 'because Rose::DB::Object not installed.') if not $installed;
