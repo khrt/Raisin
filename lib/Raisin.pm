@@ -496,8 +496,7 @@ Returns the C<PSGI> application.
 
 =head3 req
 
-An alias for C<$self-E<gt>req>, which provides quick access to the
-L<Raisin::Request> object for the current route.
+Provides quick access to the L<Raisin::Request> object for the current route.
 
 Use C<req> to get access to request headers, params, etc.
 
@@ -511,8 +510,7 @@ See also L<Plack::Request>.
 
 =head3 res
 
-An alias for C<$self-E<gt>res>, which provides quick access to the
-L<Raisin::Response> object for the current route.
+Provides quick access to the L<Raisin::Response> object for the current route.
 
 Use C<res> to set up response parameters.
 
@@ -523,7 +521,7 @@ See also L<Plack::Response>.
 
 =head3 param
 
-An alias for C<$self-E<gt>params>, which returns request parameters.
+Returns request parameters.
 Without an argument will return an array of all input parameters.
 Otherwise it will return the value of the requested parameter.
 
@@ -534,8 +532,8 @@ Returns L<Hash::MultiValue> object.
 
 =head3 session
 
-An alias for C<$self-E<gt>session>, which returns C<psgix.session> hash.
-When it exists, you can retrieve and store per-session data.
+Returns C<psgix.session> hash. When it exists, you can retrieve and store
+per-session data.
 
     # store param
     session->{hello} = 'World!';
@@ -545,7 +543,6 @@ When it exists, you can retrieve and store per-session data.
 
 =head3 present
 
-As Grape Raisin support for a range ways to present your data as well.
 Raisin hash a built-in C<present> method, which accepts two arguments: an
 object to be presented and an options associated with it. The options hash may
 include C<with> key, which is defined the entity to expose. See L<Raisin::Entity>.

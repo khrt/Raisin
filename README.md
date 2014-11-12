@@ -239,8 +239,7 @@ Returns the `PSGI` application.
 
 ### req
 
-An alias for `$self->req`, which provides quick access to the
-[Raisin::Request](https://metacpan.org/pod/Raisin::Request) object for the current route.
+Provides quick access to the [Raisin::Request](https://metacpan.org/pod/Raisin::Request) object for the current route.
 
 Use `req` to get access to request headers, params, etc.
 
@@ -254,8 +253,7 @@ See also [Plack::Request](https://metacpan.org/pod/Plack::Request).
 
 ### res
 
-An alias for `$self->res`, which provides quick access to the
-[Raisin::Response](https://metacpan.org/pod/Raisin::Response) object for the current route.
+Provides quick access to the [Raisin::Response](https://metacpan.org/pod/Raisin::Response) object for the current route.
 
 Use `res` to set up response parameters.
 
@@ -266,7 +264,7 @@ See also [Plack::Response](https://metacpan.org/pod/Plack::Response).
 
 ### param
 
-An alias for `$self->params`, which returns request parameters.
+Returns request parameters.
 Without an argument will return an array of all input parameters.
 Otherwise it will return the value of the requested parameter.
 
@@ -277,8 +275,8 @@ Returns [Hash::MultiValue](https://metacpan.org/pod/Hash::MultiValue) object.
 
 ### session
 
-An alias for `$self->session`, which returns `psgix.session` hash.
-When it exists, you can retrieve and store per-session data.
+Returns `psgix.session` hash. When it exists, you can retrieve and store
+per-session data.
 
     # store param
     session->{hello} = 'World!';
@@ -288,7 +286,6 @@ When it exists, you can retrieve and store per-session data.
 
 ### present
 
-As Grape Raisin support for a range ways to present your data as well.
 Raisin hash a built-in `present` method, which accepts two arguments: an
 object to be presented and an options associated with it. The options hash may
 include `with` key, which is defined the entity to expose. See [Raisin::Entity](https://metacpan.org/pod/Raisin::Entity).
