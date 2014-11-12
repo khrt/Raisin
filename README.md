@@ -580,18 +580,18 @@ Also see [Plack::Builder](https://metacpan.org/pod/Plack::Builder), [Plack::App:
 
 Raisin comes with three instance in _example_ directory:
 
-- music-app
-
-    Shows the ability of using ["present" in Raisin](https://metacpan.org/pod/Raisin#present) with Perl data structures,
-    [DBIx::Class](https://metacpan.org/pod/DBIx::Class) and [Rose::DB::Object](https://metacpan.org/pod/Rose::DB::Object).
-
 - pod-synopsis-app
 
-    Basic instance which is used in synposis.
+    Basic instance which is used in synopsis.
+
+- music-app
+
+    Shows the possibility of using ["present" in Raisin](https://metacpan.org/pod/Raisin#present) with [DBIx::Class](https://metacpan.org/pod/DBIx::Class)
+    and [Rose::DB::Object](https://metacpan.org/pod/Rose::DB::Object).
 
 - sample-app
 
-    Shows an example of complex application and advantages of using ["mount" in Raisin](https://metacpan.org/pod/Raisin#mount).
+    Shows an example of complex application.
 
 # BACKWARD COMPATIBILITY
 

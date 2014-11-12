@@ -104,7 +104,6 @@ sub psgi {
         $self->build_api_spec;
     }
 
-    # HOOK Before
     $self->hook('before')->($self);
 
     # Find route
@@ -134,7 +133,6 @@ sub psgi {
             # Log
             #$self->log(info => $req->method . q{ } . $route->path);
 
-            # HOOK Before validation
             $self->hook('before_validation')->($self);
 
             # Populate and validate declared params
@@ -143,25 +141,22 @@ sub psgi {
                 last;
             }
 
-            # HOOK After validation
             $self->hook('after_validation')->($self);
 
-            # Eval code
-            my $data = $code->($req->declared_params);
-
-            # TODO:
-            # set data to the res->body
-            # check only res->body
-            if (defined($data) || $res->body) {
-                # Handle delayed response
-                return $data if ref($data) eq 'CODE'; # TODO: check delayed responses
-
-                # Detect output format
-                my $format = $route->format || $req->header('Accept');
-                $res->render($format, $data) if not $res->rendered;
+            # Exec user endpoint
+            if (my $data = $code->($req->declared_params)) {
+                return $data if ref($data) eq 'CODE';
+                $res->body($data);
             }
 
-            # HOOK After
+            if ($res->body && !$res->rendered) {
+                # TODO: Handle delayed response
+
+                my $format = $route->format || $req->header('Accept');
+                $res->format($format);
+                $res->render;
+            }
+
             $self->hook('after')->($self);
         }
 
@@ -875,18 +870,18 @@ Raisin comes with three instance in I<example> directory:
 
 =over
 
-=item music-app
-
-Shows the ability of using L<Raisin/present> with Perl data structures,
-L<DBIx::Class> and L<Rose::DB::Object>.
-
 =item pod-synopsis-app
 
-Basic instance which is used in synposis.
+Basic instance which is used in synopsis.
+
+=item music-app
+
+Shows the possibility of using L<Raisin/present> with L<DBIx::Class>
+and L<Rose::DB::Object>.
 
 =item sample-app
 
-Shows an example of complex application and advantages of using L<Raisin/mount>.
+Shows an example of complex application.
 
 =back
 

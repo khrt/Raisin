@@ -32,7 +32,8 @@ subtest 'render' => sub {
 
         my $r = Raisin::Response->new($app);
 
-        ok $r->render(undef, $data);
+        ok $r->body($data);
+        ok $r->render;
         my $out = JSON::decode_json($r->body);
         is_deeply $out, $data, 'render';
 
@@ -48,7 +49,10 @@ subtest 'render' => sub {
 
         my $r = Raisin::Response->new($app);
 
-        ok $r->render('json', $data);
+        ok $r->format('json');
+        ok $r->body($data);
+        ok $r->render;
+
         my $out = JSON::decode_json($r->body);
         is_deeply $out, $data, 'render';
 
@@ -64,7 +68,10 @@ subtest 'render' => sub {
 
         my $r = Raisin::Response->new($app);
 
-        ok $r->render('yaml', $data);
+        ok $r->format('yaml');
+        ok $r->body($data);
+        ok $r->render;
+
         my $out = YAML::Load($r->body);
         is_deeply $out, $data, 'render';
 
@@ -79,7 +86,10 @@ subtest 'render' => sub {
         $app->api_default_format('json');
 
         my $r = Raisin::Response->new($app);
-        ok $r->render('text', $data);
+
+        ok $r->format('text');
+        ok $r->body($data);
+        ok $r->render;
 
         is $r->content_type, 'text/plain', 'content type';
         ok $r->rendered, 'rendered';
@@ -92,7 +102,10 @@ subtest 'render' => sub {
         $app->api_default_format('json');
 
         my $r = Raisin::Response->new($app);
-        ok $r->render('text', 'text/plain');
+
+        ok $r->format('text');
+        ok $r->body('text/plain');
+        ok $r->render;
         is $r->body, 'text/plain', 'render text';
 
         is $r->content_type, 'text/plain', 'content type';

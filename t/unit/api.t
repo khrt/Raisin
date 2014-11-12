@@ -277,6 +277,7 @@ subtest 'present' => sub {
         use Raisin::API;
         resource 'present' => sub {
             get sub {
+                use DDP;
                 present data => \@data;
                 present data_with => \@data, with => 'PersonEntity';
                 present size => scalar @data;
