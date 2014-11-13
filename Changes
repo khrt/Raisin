@@ -1,5 +1,8 @@
 0.*
     - Update documentation;
+    - New way of rendering data:
+        * store user's endpoint into response body if any;
+        * add format method to the Raisin::Response;
 
 0.5101 Fixes
     - POD add AUTHOR section;
