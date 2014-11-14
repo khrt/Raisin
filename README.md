@@ -7,6 +7,8 @@ Raisin - a REST API micro framework for Perl.
     use strict;
     use warnings;
 
+    use utf8;
+
     use Raisin::API;
     use Types::Standard qw(Any Int Str);
 
@@ -87,10 +89,17 @@ Raisin - a REST API micro framework for Perl.
                 my $params = shift;
                 { success => delete $USERS{ $params->{id} } };
             };
-
-            desc 'NOP';
-            put sub { 'nop' };
         };
+    };
+
+    resource echo => sub {
+        params(
+            optional => { name => 'data0', type => Any, default => "ёй" },
+        );
+        get sub { shift };
+
+        desc 'NOP';
+        get nop => sub { };
     };
 
     run;
@@ -207,7 +216,7 @@ Compatible with [Kelp](https://metacpan.org/pod/Kelp) modules.
 
 ### middleware
 
-Adds middleware to your application.
+Adds a middleware to your application.
 
     middleware '+Plack::Middleware::Session' => { store => 'File' };
     middleware '+Plack::Middleware::ContentLength';
@@ -316,7 +325,7 @@ The Raisin endpoint:
 
     post data => sub {
         my $params = shift;
-        $params{id}
+        $params{id};
     }
 
 Multipart `POST`s and `PUT`s are supported as well.
@@ -454,24 +463,34 @@ See [Raisin::Plugin::Logger](https://metacpan.org/pod/Raisin::Plugin::Logger).
 
 You can see application routes with the following command:
 
-    $ raisin --routes examples/simple/routes.pl
-      GET     /user
-      GET     /user/all
-      POST    /user
-      GET     /user/{id}
-      PUT     /user/{id}
-      GET     /user/{id}/bump
-      PUT     /user/{id}/bump
-      GET     /failed
+    $ raisin examples/pod-synopsis-app/darth.pl
+    GET     /user
+    GET     /user/all
+    POST    /user
+    GET     /user/:id
+    DELETE  /user/:id
+    PUT     /user/:id
+    GET     /echo
 
-Verbose output with route parameters:
+Including parameters:
 
-    $ raisin --routes --params examples/simple/routes.pl
-      GET     /user
-        optional: `start', type: Integer, default: 0
-        optional: `count', type: Integer, default: 10
-
-    ...
+    $ raisin --params examples/pod-synopsis-app/darth.pl
+    GET     /user
+       start Int{0}
+       count Int{10}
+    GET     /user/all
+    POST    /user
+      *name     Str
+      *password Str
+    email    Str
+    GET     /user/:id
+      *id Int
+    DELETE  /user/:id
+      *id Int
+    PUT     /user/:id
+      *id Int
+    GET     /echo
+      *data Any{ёй}
 
 ## Swagger
 
@@ -625,3 +644,11 @@ Artur Khabibullin - rtkh <at> cpan.org
 
 This module and all the modules in this package are governed by the same license
 as Perl itself.
+
+# POD ERRORS
+
+Hey! **The above document had some coding errors, which are explained below:**
+
+- Around line 99:
+
+    Non-ASCII character seen before =encoding in '"ёй"'. Assuming ISO8859-1

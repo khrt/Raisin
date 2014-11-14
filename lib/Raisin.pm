@@ -11,7 +11,7 @@ use Raisin::Response;
 use Raisin::Routes;
 use Raisin::Util;
 
-our $VERSION = '0.5101';
+our $VERSION = '0.5200';
 
 sub new {
     my ($class, %args) = @_;
@@ -104,65 +104,59 @@ sub psgi {
         $self->build_api_spec;
     }
 
-    $self->hook('before')->($self);
-
-    # Find route
-    my $routes = $self->routes->find($req->method, $req->path);
-
-    if (!@$routes) {
-        $res->render_404;
-        return $res->finalize;
-    }
-
     eval {
-        foreach my $route (@$routes) {
-            if ($self->api_format && (my $type = $req->accept_format)) {
-                if ($type ne $self->api_format) {
-                    $self->log(error => 'Invalid accept header');
-                    $res->render_error(406, 'Invalid accept header');
-                    last;
-                }
+        $self->hook('before')->($self);
+
+        # Find a route
+        my $route = $self->routes->find($req->method, $req->path);
+
+        if (!$route) {
+            $res->render_404;
+            return $res->finalize;
+        }
+
+        if ($self->api_format && (my $type = $req->accept_format)) {
+            if ($type ne $self->api_format) {
+                $self->log(error => 'Invalid accept header');
+                $res->render_error(406, 'Invalid accept header');
+                return $res->finalize;
             }
+        }
 
-            # Validate code variable
-            my $code = $route->code;
-            if (!$code || (ref($code) && ref($code) ne 'CODE')) {
-                croak 'Invalid endpoint for ' . $req->path;
-            }
+        my $code = $route->code;
+        if (!$code || ($code && ref($code) ne 'CODE')) {
+            $res->render_500('Invalid endpoint for ' . $req->path);
+            return $res->finalize;
+        }
 
-            # Log
-            #$self->log(info => $req->method . q{ } . $route->path);
+        $self->hook('before_validation')->($self);
 
-            $self->hook('before_validation')->($self);
+        # Validation and coercion of a declared params
+        if (not $req->prepare_params($route->params, $route->named)) {
+            $res->render_error(400, 'Invalid params!');
+            return $res->finalize;
+        }
 
-            # Populate and validate declared params
-            if (not $req->prepare_params($route->params, $route->named)) {
-                $res->render_error(400, 'Invalid params!');
-                last;
-            }
+        $self->hook('after_validation')->($self);
 
-            $self->hook('after_validation')->($self);
-
-            # Exec user endpoint
-            if (my $data = $code->($req->declared_params)) {
-                return $data if ref($data) eq 'CODE';
-                $res->body($data);
-            }
-
-            if ($res->body && !$res->rendered) {
-                # TODO: Handle delayed response
-
-                my $format = $route->format || $req->header('Accept');
-                $res->format($format);
-                $res->render;
-            }
-
-            $self->hook('after')->($self);
+        # Eval user endpoint
+        my $data = $code->($req->declared_params);
+        if (defined $data) {
+            # TODO: delayed responses are untested
+            return $data if ref($data) eq 'CODE';
+            $res->body($data);
         }
 
         if (!$res->rendered) {
+            my $format = $route->format || $req->header('Accept');
+            $res->format($format);
+            $res->render;
+        }
+
+        $self->hook('after')->($self);
+
+        if (!$res->rendered) {
             $self->log(error => 'Nothing rendered');
-            # TODO: render something
         }
 
         1;
@@ -262,6 +256,8 @@ Raisin - a REST API micro framework for Perl.
     use strict;
     use warnings;
 
+    use utf8;
+
     use Raisin::API;
     use Types::Standard qw(Any Int Str);
 
@@ -342,10 +338,17 @@ Raisin - a REST API micro framework for Perl.
                 my $params = shift;
                 { success => delete $USERS{ $params->{id} } };
             };
-
-            desc 'NOP';
-            put sub { 'nop' };
         };
+    };
+
+    resource echo => sub {
+        params(
+            optional => { name => 'data0', type => Any, default => "ёй" },
+        );
+        get sub { shift };
+
+        desc 'NOP';
+        get nop => sub { };
     };
 
     run;
@@ -464,7 +467,7 @@ Compatible with L<Kelp> modules.
 
 =head3 middleware
 
-Adds middleware to your application.
+Adds a middleware to your application.
 
     middleware '+Plack::Middleware::Session' => { store => 'File' };
     middleware '+Plack::Middleware::ContentLength';
@@ -573,7 +576,7 @@ The Raisin endpoint:
 
     post data => sub {
         my $params = shift;
-        $params{id}
+        $params{id};
     }
 
 Multipart C<POST>s and C<PUT>s are supported as well.
@@ -742,24 +745,34 @@ See L<Raisin::Plugin::Logger>.
 
 You can see application routes with the following command:
 
-    $ raisin --routes examples/simple/routes.pl
-      GET     /user
-      GET     /user/all
-      POST    /user
-      GET     /user/{id}
-      PUT     /user/{id}
-      GET     /user/{id}/bump
-      PUT     /user/{id}/bump
-      GET     /failed
+    $ raisin examples/pod-synopsis-app/darth.pl
+    GET     /user
+    GET     /user/all
+    POST    /user
+    GET     /user/:id
+    DELETE  /user/:id
+    PUT     /user/:id
+    GET     /echo
 
-Verbose output with route parameters:
+Including parameters:
 
-    $ raisin --routes --params examples/simple/routes.pl
-      GET     /user
-        optional: `start', type: Integer, default: 0
-        optional: `count', type: Integer, default: 10
-
-    ...
+    $ raisin --params examples/pod-synopsis-app/darth.pl
+    GET     /user
+       start Int{0}
+       count Int{10}
+    GET     /user/all
+    POST    /user
+      *name     Str
+      *password Str
+    email    Str
+    GET     /user/:id
+      *id Int
+    DELETE  /user/:id
+      *id Int
+    PUT     /user/:id
+      *id Int
+    GET     /echo
+      *data Any{ёй}
 
 =head2 Swagger
 
