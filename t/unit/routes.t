@@ -38,13 +38,13 @@ ok $r->add(
 is $r->list->{POST}{'/person(?<format>\.\w+)?'}, 3, 'check order in routes list';
 is_deeply $r->cache, {}, 'clear cache';
 
-my $subs;
+my $sub;
 subtest 'find' => sub {
-    ok $subs = $r->find('POST', '/person'), 'without extension';
-    ok $subs = $r->find('POST', '/person.json'), 'with extension';
+    ok $sub = $r->find('POST', '/person'), 'without extension';
+    ok $sub = $r->find('POST', '/person.json'), 'with extension';
 };
 
-is $subs->[0]->code->(), 'PERSON', 'execute found route';
+is $sub->code->(), 'PERSON', 'execute found route';
 is ref $r->cache->{'post:/person'}, 'ARRAY', 'check cache';
 
 done_testing;
