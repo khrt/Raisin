@@ -19,7 +19,12 @@ sub content_type { 'text/plain' }
 
 sub deserialize { $_[1] }
 sub serialize {
-    Data::Dumper->new([$_[1]], ['data'])->Purity(1)->Terse(1)->Deepcopy(1)->Dump;
+    Data::Dumper->new([$_[1]], ['data'])
+        ->Sortkeys(1)
+        ->Purity(1)
+        ->Terse(1)
+        ->Deepcopy(1)
+        ->Dump;
 }
 
 1;
