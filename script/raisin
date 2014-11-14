@@ -3,74 +3,78 @@
 use strict;
 use warnings;
 
-# DEBUG:
-use FindBin;
-use lib "$FindBin::Bin/../lib";
-# END
-
 use Getopt::Long;
 use Plack::Util;
 use Pod::Usage;
+use Term::ANSIColor;
 
 use Raisin;
 
-my ($help, $version, $params, $routes);
+my ($show_help, $show_version, $show_params);
 
 GetOptions(
-    help    => \$help,
-    version => \$version,
-    params => \$params,
-    routes  => \$routes,
+    help    => \$show_help,
+    version => \$show_version,
+    params => \$show_params,
 );
 
-my $file = $ARGV[0] || do { $help = 1; '' };
+my $file = $ARGV[0] || do { $show_help = 1; '' };
 
-if ($version) {
-    print "Raisin v.$Raisin::VERSION\n";
+if ($show_version) {
+    print "Raisin $Raisin::VERSION\n";
 }
-elsif ($help) {
+elsif ($show_help) {
     pod2usage(1);
 }
-elsif ($routes) {
-    print_routes();
+else {
+    print_routes(with_params => $show_params);
 }
 
+exit 0;
 
-### Subroutines
+### ###
 
-# TODO: move to APIDocs
 sub print_routes {
+    my %args = @_;
+
     if (!$file || !-e $file) {
         print "$0: file `$file` doesn't exists\n";
         exit;
     }
 
-    my $app_routes;
+    my $routes;
     {
         no warnings 'redefine';
-        *Raisin::run = sub { $app_routes = shift->routes->routes };
+        *Raisin::run = sub { $routes = shift->routes->routes };
     }
-    my $app = Plack::Util::load_psgi($file);
+    Plack::Util::load_psgi($file);
 
-    for my $r (@$app_routes) {
+    for my $r (@$routes) {
         my $path = $r->path;
-        $path =~ s#:([^/]+)#{$1}#g;
+        $path =~ s#:([^/]+)#colored(['green'], ":$1")#ge;
+        printf "%-7s %s\n", $r->method, $path;
 
-        printf "  %-7s %s\n", $r->method, $path;
-
-        if ($params) {
+        if ($args{with_params}) {
+            my $longest = 0;
             for my $p (@{ $r->params }) {
-                printf "    %s: `%s', type: %s",
-                    $p->required ? 'required' : 'optional',
-                    $p->name,
-                    $p->type->name;
+                $longest = length($p->name) if length($p->name) > $longest;
+            }
 
-                if (defined $p->default) {
-                    printf ', default: %s', $p->default;
-                }
+            for my $p (@{ $r->params }) {
+                my $default_str = do {
+                    if (defined $p->default) {
+                        '{' . colored(['green'], $p->default) . '}';
+                    }
+                };
+
+                printf "  %s%-${longest}s %s%s",
+                    $p->required ? colored(['cyan'], '*') : ' ',
+                    $p->name,
+                    colored(['yellow'], $p->type->name),
+                    $default_str;
+
                 print "\n";
             }
-            print "\n";
         }
     }
 }
@@ -79,21 +83,23 @@ __END__
 
 =head1 NAME
 
-raisin - Raisin command script
+raisin - Raisin command script.
 
 =head1 SYNOPSIS
 
     raisin [options] <raisin-app>
 
     Options:
-        --help          This help screen
-        --version       Display version information
-        --routes        Display application routes
-        --params        Display route params (should use with --routes)
+        --help          This help text
+        --version       Show version number and quit
+        --params        Show params
+
+    Required params are marked with a star.
+    Default values are showed in a curly brackets.
 
 =head1 DESCRIPTION
 
-List L<Raisin> application routes and show installed L<Raisin> version.
+List L<Raisin> application routes.
 
 =cut
 
