@@ -1,8 +1,14 @@
-0.*
+0.5200 Fixes & Improvments
     - Update documentation;
     - New way of rendering data:
         * store user's endpoint into response body if any;
         * add format method to the Raisin::Response;
+    - Rework `raisin` utility script:
+        * add colors;
+        * reformat an output;
+        * remove `routes` param;
+        * code clean up;
+    - Refactor `Raisin`;
 
 0.5101 Fixes
     - POD add AUTHOR section;

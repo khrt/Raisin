@@ -38,7 +38,6 @@
       },
       "runtime" : {
          "requires" : {
-            "Hash::MultiValue" : "0",
             "JSON" : "2.90",
             "List::Util" : "1.35",
             "Plack" : "1.0030",
@@ -67,7 +66,7 @@
          "web" : "https://github.com/khrt/Raisin"
       }
    },
-   "version" : "0.5101",
+   "version" : "0.5200",
    "x_contributors" : [
       "Artur Kh <khrt@ya.ru>"
    ]
