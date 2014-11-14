@@ -1,3 +1,6 @@
+0.
+    - Fix "wide character" in the terminal output;
+
 0.5200 Fixes & Improvments
     - Update documentation;
     - New way of rendering data:

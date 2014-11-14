@@ -10,6 +10,8 @@ use Term::ANSIColor;
 
 use Raisin;
 
+binmode STDOUT, ":encoding(UTF-8)";
+
 my ($show_help, $show_version, $show_params);
 
 GetOptions(
