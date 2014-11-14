@@ -48,6 +48,7 @@ sub validate {
     # Required
     # Only optional parameters can has default value
     if ($self->required && !defined($$ref_value)) {
+        #TODO: $self->app->log($e);
         carp "$self->{name} required but empty!" unless $quiet;
         return;
     }
@@ -59,6 +60,7 @@ sub validate {
     }
 
     if ($$ref_value && ref $$ref_value && ref $$ref_value ne 'ARRAY') {
+        #TODO: $self->app->log($e);
         carp "$self->{name} \$ref_value should be SCALAR or ARRAYREF" unless $quiet;
         return;
     }
@@ -84,6 +86,7 @@ sub validate {
 
         # Param check
         if ($self->regex && $v !~ $self->regex) {
+            #TODO: $self->app->log($e);
             carp "Param: regex failed; `$self->{name}` has invalid value `$v`!" unless $quiet;
             return;
         }
