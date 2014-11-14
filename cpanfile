@@ -6,10 +6,12 @@ requires 'perl', '5.010001';
 #requires 'File::Path' => '0';
 #requires 'Getopt::Long' => '0';
 #requires 'POSIX' => '0';
+#requires 'Pod::Usage' => '0';
+#requires 'Term::ANSIColor' => '0';
 #requires 'Time::HiRes' => '1.9724';
 
 #requires 'Log::Dispatch' => '2.39';
-requires 'Hash::MultiValue';
+#requires 'Hash::MultiValue';
 requires 'JSON' => '2.90';
 requires 'List::Util' => '1.35';
 requires 'Plack' => '1.0030';
