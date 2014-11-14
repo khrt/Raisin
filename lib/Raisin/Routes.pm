@@ -98,7 +98,8 @@ sub find {
         = grep { $_->match($method, $path) } @$routes;
 
     $self->cache->{$cache_key} = \@found;
-    \@found;
+    #\@found;
+    $found[0];
 }
 
 1;
