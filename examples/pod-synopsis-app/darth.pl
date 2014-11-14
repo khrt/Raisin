@@ -3,6 +3,8 @@
 use strict;
 use warnings;
 
+use utf8;
+
 use FindBin;
 use lib "$FindBin::Bin/../../lib";
 
@@ -86,17 +88,17 @@ resource user => sub {
             my $params = shift;
             { success => delete $USERS{ $params->{id} } };
         };
-
-        desc 'NOP';
-        put sub { 'nop' };
     };
 };
 
 resource echo => sub {
     params(
-        requires => { name => 'data', type => Any },
+        optional => { name => 'data0', type => Any, default => "ёй" },
     );
-    get sub { { data => 'ё' } };
+    get sub { shift };
+
+    desc 'NOP';
+    get nop => sub { };
 };
 
 run;
