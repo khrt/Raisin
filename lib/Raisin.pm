@@ -100,8 +100,8 @@ sub psgi {
     my $res = $self->res(Raisin::Response->new($self));
 
     # Build API docs
-    if ($self->can('build_api_spec')) {
-        $self->build_api_spec;
+    if ($self->can('swagger_build_spec')) {
+        $self->swagger_build_spec;
     }
 
     eval {
@@ -884,7 +884,7 @@ Raisin comes with three instance in I<example> directory:
 
 =item pod-synopsis-app
 
-Basic instance which is used in synopsis.
+Basic example.
 
 =item music-app
 
