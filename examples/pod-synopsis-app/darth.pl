@@ -25,9 +25,26 @@ my %USERS = (
 );
 
 plugin 'Swagger', enable => 'CORS';
-api_format 'json';
+#api_format 'json';
 
-desc 'Actions on users';
+swagger_setup(
+    title => 'POD synopsis API',
+    description => 'Basic example.',
+    #terms_of_service => '',
+
+    contact => {
+        name => 'Artur Kh',
+        url => 'http://github.com/khrt',
+        email => 'rtkh@cpan.org',
+    },
+
+    license => {
+        name => 'Perl license',
+        url => 'http://dev.perl.org/licenses/',
+    },
+);
+
+desc 'Users API';
 resource user => sub {
     desc 'List users';
     params(
@@ -89,16 +106,14 @@ resource user => sub {
             { success => delete $USERS{ $params->{id} } };
         };
     };
-};
-
-resource echo => sub {
-    params(
-        optional => { name => 'data0', type => Any, default => "ёй" },
-    );
-    get sub { shift };
 
     desc 'NOP';
     get nop => sub { };
+};
+
+resource echo => sub {
+    params(optional => { name => 'data0', type => Any, default => "ёй" });
+    get sub { shift };
 };
 
 run;

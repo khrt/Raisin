@@ -7,7 +7,7 @@ use parent 'Raisin::Plugin';
 
 use JSON 'encode_json';
 
-use constant SWAGGER_VERSION => '1.2';
+my %SETTINGS;
 
 sub build {
     my ($self, %args) = @_;
@@ -22,12 +22,190 @@ sub build {
         );
     }
 
-    $self->register(build_api_spec => sub { $self->build_api_spec });
+    $self->register(
+        #swagger_build_spec => sub { $self->_spec_12 },
+        swagger_build_spec => sub { $self->_spec_20 },
+        swagger_setup => sub { %SETTINGS = @_ },
+    );
 }
 
-sub build_api_spec {
+sub _contact_object {
+    my $contact = shift;
+    my %obj;
+    for (qw(name url email)) {
+        $obj{$_} = $contact->{$_} if $contact->{$_};
+    }
+    \%obj;
+}
+
+sub _license_object {
+    my $license = shift;
+    my %obj = (
+        name => $license->{name}, #R
+    );
+    $obj{url} = $license->{url} if $license->{url};
+    \%obj;
+}
+
+sub _info_object {
     my $self = shift;
-    return 1 if $self->{done};
+
+    my %obj = (
+        title => $SETTINGS{title} || 'Some API', #R
+        version => $self->app->api_version || 'NA', #R
+    );
+
+    $obj{description} = $SETTINGS{description} if $SETTINGS{description};
+    $obj{termsOfService} = $SETTINGS{terms_of_service} if $SETTINGS{terms_of_service};
+
+    $obj{contact} = _contact_object($SETTINGS{contact}) if %{ $SETTINGS{contact} };
+    $obj{license} = _license_object($SETTINGS{license}) if %{ $SETTINGS{license} };
+
+    \%obj;
+}
+
+sub _parameters_object {
+    my ($method, $pp) = @_;
+
+    my @obj;
+
+    for my $p (@$pp) {
+        my $position = do {
+            if    ($p->named)              {'path'}
+            elsif ($method =~ /post|put/i) {'formData'}
+            #elsif ($method =~ /post|put/i) {'body'}
+            #elsif ()                       {'header'}
+            else                           {'query'}
+        };
+
+        my ($type, $format) = do {
+            if    ($p->type->name =~ /int/i)            { 'integer', 'int32' }
+            elsif ($p->type->name =~ /long/i)           { 'integer', 'int64' }
+            elsif ($p->type->name =~ /num|float|real/i) { 'number',  'float' }
+            elsif ($p->type->name =~ /double/i)         { 'number',  'double' }
+            elsif ($p->type->name =~ /str/i)            { 'string',  undef }
+            elsif ($p->type->name =~ /byte/i)           { 'string',  'byte' }
+            elsif ($p->type->name =~ /bool/i)           { 'boolean', undef }
+            elsif ($p->type->name =~ /datetime/i)       { 'string',  'date-time' }
+            elsif ($p->type->name =~ /date/i)           { 'string',  'date' }
+            # fallback
+            else { 'string', undef }
+            # TODO string, number, integer, boolean, array, file
+        };
+
+        my %param = (
+            name     => $p->name, #R
+            in       => $position, #R
+            required => $p->required ? 'true' : 'false',
+            type     => $type, #R
+            default  => $p->default // 'false',
+        );
+
+        #if ($type eq 'array') {
+        #    $param{items} = ''; #R if is array
+        #    $param{collectionFormat} = ''; # if is array
+        #}
+
+        $param{format} = $format if $format;
+        $param{description} = $p->desc if $p->desc;
+
+        push @obj, \%param;
+    }
+
+    \@obj;
+}
+
+sub _operation_object {
+    my $r = shift;
+
+    my %obj = (
+        #tags => [''], # TODO
+        #summary => '',
+        #externalDocs => '',
+        operationId => "${ \$r->method}+${ \$r->path }", # TODO
+        #consumes => '',
+        #produces => '',
+        responses => { #R # TODO
+            default => { #R
+                description => 'NA', #R
+                #schema => '',
+                #headers => '',
+                #examples => '',
+            },
+        },
+        #schemes => '',
+        #deprecated => 'false', # TODO
+        #security => '',
+    );
+
+    my $params = _parameters_object($r->method, $r->params);
+
+    $obj{parameters} = $params if scalar @$params;
+    $obj{description} = $r->desc if $r->desc;
+
+    \%obj;
+}
+
+sub _paths_object {
+    my $self = shift;
+
+    my %obj;
+
+    for my $r (sort { $a->path cmp $b->path } @{ $self->app->routes->routes }) {
+        my $path = $r->path;
+        $path =~ s#:([^/]+)#{$1}#msix;
+
+        $obj{ $path }{ lc($r->method) } = _operation_object($r);
+    }
+
+    \%obj;
+}
+
+sub _spec_20 {
+    my $self = shift;
+    return 1 if $self->{built};
+    my $req = $self->app->req;
+
+    my @content_types = $self->app->api_format
+        ? $self->app->api_format
+        : qw(application/yaml application/json);
+
+    my $base_path = $req->base->as_string;
+    $base_path =~ s#http(?:s?)://[^/]+##msix;
+
+    my %spec = (
+        swagger  => '2.0',
+        info     => $self->_info_object,
+        host     => $req->remote_host || $req->address,
+        basePath => $base_path,
+        schemes  => [$req->scheme], # TODO
+        consumes => \@content_types,
+        produces => \@content_types,
+        paths    => $self->_paths_object, #R
+        #definitions => undef,
+        #parameters => undef,
+        #responses => undef,
+        #securityDefinitions => undef,
+        #security => undef,
+        #tags         => '', # TODO
+        #externalDocs => '', # TODO
+    );
+
+    $self->app->add_route(
+        method => 'GET',
+        path => '/api-docs',
+        code => sub {
+            res->content_type('application/json');
+            encode_json(\%spec);
+        }
+    );
+
+    $self->{built} = 1;
+}
+
+sub _spec_12 {
+    my $self = shift;
+    return 1 if $self->{built};
 
     my $app = $self->app;
 
@@ -47,7 +225,7 @@ sub build_api_spec {
                 {
                     allowMultiple => JSON::true,
                     defaultValue  => $p->default // JSON::false,
-                    description   => $p->desc,
+                    description   => $p->desc || '~',
                     format        => $p->type->display_name,
                     name          => $p->name,
                     paramType     => $param_type,
@@ -81,7 +259,7 @@ sub build_api_spec {
     }
 
     my %template = (
-        swaggerVersion => SWAGGER_VERSION,
+        swaggerVersion => '1.2',
     );
     $template{apiVersion} = $self->app->api_version if $self->app->api_version;
 
@@ -101,7 +279,10 @@ sub build_api_spec {
     $app->add_route(
         method => 'GET',
         path => '/api-docs',
-        code => sub { encode_json \%index }
+        code => sub {
+            res->content_type('application/json');
+            encode_json(\%index);
+        }
     );
 
     for my $ns (keys %apis) {
@@ -128,11 +309,14 @@ sub build_api_spec {
         $app->add_route(
             method => 'GET',
             path => "/api-docs${ns}",
-            code => sub { encode_json \%description }
+            code => sub {
+                res->content_type('application/json');
+                encode_json(\%description);
+            }
         );
     }
 
-    $self->{done} = 1;
+    $self->{built} = 1;
 }
 
 1;
@@ -160,6 +344,32 @@ You can use this url in L<Swagger UI|http://swagger.wordnik.com/>.
 Cross-origin resource sharing
 
     plugin 'Swagger', enable => 'CORS';
+
+=head1 FUNCTIONS
+
+=head3 swagger_setup
+
+    swagger_setup(
+        title => 'BatAPI',
+        description => 'Simple BatAPI.',
+
+        contact => {
+            name => 'Bruce Wayne',
+            url => 'http://wayne.enterprises',
+            email => 'bruce@batman.com',
+        },
+
+        license => {
+            name => 'Barman license',
+            url => 'http://wayne.enterprises/licenses/',
+        },
+    );
+
+title, description, terms_of_service
+
+contact: name, url, email
+
+license: name, url
 
 =head1 AUTHOR
 
