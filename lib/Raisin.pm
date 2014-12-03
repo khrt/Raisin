@@ -600,7 +600,7 @@ Query string and body parameters will be merged (see L<Plack::Request/parameters
 =head2 Validation and coercion
 
 You can define validations and coercion options for your parameters using a
-L<Rasisin/params> block.
+L<Raisin/params> block.
 
 Parameters can C<requires> a value and can be an C<optional>.
 C<optional> parameters can have a default value.
