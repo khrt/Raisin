@@ -10,43 +10,139 @@ use lib "$Bin/../../lib";
 use Raisin::Param;
 use Types::Standard qw(ScalarRef Any Num Str Int);
 
-my @types = (
-    optional => { name => 'str', type => Str, default => undef, regex => qr/regex/ },
-    required => { name => 'float', type => Num, default => 0, regex => qr/^\d\.\d+$/ },
-    requires => { name => 'int', type => Int },
+my $QUIET = 1;
+
+my @CASES = (
+    {
+        test => {
+            required => 0,
+            data => {
+                name => 'str',
+                type => Str,
+                default => 'def',
+                regex => qr/match/
+            },
+        },
+        input => 'match',
+        expected => 1,
+    },
+    {
+        test => {
+            required => 0,
+            data => {
+                name => 'str',
+                type => Str,
+                default => 'def',
+                regex => qr/match/
+            },
+        },
+        input => 'not much',
+        expected => undef,
+    },
+    {
+        test => {
+            required => 0,
+            data => {
+                name => 'str',
+                type => Str,
+                default => 'def',
+                regex  => qr/match/
+            },
+        },
+        input => 42,
+        expected => undef,
+    },
+
+    {
+        test => {
+            required => 1,
+            data => { name => 'float', type => Num, regex => qr/^\d\.\d+$/ },
+        },
+        input => 3.14,
+        expected => 1,
+    },
+    {
+        test => {
+            required => 1,
+            data => { name => 'float', type => Num, regex => qr/^\d\.\d+$/ },
+        },
+        input => 314,
+        expected => undef,
+    },
+    {
+        test => {
+            required => 1,
+            data => { name => 'float', type => Num, regex => qr/^\d\.\d+$/ },
+        },
+        input => 'string',
+        expected => undef,
+    },
+
+    {
+        test => {
+            required => 1,
+            data => { name => 'int', type => Int },
+        },
+        input => 42,
+        expected => 1,
+    },
+    {
+        test => {
+            required => 1,
+            data => { name => 'int', type => Int },
+        },
+        input => 4.2,
+        expected => undef,
+    },
+    {
+        test => {
+            required => 1,
+            data => { name => 'int', type => Int },
+        },
+        input => 'string',
+        expected => undef,
+    },
 );
-my @values = (
-    [qw(invalid regex)],
-    [12, '1.2000'],
-    [qw(digit 123)]
-);
-my @keys = qw(named params);
 
-my $index = 0;
-while (my @param = splice @types, 0, 2) {
-    my $required = $param[0] =~ /require(?:d|s)/ ? 1 : 0;
-    my $spec = $param[1];
-
-    my $key = $keys[int(rand(1))];
-
-    my $param = Raisin::Param->new(
-        named => $key eq 'named' ? 1 : 0,
-        type => $param[0],
-        spec => $param[1],
+sub _make_object {
+    my $test = shift;
+    Raisin::Param->new(
+        named => int(rand(1)),
+        type  => $test->{required} ? 'required' : 'optional',
+        spec  => $test->{data},
     );
-    isa_ok $param, 'Raisin::Param';
-
-    is $param->default, $spec->{default}, 'default';
-    is $param->name, $spec->{name}, 'name';
-    is $param->named, $key eq 'named' ? 1 : 0, 'named';
-    is $param->required, $required, 'required';
-    is $param->type, $spec->{type}, 'type';
-
-    my @expected = (undef, 1);
-    for my $v (@{ $values[$index] }) {
-        is $param->validate(\$v), shift @expected, "validate $v: ${\$param->type->name}";
-    }
-    $index++;
 }
+
+sub _make_name {
+    my $case = shift;
+    uc($case->{test}{data}{name}) . " " . $case->{input};
+}
+
+subtest 'parse, +accessors' => sub {
+    for my $case (@CASES) {
+        my $name = _make_name($case);
+
+        my $param = _make_object($case->{test});
+        isa_ok $param, 'Raisin::Param', $name;
+
+        is $param->default, $case->{test}{data}{default}, 'is default match';
+        is $param->name, $case->{test}{data}{name}, 'is name match';
+        is $param->named, 0, 'is named';
+        is $param->required, $case->{test}{required}, 'is required';
+        is $param->type, $case->{test}{data}{type}, 'is type match';
+    }
+};
+
+subtest 'validate' => sub {
+    for my $case (@CASES) {
+        my $name = _make_name($case);
+
+        my $param = _make_object($case->{test});
+        isa_ok $param, 'Raisin::Param', $name;
+
+        my $test = $case->{input};
+        is $param->validate(\$test, $QUIET), $case->{expected}, "validate: $case->{input}";
+    }
+};
 
 done_testing;
