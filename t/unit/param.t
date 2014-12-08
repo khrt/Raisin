@@ -16,12 +16,7 @@ my @CASES = (
     {
         test => {
             required => 0,
-            data => {
-                name => 'str',
-                type => Str,
-                default => 'def',
-                regex => qr/match/
-            },
+            data => { name => 'str', type => Str, default => 'def', regex => qr/match/ },
         },
         input => 'match',
         expected => 1,
@@ -29,12 +24,7 @@ my @CASES = (
     {
         test => {
             required => 0,
-            data => {
-                name => 'str',
-                type => Str,
-                default => 'def',
-                regex => qr/match/
-            },
+            data => { name => 'str', type => Str, default => 'def', regex => qr/match/ },
         },
         input => 'not much',
         expected => undef,
@@ -42,12 +32,7 @@ my @CASES = (
     {
         test => {
             required => 0,
-            data => {
-                name => 'str',
-                type => Str,
-                default => 'def',
-                regex  => qr/match/
-            },
+            data => { name => 'str', type => Str, default => 'def', regex  => qr/match/ },
         },
         input => 42,
         expected => undef,
