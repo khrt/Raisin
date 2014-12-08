@@ -9,15 +9,29 @@ use lib "$Bin/../../lib";
 
 use Raisin::Util;
 
-subtest 'detect_serializer' => sub {
-    is Raisin::Util::detect_serializer('application/json'), 'json', 'JSON content type';
-    is Raisin::Util::detect_serializer('application/json-rpc'), 'json', 'JSON RPC content type';
-    is Raisin::Util::detect_serializer('json'), 'json', 'JSON extension';
+my @CASES = (
+    { input => 'application/json-rpc', expected => 'json' },
+    { input => 'application/json', expected => 'json' },
+    { input => 'json', expected => 'json' },
 
-    is Raisin::Util::detect_serializer('application/yaml'), 'yaml', 'YAML content type';
-    is Raisin::Util::detect_serializer('application/yml'), 'yaml', 'YAML content type';
-    is Raisin::Util::detect_serializer('yaml'), 'yaml', 'YAML extension';
-    is Raisin::Util::detect_serializer('yml'), 'yaml', 'YAML extension';
+    { input => 'application/yaml', expected => 'yaml' },
+    { input => 'application/yml', expected => 'yaml' },
+    { input => 'yaml', expected => 'yaml' },
+    { input => 'yml', expected => 'yaml' },
+
+    { input => 'text/plain', expected => 'text' },
+    { input => 'text', expected => 'text' },
+    { input => 'txt', expected => 'text' },
+
+    { input => 'text/html', expected => undef },
+    { input => 'application/xml', expected => undef },
+);
+
+subtest 'detect_serializer' => sub {
+    for my $case (@CASES) {
+        my $title = 'Detect: ' . ($case->{expected} || '*');
+        is Raisin::Util::detect_serializer($case->{input}), $case->{expected}, $title;
+    }
 };
 
 done_testing;
