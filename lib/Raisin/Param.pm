@@ -29,17 +29,7 @@ sub new {
 
 sub _parse {
     my ($self, $spec) = @_;
-
-    my @keys = qw(name type default regex desc);
-
-    if (ref($spec) eq 'ARRAY') {
-        #TODO: $self->app->log($e);
-        carp 'Deprecated parameters definition syntax. Use hashref syntax instead.';
-        @$self{@keys} = @$spec;
-    }
-    elsif (ref($spec) eq 'HASH') {
-        $self->{$_} = $spec->{$_} for @keys;
-    }
+    $self->{$_} = $spec->{$_} for qw(name type default regex desc);
 }
 
 sub validate {
@@ -74,20 +64,22 @@ sub validate {
     for my $v (@$$ref_value) {
         # Type check
         eval { $v = $self->type->($v) };
-        my $e = $@;
-        if ($e) {
+        if (my $e = $@) {
             unless ($quiet) {
                 #TODO: $self->app->log($e);
-                carp "Param: `$self->{name}` has invalid value `$v`!";
-                carp $e;
+                printf STDERR "Param `%s' didn't pass type constraint `%s' with value \"%s\".\n",
+                    $self->name, $self->type->name, $v;
             }
             return;
         }
 
         # Param check
         if ($self->regex && $v !~ $self->regex) {
-            #TODO: $self->app->log($e);
-            carp "Param: regex failed; `$self->{name}` has invalid value `$v`!" unless $quiet;
+            unless ($quiet) {
+                #TODO: $self->app->log($e);
+                printf STDERR "Param `%s' didn't pass regex constraint `%s' with value \"%s\".\n",
+                    $self->name, $self->regex, $v;
+            }
             return;
         }
     }
