@@ -5,23 +5,29 @@ use warnings;
 
 use Carp;
 use List::Util 'pairs';
+
 use Raisin::Attributes;
 use Raisin::Param;
 use Raisin::Routes::Endpoint;
 
-has 'cache' => {};
-has 'list' => {};
-has 'routes' => [];
+has 'cache';
+has 'list';
+has 'routes';
 
 sub new {
     my $class = shift;
-    my $self = bless {}, $class;
+    my $self = bless { id => rand() }, $class;
+
+    $self->cache({});
+    $self->list({});
+    $self->routes([]);
+
     $self;
 }
 
-# method* => ''
-# path* => ''
-# code* => sub {}
+# *method => ''
+# *path => ''
+# *code => sub {}
 #
 # api_format => ''
 # desc => ''
@@ -93,12 +99,9 @@ sub find {
         ? $self->cache->{$cache_key}
         : $self->routes;
 
-    my @found
-    #   = sort { $b->bridge <=> $a->bridge || $a->pattern cmp $b->pattern }
-        = grep { $_->match($method, $path) } @$routes;
+    my @found = grep { $_->match($method, $path) } @$routes;
 
     $self->cache->{$cache_key} = \@found;
-    #\@found;
     $found[0];
 }
 
