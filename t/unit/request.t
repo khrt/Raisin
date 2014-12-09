@@ -260,7 +260,6 @@ subtest 'prepare_params, +declared_params' => sub {
         my $req = _make_object($http_req);
         isa_ok $req, 'Raisin::Request', 'request';
 
-        my %headers = @{ $case->{input}{headers} };
         my $accept = $case->{expected}{accept} || '--';
 
         my $title = "$case->{input}{method} $accept";
