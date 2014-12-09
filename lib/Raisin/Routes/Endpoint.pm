@@ -12,10 +12,9 @@ has 'desc';
 has 'format';
 has 'method';
 has 'named';
-has 'params';
+has 'params' => [];
 has 'path';
 has 'regex';
-has 'tokens_re';
 
 sub new {
     my ($class, %args) = @_;
@@ -65,7 +64,7 @@ sub _rep_regex {
 
     for ($switch) {
         if ($_ eq ':' || $_ eq '?') {
-            $r = $a . ($self->check->{$token} // '[^/]+') . $b;
+            $r = $a . ($self->check->{$token} // '[^/.]+') . $b;
         }
         if ($_ eq '*') {
             $r = $a . '.+' . $b;
