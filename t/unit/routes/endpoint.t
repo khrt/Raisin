@@ -85,10 +85,7 @@ my @CASES = (
 
 sub _make_object {
     my $object = shift;
-
-    Raisin::Routes::Endpoint->new(
-        code => sub { $object->{method} }, %$object
-    );
+    Raisin::Routes::Endpoint->new(code => sub { $object->{method} }, %$object);
 }
 
 subtest 'accessors' => sub {
