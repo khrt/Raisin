@@ -13,27 +13,17 @@ sub import {
     no warnings 'redefine';
 
     *{"${caller}::has"} = sub { __has($caller, @_) };
-    #*{"${caller}::has_many"} = sub { __has_many($caller, @_) };
-}
-
-sub __has_many {
-    my ($class, @names) = @_;
-    for (@names) {
-        __has($class, $_);
-    }
 }
 
 sub __has {
     my ($class, $name, $default) = @_;
 
-    my $attr = sub {
+    no strict 'refs';
+    *{"${class}::$name"} = sub {
         my ($self, $value) = @_;
         $self->{$name} = $value if defined $value;
         $self->{$name} // $default;
     };
-
-    no strict 'refs';
-    *{"${class}::$name"} = $attr;
 }
 
 1;
