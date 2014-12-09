@@ -44,13 +44,11 @@ sub deserialize {
     $data;
 }
 
-sub declared_params { shift->{'raisin.params'} }
-
 sub prepare_params {
     my ($self, $declared, $named) = @_;
 
     # Serialization / Deserialization
-    my $params = do {
+    my $content_params = do {
         if ($self->method =~ /POST|PUT/ && (my $content = $self->content)) {
             if ($self->content_type =~ m{application/x-www-form-urlencoded}imsx) {
                 $self->body_parameters->mixed;
@@ -59,10 +57,11 @@ sub prepare_params {
                 $self->deserialize($content);
             }
         }
-        else {
-            $self->query_parameters->mixed;
-        }
     };
+
+    my $query_params = $self->query_parameters->mixed;
+
+    my $params = { %{ $content_params || {} }, %{ $query_params || {} } };
 
     foreach my $p (@$declared) {
         my $name = $p->name;
@@ -84,6 +83,8 @@ sub prepare_params {
 
     1;
 }
+
+sub declared_params { shift->{'raisin.params'} }
 
 1;
 
