@@ -39,7 +39,7 @@ sub validate {
     # Only optional parameters can has default value
     if ($self->required && !defined($$ref_value)) {
         #TODO: $self->app->log($e);
-        carp "$self->{name} required but empty!" unless $quiet;
+        print STDERR "`$self->{name}' is required but empty!\n" unless $quiet;
         return;
     }
 
@@ -49,10 +49,11 @@ sub validate {
         return 1;
     }
 
+    # TODO: validate HASHes
     if ($$ref_value && ref $$ref_value && ref $$ref_value ne 'ARRAY') {
         #TODO: $self->app->log($e);
-        carp "$self->{name} \$ref_value should be SCALAR or ARRAYREF" unless $quiet;
-        return;
+        print STDERR "`$self->{name}' \$ref_value should be SCALAR or ARRAYREF\n" unless $quiet;
+        return 1;
     }
 
     my $was_scalar;
