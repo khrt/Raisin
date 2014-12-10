@@ -5,158 +5,169 @@ use warnings;
 use FindBin '$Bin';
 use Test::More;
 
+use Data::Dumper;
+use JSON qw();
+use YAML qw();
+
 use lib "$Bin/../../lib";
 
 use Raisin;
 use Raisin::Response;
 
-use JSON;
-use YAML;
+my %DATA = (
+    string => 'data0', array => [0, 1, 2], hash => { key => 'value' },
+);
 
-#subtest 'serialize' => sub {
-#
-#};
+my @CASES = (
+    {
+        input => {
+            body => \%DATA,
+            content_type => 'application/json',
+            format => 'json',
+        },
+        expected => {
+            body => JSON::to_json(\%DATA, { utf8 => 0 }),
+            content_type => 'application/json',
+        },
+    },
+    {
+        input => {
+            body => \%DATA,
+            content_type => 'application/json',
+            format => 'json',
+            status => 201,
+        },
+        expected => {
+            body => JSON::to_json(\%DATA, { utf8 => 0 }),
+            content_type => 'application/json',
+        },
+    },
 
-my $caller = caller;
+    {
+        input => {
+            body => \%DATA,
+            content_type => 'application/yaml',
+            format => 'yaml',
+            status => 202,
+        },
+        expected => {
+            body => YAML::Dump(\%DATA),
+            content_type => 'application/yaml',
+        },
+    },
+    {
+        input => {
+            body => \%DATA,
+            content_type => 'application/yaml',
+            format => 'yaml',
+            status => 203,
+        },
+        expected => {
+            body => YAML::Dump(\%DATA),
+            content_type => 'application/yaml',
+        },
+    },
 
-subtest 'render' => sub {
-    my $data = {
-        key0 => 'value0',
-        key1 => { subkey0 => 'subvalue0' },
-        key2 => 2,
-    };
+    {
+        input => {
+            body => \%DATA,
+            content_type => 'text/plain',
+            format => 'text',
+            status => 204,
+        },
+        expected => {
+            body => Data::Dumper->new([\%DATA], ['data'])->Sortkeys(1)->Purity(1)->Terse(1)->Deepcopy(1)->Dump,
+            content_type => 'text/plain',
+        },
+    },
+    {
+        input => {
+            body => \%DATA,
+            content_type => 'text/plain',
+            format => 'text',
+            status => 400,
+        },
+        expected => {
+            body => Data::Dumper->new([\%DATA], ['data'])->Sortkeys(1)->Purity(1)->Terse(1)->Deepcopy(1)->Dump,
+            content_type => 'text/plain',
+        },
+    },
+);
 
-    subtest 'JSON as default formatter' => sub {
-        my $app = Raisin->new(caller => $caller);
-        $app->api_default_format('json');
+sub _make_object {
+    my $object = shift;
+    my $caller = caller;
+    my $app = Raisin->new(caller => $caller);
+    Raisin::Response->new($app);
+}
 
-        my $r = Raisin::Response->new($app);
+subtest 'serialize' => sub {
+    for my $case (@CASES) {
+        my $resp = _make_object;
 
-        ok $r->body($data);
-        ok $r->render;
-        my $out = JSON::decode_json($r->body);
-        is_deeply $out, $data, 'render';
-
-        is $r->content_type, 'application/json', 'content type';
-        ok $r->rendered, 'rendered';
-
-        $r->{rendered} = 0;
-    };
-
-    subtest 'JSON' => sub {
-        my $app = Raisin->new(caller => $caller);
-        $app->api_default_format('json');
-
-        my $r = Raisin::Response->new($app);
-
-        ok $r->format('json');
-        ok $r->body($data);
-        ok $r->render;
-
-        my $out = JSON::decode_json($r->body);
-        is_deeply $out, $data, 'render';
-
-        is $r->content_type, 'application/json', 'content type';
-        ok $r->rendered, 'rendered';
-
-        $r->{rendered} = 0;
-    };
-
-    subtest 'YAML' => sub {
-        my $app = Raisin->new(caller => $caller);
-        $app->api_default_format('json');
-
-        my $r = Raisin::Response->new($app);
-
-        ok $r->format('yaml');
-        ok $r->body($data);
-        ok $r->render;
-
-        my $out = YAML::Load($r->body);
-        is_deeply $out, $data, 'render';
-
-        is $r->content_type, 'application/yaml', 'content type';
-        ok $r->rendered, 'rendered';
-
-        $r->{rendered} = 0;
-    };
-
-    subtest 'fallback text' => sub {
-        my $app = Raisin->new(caller => $caller);
-        $app->api_default_format('json');
-
-        my $r = Raisin::Response->new($app);
-
-        ok $r->format('text');
-        ok $r->body($data);
-        ok $r->render;
-
-        is $r->content_type, 'text/plain', 'content type';
-        ok $r->rendered, 'rendered';
-
-        $r->{rendered} = 0;
-    };
-
-    subtest 'text' => sub {
-        my $app = Raisin->new(caller => $caller);
-        $app->api_default_format('json');
-
-        my $r = Raisin::Response->new($app);
-
-        ok $r->format('text');
-        ok $r->body('text/plain');
-        ok $r->render;
-        is $r->body, 'text/plain', 'render text';
-
-        is $r->content_type, 'text/plain', 'content type';
-        ok $r->rendered, 'rendered';
-
-        $r->{rendered} = 0;
-    };
+        is $resp->serialize($case->{input}{format}, $case->{input}{body}),
+            $case->{expected}{body}, "serialize: $case->{input}{format}";
+        is $resp->content_type, $case->{expected}{content_type},
+            "content_type: $case->{expected}{content_type}";
+    }
 };
 
-subtest 'render error' => sub {
-    subtest 'render_500' => sub {
-        my $app = Raisin->new(caller => $caller);
-        $app->api_default_format('json');
+subtest 'render' => sub {
+    for my $case (@CASES) {
+        my $resp = _make_object;
 
-        my $r = Raisin::Response->new($app);
+        $resp->body(\%DATA);
 
-        ok $r->render_500('My internal error');
-        is $r->body, 'My internal error', 'render';
-        is $r->code, 500, 'code';
-        ok $r->rendered, 'rendered';
+        ok $resp->format($case->{input}{format}), "format: $case->{input}{format}";
 
-        $r->{rendered} = 0;
-    };
+        if ($case->{input}{status}) {
+            ok $resp->status($case->{input}{status}), "status: $case->{input}{status}";
+        }
 
-    subtest 'render_404' => sub {
-        my $app = Raisin->new(caller => $caller);
-        $app->api_default_format('json');
+        ok $resp->render, "render: $case->{input}{format}";
 
-        my $r = Raisin::Response->new($app);
+        is $resp->body, $case->{expected}{body}, 'body';
+        is $resp->content_type, $case->{expected}{content_type}, 'content_type';
+        is $resp->status, $case->{input}{status} || 200, 'status';
 
-        ok $r->render_404('My nothing found');
-        is $r->body, 'My nothing found', 'render';
-        is $r->code, 404, 'code';
-        ok $r->rendered, 'rendered';
+        ok $resp->rendered, 'rendered';
+    }
+};
 
-        $r->{rendered} = 0;
-    };
+subtest 'render_401' => sub {
+    my $resp = _make_object;
+    ok $resp->render_401;
 
-    subtest 'render_401' => sub {
-        my $app = Raisin->new(caller => $caller);
-        $app->api_default_format('json');
+    is $resp->status, 401, 'status';
+    is $resp->body, 'Unauthorized', 'body';
+    ok $resp->rendered, 'rendered';
+};
 
-        my $r = Raisin::Response->new($app);
+subtest 'render_404' => sub {
+    my $resp = _make_object;
+    ok $resp->render_404;
 
-        ok $r->render_401('My unauthorized');
-        is $r->body, 'My unauthorized', 'render';
-        is $r->code, 401, 'code';
-        ok $r->rendered, 'rendered';
+    is $resp->status, 404, 'status';
+    is $resp->body, 'Nothing found', 'body';
+    ok $resp->rendered, 'rendered';
+};
 
-        $r->{rendered} = 0;
-    };
+subtest 'render_500' => sub {
+    my $resp = _make_object;
+    ok $resp->render_500;
+
+    is $resp->status, 500, 'status';
+    is $resp->body, 'Internal error', 'body';
+    ok $resp->rendered, 'rendered';
+};
+
+subtest 'render_error' => sub {
+    my $resp = _make_object;
+    ok $resp->render_error('403', 'Forbiden?'), 'render_error: 403 Forbiden?';
+
+    is $resp->status, 403, 'status';
+    is $resp->body, 'Forbiden?', 'body';
+    ok $resp->rendered, 'rendered';
 };
 
 done_testing;
