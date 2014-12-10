@@ -895,15 +895,6 @@ Shows an example of complex application.
 
 =back
 
-=head1 BACKWARD COMPATIBILITY
-
-Since version C<0.5000> Raisin was migrated to the new API syntax.
-
-You could still use an old style API for a while by passing an C<-old> key
-to the L<Raisin::API>.
-
-    use Raisin::API '-old';
-
 =head1 ROADMAP
 
 =over

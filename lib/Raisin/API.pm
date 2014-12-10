@@ -39,12 +39,6 @@ sub import {
     strict->import;
     warnings->import;
 
-    my $params = shift;
-    if ($params && $params eq '-old') {
-        carp 'You are using an obsolete API';
-        $OLD_API = 1;
-    }
-
     my $caller = caller;
     $app ||= Raisin->new(caller => $caller);
 }
@@ -101,28 +95,11 @@ sub resource {
 }
 sub namespace { resource(@_) }
 
-sub route_param { $OLD_API ? route_param_OLD(@_) : route_param_NEW(@_) }
-
-sub route_param_NEW {
+sub route_param {
     my ($param, $code) = @_;
     resource(":$param", $code, named => delete $SETTINGS{params});
 }
 
-sub route_param_OLD {
-    my $code = pop @_;
-
-    my ($param, $spec);
-    if (ref $_[0] eq 'HASH') {
-        $spec = $_[0];
-        $param = $spec->{name};
-    }
-    else {
-        $spec = { name => $_[0], type => $_[1], desc => $_[0] };
-        $param = $_[0];
-    }
-
-    resource(":$param", $code, named => [requires => $spec]);
-}
 #
 # Actions
 #
@@ -134,18 +111,10 @@ sub patch   { _add_route('patch', @_) }
 sub post    { _add_route('post', @_) }
 sub put     { _add_route('put', @_) }
 
-sub desc { $OLD_API ? desc_OLD(@_) : desc_NEW(@_) }
-sub params { $OLD_API ? params_OLD(@_) : params_NEW(@_) }
+sub desc { $SETTINGS{desc} = shift }
+sub params { $SETTINGS{params} = ref($_[0]) eq 'ARRAY' ? $_[0] : \@_ }
 
-sub desc_NEW { $SETTINGS{desc} = shift }
-sub params_NEW { $SETTINGS{params} = ref($_[0]) eq 'ARRAY' ? $_[0] : \@_ }
-
-sub desc_OLD { _add_route('desc', @_) }
-sub params_OLD { _add_route('params', @_) }
-
-sub _add_route { $OLD_API ? _add_route_OLD(@_) : _add_route_NEW(@_) }
-
-sub _add_route_NEW {
+sub _add_route {
     my @params = @_;
 
     my $code = pop @params;
@@ -161,45 +130,6 @@ sub _add_route_NEW {
         params => delete $SETTINGS{params},
         %SETTINGS,
     );
-}
-
-sub _add_route_OLD {
-    my @params = @_;
-
-    my %pp = (%SETTINGS, code => pop @params);
-
-    my $i = 0;
-    while ($i < scalar(@params)) {
-        my $k = $params[$i];
-        my $v = $params[$i + 1] || undef;
-
-        if ($k eq 'desc' || $k eq 'params') {
-            $pp{$k} = $v;
-        }
-        elsif (grep { $k =~ /^$_$/imsx } @HTTP_METHODS) {
-            $pp{method} = $k =~ /del/i ? 'delete' : $k;
-            $pp{path} = resource() . ($v ? "/$v" : '');
-        }
-        elsif ($k =~ /^resource|namespace$/msx) {
-            $pp{resource} = $v;
-        }
-        elsif ($k eq 'route_param') {
-            $pp{$k} = $v;
-        }
-
-        $i++;
-    }
-
-    if ($pp{resource}) {
-        my $path = resource($pp{resource}, $pp{code}) . $pp{resource};
-        $app->resource_desc($path, $pp{desc});
-    }
-    elsif ($pp{route_param}) {
-        my $path = resource(":$pp{route_param}", $pp{code}, named => $pp{params});
-    }
-    else {
-        $app->add_route(%pp);
-    }
 }
 
 #
@@ -228,6 +158,7 @@ sub present {
 
     my $body = res->body || {};
     my $representation = { $key => $value, %$body };
+
     res->body($representation);
 
     return;
