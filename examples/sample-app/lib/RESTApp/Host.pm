@@ -53,7 +53,7 @@ resource host => sub {
         desc 'Delete host';
         del sub {
             my $params = shift;
-            { success => UseCase::Host::delete($params->{id}) }
+            { success => UseCase::Host::remove($params->{id}) }
         }
     };
 };

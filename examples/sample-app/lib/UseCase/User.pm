@@ -49,7 +49,7 @@ sub edit {
     $USERS{$id};
 }
 
-sub delete {
+sub remove {
     my $id = shift;
     delete $USERS{$id};
     1;

@@ -54,7 +54,7 @@ sub edit {
     $HOSTS{$id};
 }
 
-sub delete {
+sub remove {
     my $id = shift;
     delete $HOSTS{$id};
     1;
