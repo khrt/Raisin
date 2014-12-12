@@ -147,14 +147,8 @@ sub session { $app->session(@_) }
 sub present {
     my ($key, $data, %params) = @_;
 
-    my $value = do {
-        if (my $entity = $params{with}) {
-            $entity->compile($data);
-        }
-        else {
-            Raisin::Entity->compile($data);
-        }
-    };
+    my $entity = $params{with} || 'Raisin::Entity::Default';
+    my $value = Raisin::Entity->compile($entity, $data);
 
     my $body = res->body || {};
     my $representation = { $key => $value, %$body };

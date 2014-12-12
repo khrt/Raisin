@@ -10,6 +10,39 @@ use YAML 'Load';
 
 use lib "$Bin/../../lib";
 
+subtest 'run' => sub {
+    plan skip_all => 'not implemented';
+};
+
+subtest 'mount' => sub {
+    plan skip_all => 'not implemented';
+};
+
+subtest 'middleware' => sub {
+    plan skip_all => 'not implemented';
+
+};
+
+subtest 'before' => sub {
+    plan skip_all => 'not implemented';
+
+};
+
+subtest 'before_validation' => sub {
+    plan skip_all => 'not implemented';
+
+};
+
+subtest 'after_validation' => sub {
+    plan skip_all => 'not implemented';
+
+};
+
+subtest 'after' => sub {
+    plan skip_all => 'not implemented';
+
+};
+
 subtest 'resource' => sub {
     my $app = eval {
         use Raisin::API;
@@ -65,6 +98,16 @@ subtest 'route_param' => sub {
             is $res->code, 404;
         };
     };
+};
+
+subtest 'HTTP verbs' => sub {
+    plan skip_all => 'not implemented';
+
+};
+
+subtest 'desc' => sub {
+    plan skip_all => 'not implemented';
+
 };
 
 subtest 'params' => sub {
@@ -247,6 +290,11 @@ subtest 'new route' => sub {
     };
 };
 
+subtest 'session' => sub {
+    plan skip_all => 'not implemented';
+
+};
+
 subtest 'present' => sub {
     my %item0 = (id => 1, name => 'Bruce Wayne');
     my %item1 = (id => 2, name => 'Batman');
@@ -268,10 +316,10 @@ subtest 'present' => sub {
 
     my $app = eval {
         package PersonEntity;
-        use parent 'Raisin::Entity';
-        __PACKAGE__->expose('id');
-        __PACKAGE__->expose('name');
-        __PACKAGE__->expose('hash', $hash_func);
+        use Raisin::Entity;
+        expose 'id';
+        expose 'name';
+        expose 'hash', $hash_func;
 
         package main;
         use Raisin::API;
@@ -295,6 +343,31 @@ subtest 'present' => sub {
             size => scalar @data,
         };
     };
+};
+
+subtest 'plugin' => sub {
+    plan skip_all => 'not implemented';
+
+};
+
+subtest 'api_default_format' => sub {
+    plan skip_all => 'not implemented';
+
+};
+
+subtest 'api_format' => sub {
+    plan skip_all => 'not implemented';
+
+};
+
+subtest 'api_version' => sub {
+    plan skip_all => 'not implemented';
+
+};
+
+subtest 'error' => sub {
+    plan skip_all => 'not implemented';
+
 };
 
 done_testing;

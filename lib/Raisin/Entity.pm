@@ -6,8 +6,15 @@ use warnings;
 use Carp;
 use Scalar::Util qw(blessed);
 
+use parent 'Exporter';
+
+our @EXPORT = qw(expose);
+
+my $SUBNAME_PREFIX = 'Raisin::Entity::Nested';
+my @SUBNAME;
+
 sub expose {
-    my ($class, $name, @params) = @_;
+    my ($name, @params) = @_;
 
     my $runtime;
     if (scalar(@params) % 2 && ref($params[-1]) eq 'CODE') {
@@ -15,28 +22,34 @@ sub expose {
     }
 
     my %params = @params;
+    my %settings = (
+        alias         => $params{as},
+        condition     => $params{if},
+        name          => $name,
+        runtime       => $runtime,
+        using         => $params{using},
+    );
+
+    #documentation => $params{documentation}, # TODO
+
+    my $class = caller;
+    $class = $SUBNAME_PREFIX . '::' . $SUBNAME[-1] if scalar @SUBNAME;
 
     {
         no strict 'refs';
-        push @{ "${class}::EXPOSE" }, {
-            alias         => $params{as},
-            condition     => $params{if},
-            documentation => $params{documentation},
-            name          => $name,
-            runtime       => $runtime,
-            using         => $params{using},
-        };
+        push @{ "${class}::EXPOSE" }, \%settings;
     }
 
+    return $class if scalar @SUBNAME;
     return;
 }
 
 sub compile {
-    my ($class, $data) = @_;
+    my ($self, $entity, $data) = @_;
 
     my @expose = do {
         no strict 'refs';
-        @{"${class}::EXPOSE"};
+        @{"${entity}::EXPOSE"};
     };
 
     @expose = _make_exposition($data) unless @expose;
@@ -53,12 +66,12 @@ sub compile {
     if (blessed($data) && $data->can('next'))
     {
         while (my $i = $data->next) {
-            push @$result, _compile_column($i, \@expose);
+            push @$result, _compile_column($entity, $i, \@expose);
         }
     }
     elsif (ref($data) eq 'ARRAY') {
         for my $i (@$data) {
-            push @$result, _compile_column($i, \@expose);
+            push @$result, _compile_column($entity, $i, \@expose);
         }
     }
     elsif (ref($data) eq 'HASH'
@@ -66,7 +79,7 @@ sub compile {
                && (   $data->isa('Rose::DB::Object')
                    || $data->isa('DBIx::Class::Core'))))
     {
-        $result = _compile_column($data, \@expose);
+        $result = _compile_column($entity, $data, \@expose);
     }
     else {
         $result = $data;
@@ -76,35 +89,38 @@ sub compile {
 }
 
 sub _compile_column {
-    my ($data, $settings) = @_;
+    my ($entity, $data, $settings) = @_;
+    my %result;
 
-    my %result = map {
-        my $column = $_->{name};
-        my $key = $_->{alias} || $_->{name};
+    for my $i (@$settings) {
+        next if $i->{condition} && !$i->{condition}->($data);
 
+        my $column = $i->{name};
+
+        my $key = $i->{alias} || $i->{name};
         my $value = do {
-            if (my $runtime = $_->{runtime}) {
-                $runtime->($data);
+            if (my $runtime = $i->{runtime}) {
+                push @SUBNAME, "${entity}::$column";
+                my $retval = $runtime->($data);
+                pop @SUBNAME;
+
+                if ($retval && !ref($retval) && $retval =~ /^Raisin::Entity::Nested::/) {
+                    $retval = __PACKAGE__->compile($retval, $data);
+                }
+
+                $retval;
             }
-            elsif (my $entity = $_->{using}) {
-                my $inner_data = blessed($data) ? $data->$column : $data->{$column};
-                $entity->compile($inner_data);
+            elsif (my $e = $i->{using}) {
+                my $in = blessed($data) ? $data->$column : $data->{$column};
+                __PACKAGE__->compile($e, $in);
             }
             else {
                 blessed($data) ? $data->$column : $data->{$column};
             }
         };
 
-        if (my $condition = $_->{condition}) {
-            # TODO:
-            # value has to be evaluatead each time
-            # despite of condition which can be false
-            $condition->($data) ? ($key => $value) : ();
-        }
-        else {
-            ($key => $value);
-        }
-    } @$settings;
+        $result{$key} = $value;
+    }
 
     \%result;
 }
@@ -150,7 +166,7 @@ __END__
 
 =head1 NAME
 
-Raisin::Entity - Simple Facade to use with your API.
+Raisin::Entity - Simple facade to use with your API.
 
 =head1 SYNOPSIS
 
@@ -159,16 +175,16 @@ Raisin::Entity - Simple Facade to use with your API.
     use strict;
     use warnings;
 
-    use parent 'Raisin::Entity';
+    use Raisin::Entity;
 
-    __PACKAGE__->expose('id');
-    __PACKAGE__->expose('name', as => 'artist');
-    __PACKAGE__->expose('website', if => sub {
+    expose 'id';
+    expose 'name', as => 'artist';
+    expose 'website', if => sub {
         my $artist = shift;
         $artist->website;
-    });
-    __PACKAGE__->expose('albums', using => 'MusicApp::Entity::Album');
-    __PACKAGE__->expose('hash', sub {
+    };
+    expose 'albums', using => 'MusicApp::Entity::Album';
+    expose 'hash', sub {
         my $artist = shift;
         my $hash = 0;
         my $name = blessed($artist) ? $artist->name : $artist->{name};
@@ -176,7 +192,7 @@ Raisin::Entity - Simple Facade to use with your API.
             $hash = $hash * 42 + ord($_);
         }
         $hash;
-    });
+    };
 
     1;
 
@@ -205,63 +221,61 @@ The field lookup requests specified name
 
 =head3 Basic exposure
 
-    __PACKAGE__->expose('id');
+    expose 'id';
 
 =head3 Exposing with a presenter
 
-Use C<using> to expose field with a presenter.
+Use C<using> to expose a field with a presenter.
 
-    __PACKAGE__->expose('albums', using => 'MusicApp::Entity::Album');
+    expose 'albums', using => 'MusicApp::Entity::Album';
 
 =head3 Conditional exposure
 
 You can use C<if> to expose fields conditionally.
 
-    __PACKAGE__->expose('website', if => sub {
+    expose 'website', if => sub {
         my $artist = shift;
         blessed($artist) && $artist->can('website');
-    });
+    };
 
 =head3 Nested exposure
 
-NOT IMPLEMENTED!
-
 Supply a block to define a hash using nested exposures.
 
-    __PACKAGE__->expose('contact_info', sub {
-        __PACKAGE__->expose('phone');
-        __PACKAGE__->expose('address', using => 'API::Address');
-    });
+    expose 'contact_info', sub {
+        expose('phone');
+        expose('address', using => 'API::Address');
+    };
 
 =head3 Runtime exposure
 
 Use a subroutine to evaluate exposure at runtime.
 
-    __PACKAGE__->expose('hash', sub {
+    expose 'hash', sub {
         my $artist = shift;
         my $hash;
         foreach (split //, $artist->name) {
             $hash = $hash * 42 + ord($_);
         }
         $hash;
-    });
+    };
 
 =head3 Aliases exposure
 
-Expose under a different name with C<as>.
+Expose under an alias with C<as>.
 
-    __PACKAGE__->expose('name', as => 'artist');
+    expose 'name', as => 'artist';
 
 =head3 Documentation
 
 NOT IMPLEMENTED!
 
 Expose documentation with the field.
-Gets bubbled up when used with L<Raisin::Plugin::Swagger> API documentation systems.
+Is used in a L<Raisin::Plugin::Swagger> API documentation systems.
 
-    __PACKAGE__->expose(
-        'name', documentation => { type => 'String', desc => 'Artists name' }
-    );
+    expose 'name', documentation => { type => 'String', desc => 'Artists name' };
+
+All available keys for C<documentation> you could find in the L<Raisin::Plugin::Swagger>.
 
 =head2 compile
 
