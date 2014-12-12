@@ -107,14 +107,16 @@ subtest 'parse, +accessors' => sub {
     for my $case (@CASES) {
         my $name = _make_name($case);
 
-        my $param = _make_object($case->{test});
-        isa_ok $param, 'Raisin::Param', $name;
+        subtest $name => sub {
+            my $param = _make_object($case->{test});
+            isa_ok $param, 'Raisin::Param', 'param';
 
-        is $param->default, $case->{test}{data}{default}, 'is default match';
-        is $param->name, $case->{test}{data}{name}, 'is name match';
-        is $param->named, 0, 'is named';
-        is $param->required, $case->{test}{required}, 'is required';
-        is $param->type, $case->{test}{data}{type}, 'is type match';
+            is $param->default, $case->{test}{data}{default}, 'default';
+            is $param->name, $case->{test}{data}{name}, 'name';
+            is $param->named, 0, 'named';
+            is $param->required, $case->{test}{required}, 'required';
+            is $param->type, $case->{test}{data}{type}, 'type';
+        };
     }
 };
 
@@ -122,11 +124,13 @@ subtest 'validate' => sub {
     for my $case (@CASES) {
         my $name = _make_name($case);
 
-        my $param = _make_object($case->{test});
-        isa_ok $param, 'Raisin::Param', $name;
+        subtest $name => sub {
+            my $param = _make_object($case->{test});
+            isa_ok $param, 'Raisin::Param', 'param';
 
-        my $test = $case->{input};
-        is $param->validate(\$test, $QUIET), $case->{expected}, "validate: $case->{input}";
+            my $test = $case->{input};
+            is $param->validate(\$test, $QUIET), $case->{expected}, "validate: $case->{input}";
+        };
     }
 };
 

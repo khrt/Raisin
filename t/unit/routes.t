@@ -55,76 +55,83 @@ my @CASES = (
 
 subtest 'add' => sub {
     for my $case (@CASES) {
-        my $r = Raisin::Routes->new;
-        isa_ok $r, 'Raisin::Routes', 'r';
+        my $cache_key = lc "$case->{input}{method}:$case->{input}{path}";
 
-        is_deeply $r->cache, {}, 'Cache should be empty';
-        is_deeply $r->list, {}, 'List should be empty';
-        is_deeply $r->routes, [], 'Routes should be empty';
+        subtest $cache_key => sub {
+            my $r = Raisin::Routes->new;
+            #isa_ok $r, 'Raisin::Routes', 'r';
 
-        my $res = $r->add(
-            code => sub { $case->{object}{method} }, %{ $case->{object} }
-        );
+            is_deeply $r->cache, {}, 'Cache should be empty';
+            is_deeply $r->list, {}, 'List should be empty';
+            is_deeply $r->routes, [], 'Routes should be empty';
 
-        ok $res, "Add: $case->{object}{method} $case->{object}{path}";
+            my $res = $r->add(
+                code => sub { $case->{object}{method} }, %{ $case->{object} }
+            );
+            ok $res, 'add';
 
-        is_deeply $r->cache, {}, 'Cache should be empty';
+            is_deeply $r->cache, {}, 'Cache should be empty';
 
-        ok $r->list->{ $case->{object}{method} }{ $case->{object}{path} },
-            "List: $case->{object}{method} $case->{object}{path}";
+            ok $r->list->{ $case->{object}{method} }{ $case->{object}{path} },
+                'list';
 
-        my $e = $r->routes->[-1];
-        is $e->method, $case->{object}{method}, 'Routes: method';
-        is $e->path, $case->{object}{path}, 'Routes: path';
+            subtest 'routes' => sub {
+                my $er = $r->routes->[-1];
+                is $er->method, $case->{object}{method}, 'method';
+                is $er->path, $case->{object}{path}, 'path';
+            };
+        };
     }
 };
 
 subtest 'find' => sub {
     for my $case (@CASES) {
-        my $r = Raisin::Routes->new;
-        isa_ok $r, 'Raisin::Routes', 'r';
-
-        is_deeply $r->cache, {}, 'Cache should be empty';
-        is_deeply $r->list, {}, 'List should be empty';
-        is_deeply $r->routes, [], 'Routes should be empty';
-
         my $cache_key = lc "$case->{input}{method}:$case->{input}{path}";
 
-        my $res = $r->add(
-            code => sub { $case->{object}{method} }, %{ $case->{object} }
-        );
-        ok $res, "Add: $cache_key";
+        subtest $cache_key => sub {
+            my $r = Raisin::Routes->new;
+            #isa_ok $r, 'Raisin::Routes', 'r';
 
-        my $e;
-        subtest 'find' => sub {
-            $e = $r->find($case->{input}{method}, $case->{input}{path});
+            is_deeply $r->cache, {}, 'Cache should be empty';
+            is_deeply $r->list, {}, 'List should be empty';
+            is_deeply $r->routes, [], 'Routes should be empty';
 
-            my $expected;
-            if ($case->{expected}) {
-                $expected = $e;
-            }
-            else {
-                $expected = undef;
-            }
+            my $res = $r->add(
+                code => sub { $case->{object}{method} }, %{ $case->{object} }
+            );
+            ok $res, 'add';
 
-            is_deeply $e, $expected, "Find: $cache_key";
+            my $e;
+            subtest 'find' => sub {
+                $e = $r->find($case->{input}{method}, $case->{input}{path});
 
-            if ($e) {
-                is $e->method, $case->{object}{method}, 'Method: ' . $e->method;
-                is $e->path, $case->{object}{path}, 'Path: ' . $e->path;
-            }
-        };
+                my $expected;
+                if ($case->{expected}) {
+                    $expected = $e;
+                }
+                else {
+                    $expected = undef;
+                }
 
-        my $cache = $r->cache;
-        is_deeply $cache->{$cache_key}[0], $e, "Cache: $cache_key";
+                is_deeply $e, $expected, 'find';
 
-        ok $r->list->{ $case->{object}{method} }{ $case->{object}{path} },
-            "List: $case->{object}{method} $case->{object}{path}";
+                if ($e) {
+                    is $e->method, $case->{object}{method}, 'method: ' . $e->method;
+                    is $e->path, $case->{object}{path}, 'path: ' . $e->path;
+                }
+            };
 
-        subtest 'routes' => sub {
-            my $er = $r->routes->[-1];
-            is $er->method, $case->{object}{method}, 'Routes: method';
-            is $er->path, $case->{object}{path}, 'Routes: path';
+            my $cache = $r->cache;
+            is_deeply $cache->{$cache_key}[0], $e, 'cache';
+
+            ok $r->list->{ $case->{object}{method} }{ $case->{object}{path} },
+                'list';
+
+            subtest 'routes' => sub {
+                my $er = $r->routes->[-1];
+                is $er->method, $case->{object}{method}, 'method';
+                is $er->path, $case->{object}{path}, 'path';
+            };
         };
     }
 };

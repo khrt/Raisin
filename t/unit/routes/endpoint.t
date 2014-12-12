@@ -91,35 +91,38 @@ sub _make_object {
 subtest 'accessors' => sub {
     for my $case (@CASES) {
         my $e = _make_object($case->{object});
-        isa_ok $e, 'Raisin::Routes::Endpoint', 'e';
+        #isa_ok $e, 'Raisin::Routes::Endpoint', 'e';
 
-        for my $m (keys %{ $case->{object} }) {
-            is $e->$m, $case->{object}{$m}, $m;
-        }
+        subtest '-' => sub {
+            for my $m (keys %{ $case->{object} }) {
+                is $e->$m, $case->{object}{$m}, $m;
+            }
+        };
     }
 };
 
 subtest 'match' => sub {
     for my $case (@CASES) {
-        my $e = _make_object($case->{object});
-        isa_ok $e, 'Raisin::Routes::Endpoint', 'e';
+        subtest "$case->{object}{method}:$case->{object}{path}" => sub {
+            my $e = _make_object($case->{object});
+            #isa_ok $e, 'Raisin::Routes::Endpoint', 'e';
 
-        my $is_matched = $e->match($case->{input}{method}, $case->{input}{path});
+            my $is_matched = $e->match($case->{input}{method}, $case->{input}{path});
 
-        is $is_matched, $case->{expected},
-            "Match: $case->{object}{method}<>$case->{input}{method} $case->{object}{path}<>$case->{input}{path}";
+            is $is_matched, $case->{expected}, 'match';
 
-        # format
-        if ($is_matched && ($case->{input}{path} =~ /\.(.+)$/msix)) {
-            is $e->format, $1, 'Format: ' . $1;
-        }
-
-        # named params
-        if ($is_matched && @{ $e->params }) {
-            for my $p (@{ $e->params }) {
-                ok $e->named->{$p->name}, 'Param: ' . $p->name;
+            # format
+            if ($is_matched && ($case->{input}{path} =~ /\.(.+)$/msix)) {
+                is $e->format, $1, 'format: ' . $1;
             }
-        }
+
+            # named params
+            if ($is_matched && @{ $e->params }) {
+                for my $p (@{ $e->params }) {
+                    ok $e->named->{$p->name}, 'named: ' . $p->name;
+                }
+            }
+        };
     }
 };
 

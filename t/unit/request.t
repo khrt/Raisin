@@ -228,12 +228,13 @@ sub _make_request {
 
 subtest 'accept_format' => sub {
     for my $case (@CASES) {
+        my $title = $case->{expected}{accept} || 'any';
+
         my $http_req = _make_request($case->{input});
         my $req = _make_object($http_req);
-        isa_ok $req, 'Raisin::Request', 'request';
+        #isa_ok $req, 'Raisin::Request', 'request';
 
-        my $title = $case->{expected}{accept} || 'any';
-        is $req->accept_format, $case->{expected}{accept}, "Accept: $title";
+        is $req->accept_format, $case->{expected}{accept}, "accept_format: $title";
     }
 };
 
@@ -243,32 +244,33 @@ subtest 'deserialize' => sub {
 
         my $http_req = _make_request($case->{input});
         my $req = _make_object($http_req);
-        isa_ok $req, 'Raisin::Request', 'request';
+        #isa_ok $req, 'Raisin::Request', 'request';
 
         # XXX:
         next if $req->content_type eq 'application/x-www-form-urlencoded';
 
         is_deeply $req->deserialize($req->content),
-            $case->{expected}{deserialize},
-            'Deserialize: ' . $req->content_type;
+            $case->{expected}{deserialize}, 'deserialize: ' . $req->content_type;
     }
 };
 
 subtest 'prepare_params, +declared_params' => sub {
     for my $case (@CASES) {
-        my $http_req = _make_request($case->{input});
-        my $req = _make_object($http_req);
-        isa_ok $req, 'Raisin::Request', 'request';
+        my $title = "$case->{input}{method} " . ($case->{expected}{accept} || '--');
 
-        my $accept = $case->{expected}{accept} || '--';
+        subtest $title => sub {
+            my $http_req = _make_request($case->{input});
+            my $req = _make_object($http_req);
+            isa_ok $req, 'Raisin::Request', 'request';
 
-        my $title = "$case->{input}{method} $accept";
-        my $r = $case->{input}{route};
+            my $r = $case->{input}{route};
 
-        ok $r->match($req->method, $req->path), "Match: ${ \$r->method } ${ \$r->path }";
+            ok $r->match($req->method, $req->path), "match: ${ \$r->path }";
 
-        ok $req->prepare_params($r->params, $r->named), "Prepare: $title";
-        is_deeply $req->declared_params, $case->{expected}{prepare_params}, "Declared: $title";
+            ok $req->prepare_params($r->params, $r->named), 'prepare_params';
+            is_deeply $req->declared_params, $case->{expected}{prepare_params},
+                'declared params';
+        };
     }
 };
 

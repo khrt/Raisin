@@ -55,7 +55,7 @@ sub _reset_object {
 
     for my $pkg (qw(main Raisin)) {
         *{"${pkg}::log"} = 0;
-        delete $pkg::{log};
+        #delete ${$pkg}::{log};
     }
 }
 
@@ -64,32 +64,33 @@ subtest 'build' => sub {
     my @loggers = map { $_ } keys %uniq;
 
     for my $logger (@loggers) {
-        my $app = _make_object($logger);
+        subtest $logger => sub {
+            my $app = _make_object($logger);
 
-        my $path = "$logger.pm";
-        $path =~ s#::#/#g;
+            my $path = "$logger.pm";
+            $path =~ s#::#/#g;
 
-        ok $INC{$path}, "load $logger";
-        ok $app->can('log'), "app can log";
+            ok $INC{$path}, "load $logger";
+            ok $app->can('log'), "app can log";
 
-        my $main_can = main->can('log');
-        ok $main_can, "main can log";
+            my $main_can = main->can('log');
+            ok $main_can, "main can log";
+        };
 
         _reset_object();
     }
 };
 
 subtest 'message' => sub {
-    plan skip_all => 'Can not clean namespace';
-
-    _reset_object();
-    for my $case (@CASES) {
-        my $app = _make_object($case->{logger});
-
-        $app->log($case->{level}, $case->{message});
-
-        _reset_object();
-    }
+    plan skip_all => 'NA';
+#    _reset_object();
+#    for my $case (@CASES) {
+#        my $app = _make_object($case->{logger});
+#
+#        $app->log($case->{level}, $case->{message});
+#
+#        _reset_object();
+#    }
 };
 
 done_testing;

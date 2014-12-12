@@ -105,32 +105,37 @@ subtest 'serialize' => sub {
     for my $case (@CASES) {
         my $resp = _make_object;
 
-        is $resp->serialize($case->{input}{format}, $case->{input}{body}),
-            $case->{expected}{body}, "serialize: $case->{input}{format}";
-        is $resp->content_type, $case->{expected}{content_type},
-            "content_type: $case->{expected}{content_type}";
+        subtest $case->{expected}{content_type} => sub {
+            is $resp->serialize($case->{input}{format}, $case->{input}{body}),
+                $case->{expected}{body}, "serialize: $case->{input}{format}";
+
+            is $resp->content_type, $case->{expected}{content_type},
+                "content_type: $case->{expected}{content_type}";
+        };
+
     }
 };
 
 subtest 'render' => sub {
     for my $case (@CASES) {
-        my $resp = _make_object;
+        subtest $case->{input}{format} => sub {
+            my $resp = _make_object;
+            $resp->body(\%DATA);
 
-        $resp->body(\%DATA);
+            ok $resp->format($case->{input}{format}), 'format';
 
-        ok $resp->format($case->{input}{format}), "format: $case->{input}{format}";
+            if ($case->{input}{status}) {
+                ok $resp->status($case->{input}{status}), 'set status';
+            }
 
-        if ($case->{input}{status}) {
-            ok $resp->status($case->{input}{status}), "status: $case->{input}{status}";
-        }
+            ok $resp->render, 'render';
 
-        ok $resp->render, "render: $case->{input}{format}";
+            is $resp->body, $case->{expected}{body}, 'body';
+            is $resp->content_type, $case->{expected}{content_type}, 'content_type';
+            is $resp->status, $case->{input}{status} || 200, 'status';
 
-        is $resp->body, $case->{expected}{body}, 'body';
-        is $resp->content_type, $case->{expected}{content_type}, 'content_type';
-        is $resp->status, $case->{input}{status} || 200, 'status';
-
-        ok $resp->rendered, 'rendered';
+            ok $resp->rendered, 'rendered';
+        };
     }
 };
 
