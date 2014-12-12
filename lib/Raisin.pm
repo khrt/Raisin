@@ -11,7 +11,7 @@ use Raisin::Response;
 use Raisin::Routes;
 use Raisin::Util;
 
-our $VERSION = '0.5200';
+our $VERSION = '0.55';
 
 sub new {
     my ($class, %args) = @_;
@@ -246,6 +246,8 @@ sub session {
 1;
 
 __END__
+
+=encoding utf8
 
 =head1 NAME
 
@@ -899,11 +901,7 @@ Shows an example of complex application.
 
 =over
 
-=item * Make test application in I<t/>;
-
-=item * Improve L<Raisin::Entity>;
-
-=item * Upgrade Swagger to L<2.0|https://github.com/wordnik/swagger-spec/blob/master/versions/2.0.md>;
+=item * Upgrade Swagger to L<2.0|https://github.com/wordnik/swagger-spec/blob/master/versions/2.0.md> and make support for L<Raisin::Entity/documentation>;
 
 =item * Endpoint's hooks: C<after>, C<before>;
 

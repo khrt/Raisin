@@ -343,7 +343,7 @@ Query string and body parameters will be merged (see ["parameters" in Plack::Req
 ## Validation and coercion
 
 You can define validations and coercion options for your parameters using a
-["params" in Rasisin](https://metacpan.org/pod/Rasisin#params) block.
+["params" in Raisin](https://metacpan.org/pod/Raisin#params) block.
 
 Parameters can `requires` a value and can be an `optional`.
 `optional` parameters can have a default value.
@@ -609,20 +609,9 @@ Raisin comes with three instance in _example_ directory:
 
     Shows an example of complex application.
 
-# BACKWARD COMPATIBILITY
-
-Since version `0.5000` Raisin was migrated to the new API syntax.
-
-You could still use an old style API for a while by passing an `-old` key
-to the [Raisin::API](https://metacpan.org/pod/Raisin::API).
-
-    use Raisin::API '-old';
-
 # ROADMAP
 
-- Make test application in _t/_;
-- Improve [Raisin::Entity](https://metacpan.org/pod/Raisin::Entity);
-- Upgrade Swagger to [2.0](https://github.com/wordnik/swagger-spec/blob/master/versions/2.0.md);
+- Upgrade Swagger to [2.0](https://github.com/wordnik/swagger-spec/blob/master/versions/2.0.md) and make support for ["documentation" in Raisin::Entity](https://metacpan.org/pod/Raisin::Entity#documentation);
 - Endpoint's hooks: `after`, `before`;
 - Mount API's in any place of `resource` block;
 - `declared` keyword which should be applicable to `param` and supports for `missing` keyword;
@@ -644,11 +633,3 @@ Artur Khabibullin - rtkh <at> cpan.org
 
 This module and all the modules in this package are governed by the same license
 as Perl itself.
-
-# POD ERRORS
-
-Hey! **The above document had some coding errors, which are explained below:**
-
-- Around line 99:
-
-    Non-ASCII character seen before =encoding in '"ёй"'. Assuming ISO8859-1

@@ -1,5 +1,18 @@
-0.
-    - Fix "wide character" in the terminal output;
+0.55 Tests & Fixes
+    - Drop support for old routes syntax;
+    - Add support for nested entities;
+    - Fix "wide character" in the terminal output & in the POD;
+    - Supplement unit tests;
+    - Many fixes in Param:
+        * fetch all params and apply precedence rules;
+        * delete an obsolete syntax support [array];
+        * update errors format;
+    - Util:
+        * fix & suplement `detect_serializer`;
+    - Fix Routes::Endpoint;
+    - Fix Routes;
+    - Cleanup Attributes;
+    - Return to X.XX version format;
 
 0.5200 Fixes & Improvments
     - Update documentation;
