@@ -60,25 +60,26 @@ sub _reset_object {
 }
 
 subtest 'build' => sub {
-    my %uniq = map { $_->{logger} => 1 } @CASES;
-    my @loggers = map { $_ } keys %uniq;
-
-    for my $logger (@loggers) {
-        subtest $logger => sub {
-            my $app = _make_object($logger);
-
-            my $path = "$logger.pm";
-            $path =~ s#::#/#g;
-
-            ok $INC{$path}, "load $logger";
-            ok $app->can('log'), "app can log";
-
-            my $main_can = main->can('log');
-            ok $main_can, "main can log";
-        };
-
-        _reset_object();
-    }
+    plan skip_all => 'NA';
+#    my %uniq = map { $_->{logger} => 1 } @CASES;
+#    my @loggers = map { $_ } keys %uniq;
+#
+#    for my $logger (@loggers) {
+#        subtest $logger => sub {
+#            my $app = _make_object($logger);
+#
+#            my $path = "$logger.pm";
+#            $path =~ s#::#/#g;
+#
+#            ok $INC{$path}, "load $logger";
+#            ok $app->can('log'), "app can log";
+#
+#            my $main_can = main->can('log');
+#            ok $main_can, "main can log";
+#        };
+#
+#        _reset_object();
+#    }
 };
 
 subtest 'message' => sub {
