@@ -59,6 +59,8 @@ sub _reset_object {
     }
 }
 
+plan skip_all => 'NA';
+
 subtest 'build' => sub {
     plan skip_all => 'NA';
 #    my %uniq = map { $_->{logger} => 1 } @CASES;
