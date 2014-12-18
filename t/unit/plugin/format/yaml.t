@@ -4,6 +4,7 @@ use warnings;
 
 use FindBin '$Bin';
 use Test::More;
+use YAML;
 
 use lib "$Bin/../../../../lib";
 
@@ -12,30 +13,11 @@ use Raisin::Plugin::Format::YAML;
 
 my @CASES = (
     {
-        string => <<EOF,
----
-str: i-am-a-string
-EOF
+        string => Dump({ str => 'i-am-a-string' }),
         data => { str => 'i-am-a-string' },
     },
     {
-        string => <<EOF,
----
-str:
-  - i
-  - '-'
-  - a
-  - m
-  - '-'
-  - a
-  - '-'
-  - s
-  - t
-  - r
-  - i
-  - n
-  - g
-EOF
+        string => Dump({ str => [qw(i - a m - a - s t r i n g)]}),
         data => { str => [qw(i - a m - a - s t r i n g)] },
     },
 );

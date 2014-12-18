@@ -4,6 +4,7 @@ use warnings;
 
 use FindBin '$Bin';
 use Test::More;
+use JSON qw(to_json from_json);
 
 use lib "$Bin/../../../../lib";
 
@@ -12,11 +13,11 @@ use Raisin::Plugin::Format::JSON;
 
 my @CASES = (
     {
-        string => '{"str":"i-am-a-string"}',
+        string => to_json({ str => 'i-am-a-string' }, { utf8 => 0 }),
         data => { str => 'i-am-a-string' },
     },
     {
-        string => '{"str":["i","-","a","m","-","a","-","s","t","r","i","n","g"]}',
+        string => to_json({ str => [qw(i - a m - a - s t r i n g)] }, { utf8 => 0 }),
         data => { str => [qw(i - a m - a - s t r i n g)] },
     },
 );
