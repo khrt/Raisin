@@ -243,8 +243,8 @@ You can use C<if> to expose fields conditionally.
 Supply a block to define a hash using nested exposures.
 
     expose 'contact_info', sub {
-        expose('phone');
-        expose('address', using => 'API::Address');
+        expose 'phone';
+        expose 'address', using => 'API::Address';
     };
 
 =head3 Runtime exposure
