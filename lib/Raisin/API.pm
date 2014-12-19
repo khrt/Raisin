@@ -6,12 +6,13 @@ use warnings;
 use parent 'Exporter';
 
 use Carp;
+
 use Raisin;
 use Raisin::Entity;
 
 my @APP_CONF_METHODS = qw(api_default_format api_format api_version middleware mount plugin);
 my @APP_EXEC_METHODS = qw(new run);
-my @APP_METHODS = qw(req res param session present);
+my @APP_METHODS = qw(req res param session present error);
 my @HOOKS_METHODS = qw(before before_validation after_validation after);
 my @HTTP_METHODS = qw(del get head options patch post put);
 my @ROUTES_METHODS = qw(resource namespace route_param desc params);
@@ -30,8 +31,6 @@ my @NS = ('');
 
 my $app;
 
-my $OLD_API = 0;
-
 sub import {
     my $class = shift;
     $class->export_to_level(1, @_);
@@ -42,6 +41,8 @@ sub import {
     my $caller = caller;
     $app ||= Raisin->new(caller => $caller);
 }
+
+sub app { $app }
 
 #
 # Execution
@@ -74,7 +75,6 @@ sub resource {
         $name =~ s{^/}{}msx;
         push @NS, $name;
 
-        # Not present in previous API
         if ($SETTINGS{desc}) {
             my $path = join '/', @NS;
             $app->resource_desc($path, delete $SETTINGS{desc});
@@ -112,7 +112,7 @@ sub post    { _add_route('post', @_) }
 sub put     { _add_route('put', @_) }
 
 sub desc { $SETTINGS{desc} = shift }
-sub params { $SETTINGS{params} = ref($_[0]) eq 'ARRAY' ? $_[0] : \@_ }
+sub params { $SETTINGS{params} = \@_ }
 
 sub _add_route {
     my @params = @_;
@@ -130,6 +130,8 @@ sub _add_route {
         params => delete $SETTINGS{params},
         %SETTINGS,
     );
+
+    join '/', @NS;
 }
 
 #
