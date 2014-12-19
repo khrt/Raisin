@@ -53,6 +53,7 @@ sub compile {
     };
 
     @expose = _make_exposition($data) unless @expose;
+    return $data unless @expose;
 
     my $result;
 
@@ -131,13 +132,13 @@ sub _make_exposition {
     my @columns = do {
         if (blessed($data)) {
             if ($data->isa('DBIx::Class::ResultSet')) {
-                keys %{ $data->first->columns_info }; # -> HASH
+                keys %{ $data->first->columns_info };
             }
             elsif ($data->isa('DBIx::Class::Core')) {
-                keys %{ $data->columns_info }; # -> HASH
+                keys %{ $data->columns_info };
             }
             elsif ($data->isa('Rose::DB::Object')) {
-                $data->meta->column_names; # -> ARRAY
+                $data->meta->column_names;
             }
             elsif ($data->isa('Rose::DB::Object::Iterator')) {
                 croak 'Rose::DB::Object::Iterator isn\'t supported';
@@ -145,14 +146,14 @@ sub _make_exposition {
         }
         elsif (ref($data) eq 'ARRAY') {
             if (blessed($data->[0]) && $data->[0]->isa('Rose::DB::Object')) {
-                $data->[0]->meta->column_names; # -> ARRAY
+                $data->[0]->meta->column_names;
             }
             else {
-                keys %{ $data->[0] }; # -> HASH
+                ();
             }
         }
         elsif (ref($data) eq 'HASH') {
-            keys %$data; # -> HASH
+            ();
         }
     };
 
