@@ -19,7 +19,7 @@ sub new {
     my ($class, %args) = @_;
     my $self = bless {}, $class;
 
-    $self->{named} = $args{named};
+    $self->{named} = $args{named} || 0;
     $self->{required} = $args{type} =~ /^require(s|d)$/ ? 1 : 0;
 
     $self->_parse($args{spec});
