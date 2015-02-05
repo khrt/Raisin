@@ -6,6 +6,23 @@ perl:
   - "5.16"
   - "5.18"
   - "5.20"
+matrix:
+  include:
+    - perl: 5.20
+      env: COVERAGE=1
 before_install:
   - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
-  - source ~/travis-perl-helpers/init --auto
+  - source ~/travis-perl-helpers/init
+  - build-perl
+  - perl -V
+  - build-dist
+  - cd $BUILD_DIR
+install:
+  - cpan-install --deps
+  - cpan-install --coverage
+before_script:
+  - coverage-setup
+script:
+  - prove -l -j$((SYSTEM_CORES + 1)) $(test-dirs)
+after_success:
+  - coverage-report
