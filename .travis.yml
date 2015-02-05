@@ -6,19 +6,25 @@ perl:
   - "5.16"
   - "5.18"
   - "5.20"
+  - "blead"
 matrix:
   include:
-    - perl: 5.20
-      env: COVERAGE=1
+    - perl: 5.18.2
+      env: COVERAGE=1 MATCH_SIMPLE_IMPLEMENTATION=PP
 before_install:
-  - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
-  - source ~/travis-perl-helpers/init
+  - git clone git://github.com/haarg/perl-travis-helper
+  - source perl-travis-helper/init
+  - build-perl
+  - perl -V
+  - build-dist
+  - cd $BUILD_DIR
 install:
+  - cpan-install --toolchain
   - cpan-install --deps
   - cpan-install --coverage
 before_script:
   - coverage-setup
 script:
-  - prove -l -j$((SYSTEM_CORES + 1)) $(test-dirs)
+  - prove -l $(test-dirs)
 after_success:
   - coverage-report
