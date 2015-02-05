@@ -6,6 +6,8 @@ perl:
   - "5.16"
   - "5.18"
   - "5.20"
+install:
+  - cpan-install --deps
 before_install:
   - git clone git://github.com/haarg/perl-travis-helper
   - source perl-travis-helper/init
