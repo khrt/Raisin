@@ -1,3 +1,9 @@
+0.57 Fix
+    * Fix `t/unit/plugin/format/*` tests;
+    * New `t/unit/api.t` test;
+    * New `t/unit/integration` tests;
+    * Small fixes in `API`, `Entity` & `Param`;
+
 0.56 Fix
     * Skip t/unit/plugin/logger.t;
 
