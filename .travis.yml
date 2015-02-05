@@ -10,21 +10,14 @@ perl:
 matrix:
   include:
     - perl: 5.18.2
-      env: COVERAGE=1 MATCH_SIMPLE_IMPLEMENTATION=PP
+      env: COVERAGE=1
 before_install:
   - git clone git://github.com/haarg/perl-travis-helper
   - source perl-travis-helper/init
-  - build-perl
-  - perl -V
-  - build-dist
-  - cd $BUILD_DIR
 install:
-  - cpan-install --toolchain
   - cpan-install --deps
   - cpan-install --coverage
 before_script:
   - coverage-setup
-script:
-  - prove -l $(test-dirs)
 after_success:
   - coverage-report
