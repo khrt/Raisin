@@ -11,8 +11,6 @@ use Raisin::API;
 use Raisin::Response;
 use Raisin::Routes;
 
-#use DDP;
-
 sub _clean_app {
     my $app = Raisin::API->app;
     $app->{middleware} = {};

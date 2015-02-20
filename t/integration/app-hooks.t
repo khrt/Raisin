@@ -7,16 +7,12 @@ use HTTP::Request::Common;
 use Plack::Test;
 use Test::More;
 use Time::HiRes qw(time);
-
-#use YAML;
+use YAML;
 
 use lib "$Bin/../../lib";
 
 use Raisin::API;
 use Types::Standard qw(Int Str);
-
-use feature 'say';
-use DDP;
 
 my $app = eval {
     my %DATA = (
