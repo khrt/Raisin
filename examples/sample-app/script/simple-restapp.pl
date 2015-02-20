@@ -35,8 +35,9 @@ sub _return_max {
 plugin 'Swagger', enable => 'CORS';
 plugin 'Logger', outputs => [['Screen', min_level => 'debug']];
 
-resource user => sub {
-    desc 'List users';
+desc 'Operations about user';
+resource users => sub {
+    summary 'List users';
     params(
         optional => { name => 'start', type => Int, default => 0, desc => 'Pager start' },
         optional => { name => 'count', type => Int, default => 10, desc => 'Pager count' },
@@ -47,14 +48,14 @@ resource user => sub {
         { data => paginate(\@users, $params) }
     };
 
-    desc 'List all users';
+    summary 'List all users';
     get 'all' => sub {
         my $params = shift;
         my @users = UseCase::User::list(%$params);
         { data => \@users }
     };
 
-    desc 'Create new user';
+    summary 'Create new user';
     params(
         required => { name => 'name', type => Str, desc => 'User name' },
         required => { name => 'password', type => Str, desc => 'User password' },
@@ -66,16 +67,16 @@ resource user => sub {
     };
 
     params(
-        requires => { name => 'id', type => Int },
+        requires => { name => 'id', type => Int, desc => 'User ID' },
     );
     route_param id => sub {
-        desc 'Show user';
+        summary 'Show user';
         get sub {
             my $params = shift;
             { data => UseCase::User::show($params->{id}) }
         };
 
-        desc 'Edit user';
+        summary 'Edit user';
         params(
             optional => { name => 'password', type => Str, desc => 'User password' },
             optional => { name => 'email', type => Str, desc => 'User email' },
@@ -85,14 +86,17 @@ resource user => sub {
             { data => UseCase::User::edit($params->{id}, %$params) }
         };
 
+        desc 'Bump a user';
         resource bump => sub {
-            desc 'Get bumps count';
+            summary 'Get bumps count';
+            tags 'users', 'bump';
             get sub {
                 my $params = shift;
                 { data => UseCase::User::show($params->{id})->{bumped} }
             };
 
-            desc 'Bump user';
+            summary 'Bump user';
+            tags 'users', 'bump';
             put sub {
                 my $params = shift;
                 { success => UseCase::User::bump($params->{id}) }
@@ -101,8 +105,9 @@ resource user => sub {
     };
 };
 
-resource host => sub {
-    desc 'List hosts';
+desc 'Operations about host';
+resource hosts => sub {
+    summary 'List hosts';
     params(
         optional => { name => 'start', type => Int, default => 0, desc => 'Pager start' },
         optional => { name => 'count', type => Int, default => 10, desc => 'Pager count' },
@@ -113,7 +118,7 @@ resource host => sub {
         { data => paginate(\@hosts, $params) }
     };
 
-    desc 'Create new host';
+    summary 'Create new host';
     params(
         required => { name => 'name', type => Str, desc => 'Host name' },
         required => { name => 'user_id', type => Int, desc => 'Host owner' },
@@ -125,16 +130,16 @@ resource host => sub {
     };
 
     params(
-        requires => { name => 'id', type => Int }
+        requires => { name => 'id', type => Int, desc => 'Host ID' }
     );
     route_param id => sub {
-        desc 'Show host';
+        summary 'Show host';
         get sub {
             my $params = shift;
             { data => UseCase::Host::show($params->{id}) }
         };
 
-        desc 'Edit host';
+        summary 'Edit host';
         params(
             required => { name => 'state', type => Str, desc => 'Host state' },
         );
@@ -143,7 +148,7 @@ resource host => sub {
             { data => UseCase::Host::edit($params->{id}, %$params) }
         };
 
-        desc 'Delete host';
+        summary 'Delete host';
         del sub {
             my $params = shift;
             { success => UseCase::Host::remove($params->{id}) }
