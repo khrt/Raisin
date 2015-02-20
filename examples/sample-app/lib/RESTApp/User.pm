@@ -8,8 +8,9 @@ use UseCase::User;
 
 use Types::Standard qw(Int Str);
 
-resource user => sub {
-    desc 'List users';
+desc 'Operations about user';
+resource users => sub {
+    summary 'List users';
     params(
         optional => { name => 'start', type => Int, default => 0, desc => 'Pager start' },
         optional => { name => 'count', type => Int, default => 10, desc => 'Pager count' },
@@ -17,17 +18,17 @@ resource user => sub {
     get sub {
         my $params = shift;
         my @users = UseCase::User::list(%$params);
-        { data => paginate(\@users, $params) }
+        { data => RESTApp::paginate(\@users, $params) }
     };
 
-    desc 'List all users';
+    summary 'List all users';
     get 'all' => sub {
         my $params = shift;
         my @users = UseCase::User::list(%$params);
         { data => \@users }
     };
 
-    desc 'Create new user';
+    summary 'Create a new user';
     params(
         required => { name => 'name', type => Str, desc => 'User name' },
         required => { name => 'password', type => Str, desc => 'User password' },
@@ -39,16 +40,16 @@ resource user => sub {
     };
 
     params(
-        requires => { name => 'id', type => Int }
+        requires => { name => 'id', type => Int, desc => 'User ID' },
     );
     route_param id => sub {
-        desc 'Show user';
+        summary 'Show a user';
         get sub {
             my $params = shift;
             { data => UseCase::User::show($params->{id}) }
         };
 
-        desc 'Edit user';
+        summary 'Edit a user';
         params(
             optional => { name => 'password', type => Str, desc => 'User password' },
             optional => { name => 'email', type => Str, desc => 'User email' },
@@ -58,19 +59,28 @@ resource user => sub {
             { data => UseCase::User::edit($params->{id}, %$params) }
         };
 
+        desc 'Bump a user';
         resource bump => sub {
-            desc 'Get bumps count';
+            summary 'Get bumps count';
+            tags 'users', 'bump';
             get sub {
                 my $params = shift;
                 { data => UseCase::User::show($params->{id})->{bumped} }
             };
 
-            desc 'Bump user';
+            summary 'Bump a user';
+            tags 'users', 'bump';
             put sub {
                 my $params = shift;
                 { success => UseCase::User::bump($params->{id}) }
             };
         };
+
+        summary 'Delete a user';
+        del sub {
+            my $params = shift;
+            { success => UseCase::User::remove($params->{id}) }
+        }
     };
 };
 

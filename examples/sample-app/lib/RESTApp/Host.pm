@@ -18,10 +18,10 @@ resource hosts => sub {
     get sub {
         my $params = shift;
         my @hosts = UseCase::Host::list(%$params);
-        { data => paginate(\@hosts, $params) }
+        { data => RESTApp::paginate(\@hosts, $params) }
     };
 
-    summary 'Create new host';
+    summary 'Create a new host';
     params(
         required => { name => 'name', type => Str, desc => 'Host name' },
         required => { name => 'user_id', type => Int, desc => 'Host owner' },
@@ -36,13 +36,13 @@ resource hosts => sub {
         requires => { name => 'id', type => Int, desc => 'Host ID' }
     );
     route_param id => sub {
-        summary 'Show host';
+        summary 'Show a host';
         get sub {
             my $params = shift;
             { data => UseCase::Host::show($params->{id}) }
         };
 
-        summary 'Edit host';
+        summary 'Edit a host';
         params(
             required => { name => 'state', type => Str, desc => 'Host state' },
         );
@@ -51,7 +51,7 @@ resource hosts => sub {
             { data => UseCase::Host::edit($params->{id}, %$params) }
         };
 
-        summary 'Delete host';
+        summary 'Delete a host';
         del sub {
             my $params = shift;
             { success => UseCase::Host::remove($params->{id}) }

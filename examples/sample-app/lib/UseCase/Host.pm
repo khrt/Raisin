@@ -33,7 +33,7 @@ sub create {
     my %params = @_;
 
     my $id = max(keys %HOSTS) + 1;
-    $HOSTS{$id} = %params;
+    $HOSTS{$id} = \%params;
 
     $id;
 }

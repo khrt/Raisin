@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 use FindBin '$Bin';
-use HTTP::Request::Common;
+use HTTP::Request::Common qw(GET POST PUT DELETE);
 use Plack::Test;
 use Plack::Util;
 use Test::More;
@@ -12,129 +12,165 @@ use JSON 'decode_json';
 
 use lib ("$Bin/../../lib", "$Bin/../../examples/sample-app/lib");
 
-my %NEW_USER = (
-    name     => 'Obi-Wan Kenobi',
-    password => 'somepassword',
-    email    => 'ow.kenobi@jedi.com',
+my $app = Plack::Util::load_psgi("$Bin/../../examples/sample-app/script/restapp.psgi");
+
+my @CASES = (
+    {
+        namespace => 'users',
+        object => {
+            name     => 'Obi-Wan Kenobi',
+            password => 'somepassword',
+            email    => 'ow.kenobi@jedi.com',
+        },
+        edit => {
+            password => 'test',
+        }
+    },
+    {
+        namespace => 'hosts',
+        object => {
+            name    => 'tatooine.com',
+            user_id => 1,
+            state   => 'ok',
+        },
+        edit => {
+            state => 'malfunc',
+        }
+    },
 );
-my @USER_IDS;
 
-my $app = Plack::Util::load_psgi("$Bin/../../examples/sample-app/script/simple-restapp.pl");
+for my $case (@CASES) {
+    my @IDS = ();
+    my %NEW = %{ $case->{object} };
 
-test_psgi $app, sub {
-    my $cb  = shift;
+    test_psgi $app, sub {
+        my $cb  = shift;
 
-    subtest 'GET /api/users' => sub {
-        my $res = $cb->(GET '/api/users');
-        if (!is $res->code, 200) {
-            diag $res->content;
-            BAIL_OUT 'FAILED!';
+        subtest "GET /api/$case->{namespace}" => sub {
+            my $res = $cb->(GET "/api/$case->{namespace}");
+            if (!is $res->code, 200) {
+                diag $res->content;
+                BAIL_OUT 'FAILED!';
+            }
+            is $res->content_type, 'application/yaml';
+            ok my $c = $res->content, 'content';
+            ok my $o = Load($c), 'decode';
+            @IDS = map { $_->{id} } grep { $_ } @{ $o->{data} };
+            ok scalar @IDS, 'data';
+        };
+
+        subtest "GET /api/$case->{namespace}.json" => sub {
+            my $res = $cb->(GET "/api/$case->{namespace}.json");
+            if (!is $res->code, 200) {
+                diag $res->content;
+                BAIL_OUT 'FAILED!';
+            }
+            is $res->content_type, 'application/json';
+            ok my $c = $res->content, 'content';
+            ok my $o = decode_json($c), 'decode';
+            @IDS = map { $_->{id} } grep { $_ } @{ $o->{data} };
+            ok scalar @IDS, 'data';
+        };
+
+        subtest "POST /api/$case->{namespace}" => sub {
+            my $res = $cb->(POST "/api/$case->{namespace}", [%NEW]);
+            if (!is $res->code, 200) {
+                diag $res->content;
+                BAIL_OUT 'FAILED!';
+            }
+            ok my $c = $res->content, 'content';
+            ok my $o = Load($c), 'decode';
+            is $o->{success}, $IDS[-1] + 1, 'success';
+            push @IDS, $o->{success};
+        };
+
+        subtest "GET /api/$case->{namespace}/$IDS[-1]" => sub {
+            my $res = $cb->(GET "/api/$case->{namespace}/$IDS[-1]");
+            if (!is $res->code, 200) {
+                diag $res->content;
+                BAIL_OUT 'FAILED!';
+            }
+            ok my $c = $res->content, 'content';
+            ok my $o = Load($c), 'decode';
+            is_deeply $o->{data}, \%NEW, 'data';
+        };
+
+        subtest "PUT /api/$case->{namespace}/$IDS[-1]" => sub {
+            my $content_string = join '&',
+                map { "$_=$case->{edit}{$_}" } keys %{ $case->{edit} };
+
+            my $res = $cb->(
+                PUT "/api/$case->{namespace}/$IDS[-1]",
+                Content => $content_string,
+                Content_Type => 'application/x-www-form-urlencoded'
+            );
+
+            my %EDITED = (
+                %NEW,
+                id => $IDS[-1],
+                %{ $case->{edit} },
+            );
+
+            if (!is $res->code, 200) {
+                diag $res->content;
+                BAIL_OUT 'FAILED!';
+            }
+            ok my $c = $res->content, 'content';
+            ok my $o = Load($c), 'decode';
+            is_deeply $o->{data}, \%EDITED, 'data';
+        };
+
+        if ($case->{namespace} eq 'users') {
+            subtest "GET /api/$case->{namespace}/all" => sub {
+                my $res = $cb->(GET "/api/$case->{namespace}/all");
+                is $res->code, 200;
+                ok my $c = $res->content, 'content';
+                ok my $o = Load($c), 'decode';
+                @IDS = map { $_->{id} } grep { $_ } @{ $o->{data} };
+                ok scalar @IDS, 'data';
+            };
+
+            subtest "PUT /api/users/$IDS[-1]/bump" => sub {
+                my $res = $cb->(PUT "/api/users/$IDS[-1]/bump");
+                if (!is $res->code, 200) {
+                    diag $res->content;
+                    BAIL_OUT 'FAILED!';
+                }
+                ok my $c = $res->content, 'content';
+                ok my $o = Load($c), 'decode';
+                ok $o->{success}, 'success';
+            };
+
+            subtest "GET /api/users/$IDS[-1]/bump" => sub {
+                my $res = $cb->(GET "/api/users/$IDS[-1]/bump");
+                if (!is $res->code, 200) {
+                    diag $res->content;
+                    BAIL_OUT 'FAILED!';
+                }
+                ok my $c = $res->content, 'content';
+                ok my $o = Load($c), 'decode';
+                ok $o->{data}, 'data';
+            };
         }
-        is $res->content_type, 'application/yaml';
-        ok my $c = $res->content, 'content';
-        ok my $o = Load($c), 'decode';
-        @USER_IDS = map { $_->{id} } grep { $_ } @{ $o->{data} };
-        ok scalar @USER_IDS, 'data';
+
+        subtest "DELETE /api/$case->{namespace}/$IDS[0]" => sub {
+            my $res = $cb->(DELETE "/api/$case->{namespace}/$IDS[0]");
+
+            if (!is $res->code, 200) {
+                diag $res->content;
+                BAIL_OUT 'FAILED!';
+            }
+            ok my $c = $res->content, 'content';
+            ok my $o = Load($c), 'decode';
+            is_deeply $o, { success => 1 }, 'success';
+        };
+
+        subtest 'GET /404' => sub {
+            my $res = $cb->(GET '/404');
+            #note explain $res->content;
+            is $res->code, 404;
+        };
     };
-
-    subtest 'GET /api/users.json' => sub {
-        my $res = $cb->(GET '/api/users.json');
-        if (!is $res->code, 200) {
-            diag $res->content;
-            BAIL_OUT 'FAILED!';
-        }
-        is $res->content_type, 'application/json';
-        ok my $c = $res->content, 'content';
-        ok my $o = decode_json($c), 'decode';
-        @USER_IDS = map { $_->{id} } grep { $_ } @{ $o->{data} };
-        ok scalar @USER_IDS, 'data';
-    };
-
-    subtest 'GET /api/users/all' => sub {
-        my $res = $cb->(GET '/api/users/all');
-        is $res->code, 200;
-        ok my $c = $res->content, 'content';
-        ok my $o = Load($c), 'decode';
-        @USER_IDS = map { $_->{id} } grep { $_ } @{ $o->{data} };
-        ok scalar @USER_IDS, 'data';
-    };
-
-    subtest 'POST /api/users' => sub {
-        my $res = $cb->(POST '/api/users', [%NEW_USER]);
-        if (!is $res->code, 200) {
-            diag $res->content;
-            BAIL_OUT 'FAILED!';
-        }
-        ok my $c = $res->content, 'content';
-        ok my $o = Load($c), 'decode';
-        is $o->{success}, $USER_IDS[-1] + 1, 'success';
-        push @USER_IDS, $o->{success};
-    };
-
-    subtest "GET /api/users/$USER_IDS[-1]" => sub {
-        my $res = $cb->(GET "/api/users/$USER_IDS[-1]");
-        if (!is $res->code, 200) {
-            diag $res->content;
-            BAIL_OUT 'FAILED!';
-        }
-        ok my $c = $res->content, 'content';
-        ok my $o = Load($c), 'decode';
-        is_deeply $o->{data}, \%NEW_USER, 'data';
-    };
-
-    subtest "PUT /api/users/$USER_IDS[-1]" => sub {
-        my $res = $cb->(
-            PUT "/api/users/$USER_IDS[-1]",
-            Content => "password=new",
-            Content_Type => 'application/x-www-form-urlencoded'
-        );
-
-        my %EDITED_USER = (%NEW_USER, password => 'new', id => $USER_IDS[-1]);
-
-        if (!is $res->code, 200) {
-            diag $res->content;
-            BAIL_OUT 'FAILED!';
-        }
-        ok my $c = $res->content, 'content';
-        ok my $o = Load($c), 'decode';
-        is_deeply $o->{data}, \%EDITED_USER, 'data';
-    };
-
-    subtest "PUT /api/users/$USER_IDS[-1]/bump" => sub {
-        my $res = $cb->(PUT "/api/users/$USER_IDS[-1]/bump");
-        if (!is $res->code, 200) {
-            diag $res->content;
-            BAIL_OUT 'FAILED!';
-        }
-        ok my $c = $res->content, 'content';
-        ok my $o = Load($c), 'decode';
-        ok $o->{success}, 'success';
-    };
-
-    subtest "GET /api/users/$USER_IDS[-1]/bump" => sub {
-        my $res = $cb->(GET "/api/users/$USER_IDS[-1]/bump");
-        if (!is $res->code, 200) {
-            diag $res->content;
-            BAIL_OUT 'FAILED!';
-        }
-        ok my $c = $res->content, 'content';
-        ok my $o = Load($c), 'decode';
-        ok $o->{data}, 'data';
-    };
-
-#    subtest 'GET /failed' => sub {
-#        my $res = $cb->(GET '/failed?failed=FAILED');
-#        is $res->code, 409;
-#        ok my $c = $res->content, 'content';
-#        ok my $o = Load($c), 'decode';
-#        is $o->{data}, 'FAILED', 'data';
-#    };
-
-    subtest 'GET /404' => sub {
-        my $res = $cb->(GET '/404');
-        #note explain $res->content;
-        is $res->code, 404;
-    };
-};
+}
 
 done_testing;
