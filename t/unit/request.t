@@ -246,6 +246,8 @@ subtest 'deserialize' => sub {
         my $req = _make_object($http_req);
         #isa_ok $req, 'Raisin::Request', 'request';
 
+        isa_ok $req->app, 'Raisin', 'raisin';
+
         # XXX:
         next if $req->content_type eq 'application/x-www-form-urlencoded';
 

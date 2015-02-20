@@ -28,11 +28,12 @@ sub _clean_app {
 
 #subtest 'run' => sub {
 #    plan skip_all => 'not implemented';
+#    _clean_app();
 #};
-#
-#subtest 'mount' => sub {
-#    plan skip_all => 'not implemented';
-#};
+
+subtest 'mount' => sub {
+    plan skip_all => 'not implemented';
+};
 
 subtest 'middleware' => sub {
     my $app = Raisin::API->app;
@@ -41,7 +42,9 @@ subtest 'middleware' => sub {
     is_deeply $app->{middleware},
         { '+Plack::Middleware::ContentLength' => [], }, 'added';
 
-    run;
+    my $psgi_app = new;
+    is ref($psgi_app), 'CODE', 'run';
+
     is_deeply $app->{_loaded_middleware},
         { '+Plack::Middleware::ContentLength' => 1, }, 'loaded';
 
@@ -70,7 +73,13 @@ subtest 'resource' => sub {
     $level0 = resource l0 => sub {
         $level1 = resource l1 => sub {
             $level2 = resource l2 => sub {
-                $level3 = get sub { 'api' };
+                $level3 = del sub { 'del' };
+                $level3 = get sub { 'get' };
+                $level3 = head sub { 'head' };
+                $level3 = options sub { 'options' };
+                $level3 = patch sub { 'patch' };
+                $level3 = post sub { 'post' };
+                $level3 = put sub { 'put' };
             };
         };
     };
@@ -81,6 +90,11 @@ subtest 'resource' => sub {
     is $level3, '/l0/l1/l2', 'level3';
 
     _clean_app();
+};
+
+subtest 'namespace' => sub {
+    my $level0 = namespace nl0 => sub {};
+    is $level0, '/', 'level0';
 };
 
 subtest 'route_param' => sub {
@@ -174,8 +188,14 @@ subtest 'params' => sub {
     _clean_app();
 };
 
-#subtest 'req' => sub {};
-#subtest 'res' => sub {};
+subtest 'req' => sub {
+    is req, undef, 'empty req';
+};
+
+subtest 'res' => sub {
+    is res, undef, 'empty res';
+};
+
 #subtest 'param' => sub {};
 #subtest 'session' => sub {};
 

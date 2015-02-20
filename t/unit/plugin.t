@@ -20,6 +20,8 @@ subtest 'register' => sub {
 
     $p->register(hello => sub { 'hello' });
 
+    ok $p->build, 'build';
+
     ok $app->can('hello'), 'registered';
     is $app->hello, 'hello', 'exec';
 };
