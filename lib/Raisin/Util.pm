@@ -33,6 +33,11 @@ sub make_serializer_class {
     'Raisin::Plugin::Format::' . uc($format);
 }
 
+sub make_tag_from_path {
+    my $path = shift;
+    (split '/', $path)[1];
+}
+
 1;
 
 __END__
@@ -50,6 +55,10 @@ Detects serializer by content type or extension.
 =head2 make_serializer_class
 
 Returns C<Raisin::Plugin::Format::E<lt>NAMEE<gt>> class name.
+
+=head2 make_tag_from_path
+
+Splits a path and returns the first part of it.
 
 =head1 AUTHOR
 
