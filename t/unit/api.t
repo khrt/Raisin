@@ -135,8 +135,8 @@ subtest 'desc' => sub {
 
     my $app = Raisin::API->app;
 
-    is $app->resource_desc('/api'), 'for resource', 'resource';
-    is $app->resource_desc('/api/:id'), 'for route_param', 'route_param';
+    is $app->resource_desc('api'), 'for resource', 'resource';
+    is $app->resource_desc(':id'), 'for route_param', 'route_param';
 
     my $r = $app->routes->routes->[0];
     is $r->desc, 'for verb', 'verb';
@@ -195,6 +195,7 @@ subtest 'present' => sub {
 
     {
         no strict 'refs';
+        no warnings 'once';
         @Raisin::API::Entity::Test::EXPOSE = ({ name => 'key0', alias => 'key' });
     }
 
@@ -210,7 +211,7 @@ subtest 'plugin' => sub {
 
     plugin 'Swagger';
     is ref($app->{loaded_plugins}{Swagger}), 'Raisin::Plugin::Swagger', 'load';
-    ok $app->can('build_api_spec'), 'export';
+    ok $app->can('swagger_build_spec'), 'export';
 
     _clean_app();
 };

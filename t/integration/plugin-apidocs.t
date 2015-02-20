@@ -3,6 +3,8 @@ use strict;
 use warnings;
 
 use FindBin '$Bin';
+use HTTP::Message::PSGI;
+use HTTP::Request;
 use Test::More;
 
 use lib "$Bin/../../lib";
@@ -12,8 +14,12 @@ use Raisin::Routes;
 use Types::Standard qw(Int Str);
 use Raisin;
 
+
 my $a = Raisin->new;
+my $req = Raisin::Request->new($a, req_to_psgi(HTTP::Request->new('GET', '/')));
+
 $a->api_version('1.23');
+$a->req($req);
 
 my $r = $a->{routes};
 
@@ -56,6 +62,7 @@ $r->add(
 );
 
 my $i = Raisin::Plugin::Swagger->new($a);
-ok $i->build_api_spec;
+ok $i->_spec_20;
+ok $i->_spec_12;
 
 done_testing;

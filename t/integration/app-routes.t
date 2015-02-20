@@ -24,8 +24,8 @@ my $app = Plack::Util::load_psgi("$Bin/../../examples/sample-app/script/simple-r
 test_psgi $app, sub {
     my $cb  = shift;
 
-    subtest 'GET /api/user' => sub {
-        my $res = $cb->(GET '/api/user');
+    subtest 'GET /api/users' => sub {
+        my $res = $cb->(GET '/api/users');
         if (!is $res->code, 200) {
             diag $res->content;
             BAIL_OUT 'FAILED!';
@@ -37,8 +37,8 @@ test_psgi $app, sub {
         ok scalar @USER_IDS, 'data';
     };
 
-    subtest 'GET /api/user.json' => sub {
-        my $res = $cb->(GET '/api/user.json');
+    subtest 'GET /api/users.json' => sub {
+        my $res = $cb->(GET '/api/users.json');
         if (!is $res->code, 200) {
             diag $res->content;
             BAIL_OUT 'FAILED!';
@@ -50,8 +50,8 @@ test_psgi $app, sub {
         ok scalar @USER_IDS, 'data';
     };
 
-    subtest 'GET /api/user/all' => sub {
-        my $res = $cb->(GET '/api/user/all');
+    subtest 'GET /api/users/all' => sub {
+        my $res = $cb->(GET '/api/users/all');
         is $res->code, 200;
         ok my $c = $res->content, 'content';
         ok my $o = Load($c), 'decode';
@@ -59,8 +59,8 @@ test_psgi $app, sub {
         ok scalar @USER_IDS, 'data';
     };
 
-    subtest 'POST /api/user' => sub {
-        my $res = $cb->(POST '/api/user', [%NEW_USER]);
+    subtest 'POST /api/users' => sub {
+        my $res = $cb->(POST '/api/users', [%NEW_USER]);
         if (!is $res->code, 200) {
             diag $res->content;
             BAIL_OUT 'FAILED!';
@@ -71,8 +71,8 @@ test_psgi $app, sub {
         push @USER_IDS, $o->{success};
     };
 
-    subtest "GET /api/user/$USER_IDS[-1]" => sub {
-        my $res = $cb->(GET "/api/user/$USER_IDS[-1]");
+    subtest "GET /api/users/$USER_IDS[-1]" => sub {
+        my $res = $cb->(GET "/api/users/$USER_IDS[-1]");
         if (!is $res->code, 200) {
             diag $res->content;
             BAIL_OUT 'FAILED!';
@@ -82,9 +82,9 @@ test_psgi $app, sub {
         is_deeply $o->{data}, \%NEW_USER, 'data';
     };
 
-    subtest "PUT /api/user/$USER_IDS[-1]" => sub {
+    subtest "PUT /api/users/$USER_IDS[-1]" => sub {
         my $res = $cb->(
-            PUT "/api/user/$USER_IDS[-1]",
+            PUT "/api/users/$USER_IDS[-1]",
             Content => "password=new",
             Content_Type => 'application/x-www-form-urlencoded'
         );
@@ -100,8 +100,8 @@ test_psgi $app, sub {
         is_deeply $o->{data}, \%EDITED_USER, 'data';
     };
 
-    subtest "PUT /api/user/$USER_IDS[-1]/bump" => sub {
-        my $res = $cb->(PUT "/api/user/$USER_IDS[-1]/bump");
+    subtest "PUT /api/users/$USER_IDS[-1]/bump" => sub {
+        my $res = $cb->(PUT "/api/users/$USER_IDS[-1]/bump");
         if (!is $res->code, 200) {
             diag $res->content;
             BAIL_OUT 'FAILED!';
@@ -111,8 +111,8 @@ test_psgi $app, sub {
         ok $o->{success}, 'success';
     };
 
-    subtest "GET /api/user/$USER_IDS[-1]/bump" => sub {
-        my $res = $cb->(GET "/api/user/$USER_IDS[-1]/bump");
+    subtest "GET /api/users/$USER_IDS[-1]/bump" => sub {
+        my $res = $cb->(GET "/api/users/$USER_IDS[-1]/bump");
         if (!is $res->code, 200) {
             diag $res->content;
             BAIL_OUT 'FAILED!';
