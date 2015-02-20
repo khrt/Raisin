@@ -23,11 +23,17 @@ sub build {
         );
     }
 
-    $self->register(
-        #swagger_build_spec => sub { $self->_spec_12 },
-        swagger_build_spec => sub { $self->_spec_20 },
-        swagger_setup => sub { %SETTINGS = @_ },
-    );
+    if ($args{version} && $args{version} == 1.2) {
+        $self->register(
+            swagger_build_spec => sub { $self->_spec_12 }
+        );
+    }
+    else {
+        $self->register(
+            swagger_build_spec => sub { $self->_spec_20 },
+            swagger_setup => sub { %SETTINGS = @_ },
+        );
+    }
 }
 
 sub _contact_object {
@@ -169,17 +175,23 @@ sub _paths_object {
 sub _tags_object  {
     my $self = shift;
 
-    my @tags;
+    my %tags;
+    for my $r (@{ $self->app->routes->routes }) {
+        $tags{ $_ }++ for @{ $r->tags };
+    }
 
-    my $tag = {
-        name => '', #R
-        description => '',
-        #externalDocs => {
-        #    description => '',
-        #    url => '', #R
-        #},
-    };
-    push @tags, $tag;
+    my @tags;
+    for my $t (keys %tags) {
+        my $tag = {
+            name => $t, #R
+            description => $self->app->resource_desc($t),
+            #externalDocs => {
+            #    description => '',
+            #    url => '', #R
+            #},
+        };
+        push @tags, $tag;
+    }
 
     \@tags;
 }
@@ -205,15 +217,15 @@ sub _spec_20 {
         host     => $req->env->{HTTP_HOST},
         basePath => $base_path,
         schemes  => [$req->scheme],
-        #consumes => \@content_types,
-        #produces => \@content_types,
+        consumes => \@content_types,
+        produces => \@content_types,
         paths    => $self->_paths_object, #R
         #definitions => undef,
         #parameters => undef,
         #responses => undef,
         #securityDefinitions => undef,
         #security => undef,
-        tags         => $self->_tags_object, # TODO
+        tags => $self->_tags_object,
         #externalDocs => '', # TODO
     );
 
@@ -221,7 +233,7 @@ sub _spec_20 {
         method => 'GET',
         path => '/api-docs',
         code => sub {
-            eval { res->content_type('application/json'); };
+            #res->content_type('application/json');
             encode_json(\%spec);
         }
     );
@@ -229,6 +241,7 @@ sub _spec_20 {
     $self->{built} = 1;
 }
 
+# NOTE: Deprecated
 sub _spec_12 {
     my $self = shift;
     return 1 if $self->{built};
