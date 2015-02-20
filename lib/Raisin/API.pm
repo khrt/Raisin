@@ -15,7 +15,9 @@ my @APP_EXEC_METHODS = qw(new run);
 my @APP_METHODS = qw(req res param session present error);
 my @HOOKS_METHODS = qw(before before_validation after_validation after);
 my @HTTP_METHODS = qw(del get head options patch post put);
-my @ROUTES_METHODS = qw(resource namespace route_param desc params);
+my @ROUTES_METHODS = qw(resource namespace route_param params);
+
+my @SWAGGER_MERTHODS = qw(desc summary tags);
 
 our @EXPORT = (
     @APP_CONF_METHODS,
@@ -24,6 +26,7 @@ our @EXPORT = (
     @HOOKS_METHODS,
     @HTTP_METHODS,
     @ROUTES_METHODS,
+    @SWAGGER_MERTHODS,
 );
 
 my %SETTINGS = ();
@@ -111,8 +114,12 @@ sub patch   { _add_route('patch', @_) }
 sub post    { _add_route('post', @_) }
 sub put     { _add_route('put', @_) }
 
-sub desc { $SETTINGS{desc} = shift }
 sub params { $SETTINGS{params} = \@_ }
+
+# Swagger
+sub desc    { $SETTINGS{desc} = shift }
+sub summary { $SETTINGS{summary} = shift }
+sub tags    { $SETTINGS{tags} = \@_ }
 
 sub _add_route {
     my @params = @_;
@@ -123,11 +130,15 @@ sub _add_route {
     $path = resource() . ($path ? "/$path" : '');
 
     $app->add_route(
-        code => $code,
-        method => $method,
-        path => $path,
-        desc => delete $SETTINGS{desc},
-        params => delete $SETTINGS{params},
+        code    => $code,
+        method  => $method,
+        path    => $path,
+        params  => delete $SETTINGS{params},
+
+        desc    => delete $SETTINGS{desc},
+        summary => delete $SETTINGS{summary},
+        tags    => delete $SETTINGS{tags},
+
         %SETTINGS,
     );
 
