@@ -28,12 +28,12 @@ plugin 'Swagger', enable => 'CORS';
 #api_format 'json';
 
 swagger_setup(
-    title => 'POD synopsis API',
-    description => 'Basic example.',
+    title => 'A POD synopsis API',
+    description => 'An example of API documentation.',
     #terms_of_service => '',
 
     contact => {
-        name => 'Artur Kh',
+        name => 'Artur Khabibullin',
         url => 'http://github.com/khrt',
         email => 'rtkh@cpan.org',
     },
@@ -45,8 +45,8 @@ swagger_setup(
 );
 
 desc 'Users API';
-resource user => sub {
-    desc 'List users';
+resource users => sub {
+    summary 'List users';
     params(
         optional => { name => 'start', type => Int, default => 0, desc => 'Pager (start)' },
         optional => { name => 'count', type => Int, default => 10, desc => 'Pager (count)' },
@@ -66,7 +66,7 @@ resource user => sub {
         { data => \@slice }
     };
 
-    desc 'List all users at once';
+    summary 'List all users at once';
     get 'all' => sub {
         my @users
             = map { { id => $_, %{ $USERS{$_} } } }
@@ -74,7 +74,7 @@ resource user => sub {
         { data => \@users }
     };
 
-    desc 'Create new user';
+    summary 'Create new user';
     params(
         requires => { name => 'name', type => Str, desc => 'User name' },
         requires => { name => 'password', type => Str, desc => 'User password' },
@@ -90,27 +90,26 @@ resource user => sub {
     };
 
     desc 'Actions on the user';
-    params(
-        requires => { name => 'id', type => Int, desc => 'User ID' },
-    );
+    params requires => { name => 'id', type => Int, desc => 'User ID' };
     route_param 'id' => sub {
-        desc 'Show user';
+        summary 'Show user';
         get sub {
             my $params = shift;
             $USERS{ $params->{id} };
         };
 
-        desc 'Delete user';
+        summary 'Delete user';
         del sub {
             my $params = shift;
             { success => delete $USERS{ $params->{id} } };
         };
     };
 
-    desc 'NOP';
+    summary 'NOP';
     get nop => sub { };
 };
 
+desc 'Echo API endpoint';
 resource echo => sub {
     params(optional => { name => 'data0', type => Any, default => "ёй" });
     get sub { shift };

@@ -35,6 +35,22 @@ sub _return_max {
 plugin 'Swagger', enable => 'CORS';
 plugin 'Logger', outputs => [['Screen', min_level => 'debug']];
 
+swagger_setup(
+    title => 'Users & hosts API',
+    description => 'An example of API documentation.',
+
+    contact => {
+        name => 'Artur Khabibullin',
+        url => 'http://github.com/khrt',
+        email => 'rtkh@cpan.org',
+    },
+
+    license => {
+        name => 'Perl license',
+        url => 'http://dev.perl.org/licenses/',
+    },
+);
+
 desc 'Operations about user';
 resource users => sub {
     summary 'List users';

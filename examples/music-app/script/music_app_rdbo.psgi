@@ -22,7 +22,7 @@ api_default_format 'yaml';
 
 desc 'Artist API';
 resource artists => sub {
-    desc 'List';
+    summary 'List';
     get sub {
         my $params = shift;
         my $artists = MusicApp::RDBO::Artist->get_artists;
@@ -45,7 +45,7 @@ resource artists => sub {
 
 desc 'Albums API';
 resource albums => sub {
-    desc 'List';
+    summary 'List';
     get sub {
         my $params = shift;
         my $albums = MusicApp::RDBO::Album->get_albums;
