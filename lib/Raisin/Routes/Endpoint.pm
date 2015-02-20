@@ -23,10 +23,6 @@ sub new {
 
     @$self{keys %args} = values %args;
 
-    unless (scalar @{ $self->tags }) {
-        $self->{tags} = [($self->path =~ m#^/([^/]+)#msx)[0]];
-    }
-
     # Populate params index
     for my $p (@{ $self->params }) {
         if ($p->named && (my $re = $p->regex)) {
@@ -82,7 +78,15 @@ sub _rep_regex {
     return $char . $r;
 }
 
-sub tags { shift->{tags} || [] }
+sub tags {
+    my $self = shift;
+
+    unless (scalar @{ $self->{tags} || [] }) {
+        return [Raisin::Util::make_tag_from_path($self->path)];
+    }
+
+    $self->{tags};
+}
 
 sub match {
     my ($self, $method, $path) = @_;
