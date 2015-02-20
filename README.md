@@ -598,7 +598,7 @@ Raisin comes with three instance in _example_ directory:
 
 - pod-synopsis-app
 
-    Basic instance which is used in synopsis.
+    Basic example.
 
 - music-app
 
