@@ -15,12 +15,17 @@ has 'named';
 has 'params' => [];
 has 'path';
 has 'regex';
+has 'summary';
 
 sub new {
     my ($class, %args) = @_;
     my $self = bless {}, $class;
 
     @$self{keys %args} = values %args;
+
+    unless (scalar @{ $self->tags }) {
+        $self->{tags} = [($self->path =~ m#^/([^/]+)#msx)[0]];
+    }
 
     # Populate params index
     for my $p (@{ $self->params }) {
@@ -76,6 +81,8 @@ sub _rep_regex {
 
     return $char . $r;
 }
+
+sub tags { shift->{tags} || [] }
 
 sub match {
     my ($self, $method, $path) = @_;

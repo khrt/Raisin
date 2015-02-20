@@ -51,8 +51,6 @@ sub add {
         return;
     }
 
-    my $desc = $params{desc};
-
     my @pp;
     for my $key (qw(params named)) {
         for my $p (pairs @{ $params{$key} }) {
@@ -77,10 +75,13 @@ sub add {
         = Raisin::Routes::Endpoint->new(
             api_format => $params{api_format},
             code => $code,
-            desc => $desc,
             method => $method,
             params => \@pp,
             path => $path,
+
+            desc => $params{desc},
+            summary => $params{summary},
+            tags => $params{tags},
         );
     push @{ $self->{routes} }, $ep;
 
