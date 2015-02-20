@@ -8,6 +8,7 @@ use parent 'Raisin::Plugin';
 use JSON 'encode_json';
 
 my %SETTINGS;
+my %DEFAULTS;
 
 sub build {
     my ($self, %args) = @_;
@@ -51,15 +52,15 @@ sub _info_object {
     my $self = shift;
 
     my %obj = (
-        title => $SETTINGS{title} || 'Some API', #R
-        version => $self->app->api_version || 'NA', #R
+        title => $SETTINGS{title} || 'API', #R
+        version => $self->app->api_version || '0.0.1', #R
     );
 
     $obj{description} = $SETTINGS{description} if $SETTINGS{description};
     $obj{termsOfService} = $SETTINGS{terms_of_service} if $SETTINGS{terms_of_service};
 
-    $obj{contact} = _contact_object($SETTINGS{contact}) if %{ $SETTINGS{contact} };
-    $obj{license} = _license_object($SETTINGS{license}) if %{ $SETTINGS{license} };
+    $obj{contact} = _contact_object($SETTINGS{contact}) if keys %{ $SETTINGS{contact} };
+    $obj{license} = _license_object($SETTINGS{license}) if keys %{ $SETTINGS{license} };
 
     \%obj;
 }
@@ -94,20 +95,19 @@ sub _parameters_object {
         };
 
         my %param = (
-            name     => $p->name, #R
-            in       => $position, #R
-            required => $p->required ? 'true' : 'false',
-            type     => $type, #R
-            default  => $p->default // 'false',
+            description => $p->desc || "",
+            in          => $position, #R
+            name        => $p->name, #R
+            required    => $p->required ? JSON::true : JSON::false,
+            type        => $type, #R
         );
+        $param{default} = $p->default if defined $p->default;
+        $param{format} = $format if $format;
 
         #if ($type eq 'array') {
         #    $param{items} = ''; #R if is array
         #    $param{collectionFormat} = ''; # if is array
         #}
-
-        $param{format} = $format if $format;
-        $param{description} = $p->desc if $p->desc;
 
         push @obj, \%param;
     }
@@ -118,22 +118,28 @@ sub _parameters_object {
 sub _operation_object {
     my $r = shift;
 
+    my $path = $r->path;
+    $path =~ tr#/:#_#;
+    my $operation_id = lc($r->method) . $path;
+
     my %obj = (
-        #tags => [''], # TODO
-        #summary => '',
+        tags => $r->tags,
+        summary => $r->summary || "",
+        description => $r->desc || "",
         #externalDocs => '',
-        operationId => "${ \$r->method}+${ \$r->path }", # TODO
-        #consumes => '',
-        #produces => '',
-        responses => { #R # TODO
-            default => { #R
-                description => 'NA', #R
+        operationId => $operation_id,
+        consumes => $DEFAULTS{consumes},
+        produces => $DEFAULTS{produces},
+        # TODO:
+        responses => { #R
+            500 => { #R
+                description => 'server exception', #R
                 #schema => '',
                 #headers => '',
                 #examples => '',
             },
         },
-        #schemes => '',
+        #schemes => [''],
         #deprecated => 'false', # TODO
         #security => '',
     );
@@ -141,7 +147,6 @@ sub _operation_object {
     my $params = _parameters_object($r->method, $r->params);
 
     $obj{parameters} = $params if scalar @$params;
-    $obj{description} = $r->desc if $r->desc;
 
     \%obj;
 }
@@ -161,6 +166,24 @@ sub _paths_object {
     \%obj;
 }
 
+sub _tags_object  {
+    my $self = shift;
+
+    my @tags;
+
+    my $tag = {
+        name => '', #R
+        description => '',
+        #externalDocs => {
+        #    description => '',
+        #    url => '', #R
+        #},
+    };
+    push @tags, $tag;
+
+    \@tags;
+}
+
 sub _spec_20 {
     my $self = shift;
     return 1 if $self->{built};
@@ -173,21 +196,24 @@ sub _spec_20 {
     my $base_path = $req->base->as_string;
     $base_path =~ s#http(?:s?)://[^/]+##msix;
 
+    $DEFAULTS{consumes} = \@content_types;
+    $DEFAULTS{produces} = \@content_types;
+
     my %spec = (
         swagger  => '2.0',
         info     => $self->_info_object,
-        host     => $req->remote_host || $req->address,
+        host     => $req->env->{HTTP_HOST},
         basePath => $base_path,
-        schemes  => [$req->scheme], # TODO
-        consumes => \@content_types,
-        produces => \@content_types,
+        schemes  => [$req->scheme],
+        #consumes => \@content_types,
+        #produces => \@content_types,
         paths    => $self->_paths_object, #R
         #definitions => undef,
         #parameters => undef,
         #responses => undef,
         #securityDefinitions => undef,
         #security => undef,
-        #tags         => '', # TODO
+        tags         => $self->_tags_object, # TODO
         #externalDocs => '', # TODO
     );
 
@@ -195,7 +221,7 @@ sub _spec_20 {
         method => 'GET',
         path => '/api-docs',
         code => sub {
-            res->content_type('application/json');
+            eval { res->content_type('application/json'); };
             encode_json(\%spec);
         }
     );
