@@ -52,7 +52,7 @@ sub validate {
     # TODO: validate HASHes
     if ($$ref_value && ref $$ref_value && ref $$ref_value ne 'ARRAY') {
         #TODO: $self->app->log($e);
-        print STDERR "`$self->{name}' \$ref_value should be SCALAR or ARRAYREF\n" unless $quiet;
+        #print STDERR "`$self->{name}' \$ref_value should be SCALAR or ARRAYREF\n" unless $quiet;
         return 1;
     }
 
