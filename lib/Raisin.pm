@@ -55,9 +55,9 @@ sub add_route {
 
 # Resource description
 sub resource_desc {
-    my ($self, $path, $desc) = @_;
-    $self->{resource_desc}{$path} = $desc if $desc;
-    $self->{resource_desc}{$path};
+    my ($self, $ns, $desc) = @_;
+    $self->{resource_desc}{$ns} = $desc if $desc;
+    $self->{resource_desc}{$ns};
 }
 
 # Hooks

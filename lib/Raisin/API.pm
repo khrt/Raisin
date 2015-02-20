@@ -79,8 +79,7 @@ sub resource {
         push @NS, $name;
 
         if ($SETTINGS{desc}) {
-            my $path = join '/', @NS;
-            $app->resource_desc($path, delete $SETTINGS{desc});
+            $app->resource_desc($NS[-1], delete $SETTINGS{desc});
         }
 
         my %prev_settings = %SETTINGS;
