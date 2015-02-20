@@ -11,7 +11,7 @@ use Raisin::Response;
 use Raisin::Routes;
 use Raisin::Util;
 
-our $VERSION = '0.57';
+our $VERSION = '0.58';
 
 sub new {
     my ($class, %args) = @_;
@@ -279,9 +279,26 @@ Raisin - a REST API micro framework for Perl.
     plugin 'Swagger', enable => 'CORS';
     api_format 'json';
 
-    desc 'Actions on users';
-    resource user => sub {
-        desc 'List users';
+    swagger_setup(
+        title => 'A POD synopsis API',
+        description => 'An example of API documentation.',
+        #terms_of_service => '',
+
+        contact => {
+            name => 'Artur Khabibullin',
+            url => 'http://github.com/khrt',
+            email => 'rtkh@cpan.org',
+        },
+
+        license => {
+            name => 'Perl license',
+            url => 'http://dev.perl.org/licenses/',
+        },
+    );
+
+    desc 'Users API';
+    resource users => sub {
+        summary 'List users';
         params(
             optional => { name => 'start', type => Int, default => 0, desc => 'Pager (start)' },
             optional => { name => 'count', type => Int, default => 10, desc => 'Pager (count)' },
@@ -301,7 +318,7 @@ Raisin - a REST API micro framework for Perl.
             { data => \@slice }
         };
 
-        desc 'List all users at once';
+        summary 'List all users at once';
         get 'all' => sub {
             my @users
                 = map { { id => $_, %{ $USERS{$_} } } }
@@ -309,7 +326,7 @@ Raisin - a REST API micro framework for Perl.
             { data => \@users }
         };
 
-        desc 'Create new user';
+        summary 'Create new user';
         params(
             requires => { name => 'name', type => Str, desc => 'User name' },
             requires => { name => 'password', type => Str, desc => 'User password' },
@@ -325,32 +342,29 @@ Raisin - a REST API micro framework for Perl.
         };
 
         desc 'Actions on the user';
-        params(
-            requires => { name => 'id', type => Int, desc => 'User ID' },
-        );
+        params requires => { name => 'id', type => Int, desc => 'User ID' };
         route_param 'id' => sub {
-            desc 'Show user';
+            summary 'Show user';
             get sub {
                 my $params = shift;
                 $USERS{ $params->{id} };
             };
 
-            desc 'Delete user';
+            summary 'Delete user';
             del sub {
                 my $params = shift;
                 { success => delete $USERS{ $params->{id} } };
             };
         };
+
+        summary 'NOP';
+        get nop => sub { };
     };
 
+    desc 'Echo API endpoint';
     resource echo => sub {
-        params(
-            optional => { name => 'data0', type => Any, default => "ёй" },
-        );
+        params(optional => { name => 'data0', type => Any, default => "ёй" });
         get sub { shift };
-
-        desc 'NOP';
-        get nop => sub { };
     };
 
     run;
@@ -404,14 +418,34 @@ Shortcuts to add a C<route> restricted to the corresponding HTTP method.
 
 =head3 desc
 
-Can be applied to C<resource> or any of the HTTP method to add a description
-for an operation or for a resource.
+Can be applied to C<resource> or any of the HTTP method to add a verbose
+explanation for an operation or for a resource.
 
-    desc 'Some action';
+    desc 'Some long explanation about an action';
     put sub { ... };
 
-    desc 'Some operations group',
+    desc 'Some exaplanation about a group of actions',
     resource => 'user' => sub { ... }
+
+=head3 summary
+
+Can be applied to any of the HTTP method to add a short summary of
+what the operation does.
+
+    summary 'Some summary';
+    put sub { ... };
+
+=head3 tags
+
+A list of tags for API documentation control.
+Tags can be used for logical grouping of operations by resources
+or any other qualifier.
+
+    tags 'delete', 'user';
+    delete sub { ... };
+
+By default tags are added automatically based on it's namespace but you always
+can overwrite it using a C<tags> function.
 
 =head3 params
 
