@@ -13,6 +13,8 @@ Makefile.old
 MANIFEST.bak
 MYMETA.json
 MYMETA.yml
+META.json
+META.yml
 nytprof.out
 pm_to_blib
 .pause
