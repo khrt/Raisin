@@ -935,8 +935,6 @@ Shows an example of complex application.
 
 =over
 
-=item * Upgrade Swagger to L<2.0|https://github.com/wordnik/swagger-spec/blob/master/versions/2.0.md> and make support for L<Raisin::Entity/documentation>;
-
 =item * Endpoint's hooks: C<after>, C<before>;
 
 =item * Mount API's in any place of C<resource> block;

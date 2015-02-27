@@ -645,7 +645,6 @@ Raisin comes with three instance in _example_ directory:
 
 # ROADMAP
 
-- Upgrade Swagger to [2.0](https://github.com/wordnik/swagger-spec/blob/master/versions/2.0.md) and make support for ["documentation" in Raisin::Entity](https://metacpan.org/pod/Raisin::Entity#documentation);
 - Endpoint's hooks: `after`, `before`;
 - Mount API's in any place of `resource` block;
 - `declared` keyword which should be applicable to `param` and supports for `missing` keyword;
