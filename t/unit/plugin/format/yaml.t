@@ -2,11 +2,8 @@
 use strict;
 use warnings;
 
-use FindBin '$Bin';
 use Test::More;
 use YAML;
-
-use lib "$Bin/../../../../lib";
 
 use Raisin;
 use Raisin::Plugin::Format::YAML;

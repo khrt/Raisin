@@ -2,14 +2,11 @@
 use strict;
 use warnings;
 
-use FindBin '$Bin';
 use HTTP::Request::Common;
 use Plack::Test;
 use Test::More;
 use Time::HiRes qw(time);
 use YAML;
-
-use lib "$Bin/../../lib";
 
 use Raisin::API;
 use Types::Standard qw(Int Str);

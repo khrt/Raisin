@@ -3,11 +3,8 @@ use strict;
 use warnings;
 
 use Data::Dumper;
-use FindBin '$Bin';
 use Plack::Util;
 use Test::More;
-
-use lib "$Bin/../../../lib";
 
 use Raisin;
 use Raisin::Plugin::Logger;

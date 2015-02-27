@@ -2,10 +2,7 @@
 use strict;
 use warnings;
 
-use FindBin '$Bin';
 use Test::More;
-
-use lib "$Bin/../../lib";
 
 use Raisin::Param;
 use Types::Standard qw(ScalarRef Any Num Str Int);

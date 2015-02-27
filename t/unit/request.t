@@ -2,7 +2,6 @@
 use strict;
 use warnings;
 
-use FindBin '$Bin';
 use Test::More;
 
 use HTTP::Message::PSGI;
@@ -12,8 +11,6 @@ use Types::Standard qw(Str Int Any);
 
 use YAML qw();
 use JSON qw();
-
-use lib "$Bin/../../lib";
 
 use Raisin;
 use Raisin::Request;

@@ -2,7 +2,6 @@
 use strict;
 use warnings;
 
-use FindBin '$Bin';
 use Test::More;
 
 use Raisin;

@@ -2,14 +2,11 @@
 use strict;
 use warnings;
 
-use FindBin '$Bin';
 use Test::More;
 
 use Data::Dumper;
 use JSON qw();
 use YAML qw();
-
-use lib "$Bin/../../lib";
 
 use Raisin;
 use Raisin::Response;

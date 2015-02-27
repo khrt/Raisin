@@ -2,18 +2,14 @@
 use strict;
 use warnings;
 
-use FindBin '$Bin';
 use HTTP::Message::PSGI;
 use HTTP::Request;
 use Test::More;
 
-use lib "$Bin/../../lib";
-
 use Raisin::Plugin::Swagger;
 use Raisin::Routes;
-use Types::Standard qw(Int Str);
 use Raisin;
-
+use Types::Standard qw(Int Str);
 
 my $a = Raisin->new;
 my $req = Raisin::Request->new($a, req_to_psgi(HTTP::Request->new('GET', '/')));

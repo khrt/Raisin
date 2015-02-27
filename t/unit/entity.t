@@ -2,10 +2,7 @@
 use strict;
 use warnings;
 
-use FindBin '$Bin';
 use Test::More;
-
-use lib ("$Bin/../../lib", "$Bin/../app");
 
 use Raisin::Entity;
 
@@ -156,7 +153,7 @@ my @CASES = (
     #    input => {},
     #    expected => {
     #        compile => {},
-    #        exposition => [],#[{ name => '' }],
+    #        exposition => [],#[{ name =>  }],
     #        expose => {
     #            alias => undef,
     #            condition => undef,

@@ -2,11 +2,8 @@
 use strict;
 use warnings;
 
-use FindBin '$Bin';
 use Test::More;
 use JSON qw(to_json from_json);
-
-use lib "$Bin/../../../../lib";
 
 use Raisin;
 use Raisin::Plugin::Format::JSON;

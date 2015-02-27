@@ -2,12 +2,9 @@
 use strict;
 use warnings;
 
-use FindBin '$Bin';
 use Test::More;
 
 use Types::Standard qw(Int);
-
-use lib "$Bin/../../lib";
 
 use Raisin::Routes;
 
