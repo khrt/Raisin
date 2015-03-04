@@ -7,32 +7,25 @@ use Test::More;
 use Raisin;
 use Raisin::Plugin::Swagger;
 
-
 sub _make_object {
-    my $object = shift;
+    my (%args) = @_;
 
     my $caller = caller;
     my $app = Raisin->new(caller => $caller);
 
     my $module = Raisin::Plugin::Swagger->new($app);
-    $module->build;
+    $module->build(%args);
 
     $module;
 }
 
-# TODO: enable CORS
+my $m = _make_object(enable => 'CORS');
 
-#subtest '_contact_object' => sub {
-#    $obj::_contact_object(%);
-#};
-
-#subtest '_license_object' => sub {
-#
-#};
+is $m->{swagger_version}, '2.0', 'Swagger 2.0 docs';
+ok defined $m->app->{middleware}{CrossOrigin}, 'CORS OK';
 
 subtest '_info_object' => sub {
-    my $m = _make_object;
-
+    # + _contact_object, _license_object
     my @CASES = (
         {
             settings => {},
@@ -79,29 +72,29 @@ subtest '_info_object' => sub {
         $m->app->api_version($case->{settings}{version})
             if $case->{settings}{version};
 
-        Raisin::swagger_setup(%{ $case->{settings} });
+        swagger_setup(%{ $case->{settings} });
         is_deeply $m->_info_object, $case->{expected_object};
     }
 };
 
-#subtest '_parameters_object' => sub {
-#
-#};
-#
-#subtest '_operation_object' => sub {
-#
-#};
-#
-#subtest '_paths_object' => sub {
-#
-#};
-#
-#subtest '_tags_object' => sub {
-#
-#};
-#
-#subtest '_spec20' => sub {
-#
-#};
+subtest '_parameters_object' => sub {
+    plan skip_all => 'TODO';
+};
+
+subtest '_operation_object' => sub {
+    plan skip_all => 'TODO';
+};
+
+subtest '_paths_object' => sub {
+    plan skip_all => 'TODO';
+};
+
+subtest '_tags_object' => sub {
+    plan skip_all => 'TODO';
+};
+
+subtest '_spec20' => sub {
+    plan skip_all => 'TODO';
+};
 
 done_testing;

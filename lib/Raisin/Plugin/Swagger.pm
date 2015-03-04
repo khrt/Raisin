@@ -27,12 +27,14 @@ sub build {
         $self->register(
             swagger_build_spec => sub { $self->_spec_12 }
         );
+        $self->{swagger_version} = '1.0';
     }
     else {
         $self->register(
             swagger_build_spec => sub { $self->_spec_20 },
             swagger_setup => sub { %SETTINGS = @_ },
         );
+        $self->{swagger_version} = '2.0';
     }
 }
 
