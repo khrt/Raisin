@@ -386,6 +386,12 @@ Cross-origin resource sharing
 
     plugin 'Swagger', enable => 'CORS';
 
+=head1 VERSION
+
+Which Swagger version to use. By default 2.0 is used, also 1.2 available.
+
+    plugin 'Swagger', version => 1.2;
+
 =head1 FUNCTIONS
 
 =head3 swagger_setup
