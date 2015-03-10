@@ -8,6 +8,7 @@ use utf8;
 use FindBin;
 use lib "$FindBin::Bin/../../lib";
 
+use List::Util qw(max);
 use Raisin::API;
 use Types::Standard qw(Any Int Str);
 
