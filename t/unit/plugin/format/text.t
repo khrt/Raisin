@@ -9,29 +9,11 @@ use Raisin::Plugin::Format::TEXT;
 
 my @CASES = (
     {
-        string => "{\n  'str' => 'i-am-a-string'\n}\n",
+        string => "{'str'=>'i-am-a-string'}",
         data => { str => 'i-am-a-string' },
     },
     {
-        string => <<EOF,
-{
-  'str' => [
-             'i',
-             '-',
-             'a',
-             'm',
-             '-',
-             'a',
-             '-',
-             's',
-             't',
-             'r',
-             'i',
-             'n',
-             'g'
-           ]
-}
-EOF
+        string => "{'str'=>['i','-','a','m','-','a','-','s','t','r','i','n','g']}",
         data => { str => [qw(i - a m - a - s t r i n g)] },
     },
 );
@@ -51,7 +33,10 @@ is $app->serializer->content_type, 'text/plain', 'content_type';
 
 subtest 'serialize' => sub {
     for my $case (@CASES) {
-        is_deeply $app->serializer->serialize($case->{data}), $case->{string};
+        my $s = $app->serializer->serialize($case->{data});
+        $s =~ s/[\r\n\s]//g;
+
+        is_deeply $s, $case->{string};
     }
 };
 
