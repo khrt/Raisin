@@ -4,7 +4,7 @@
       "Artur Khabibullin - rtkh <at> cpan.org"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 5.025, Dist::Milla version v1.0.8, CPAN::Meta::Converter version 2.142690",
+   "generated_by" : "Dist::Zilla version 5.025, CPAN::Meta::Converter version 2.142690",
    "license" : [
       "perl_5"
    ],
@@ -17,9 +17,6 @@
       "directory" : [
          "t",
          "xt",
-         "inc",
-         "share",
-         "eg",
          "examples"
       ]
    },
@@ -32,7 +29,6 @@
       "develop" : {
          "requires" : {
             "Data::Printer" : "0.35",
-            "Dist::Milla" : "v1.0.8",
             "Test::Pod" : "1.41"
          }
       },
@@ -66,10 +62,6 @@
          "web" : "https://github.com/khrt/Raisin"
       }
    },
-   "version" : "0.58",
-   "x_contributors" : [
-      "Artie Kh <khrt@ya.ru>",
-      "Dotan Dimet <dotan@corky.net>"
-   ]
+   "version" : "0.58"
 }
 
