@@ -1,16 +1,21 @@
+<next> Fix
+    * Fix examples;
+    * Fix a `t/unit/plugin/format/text.t` test;
+    * Add an `include_missing` function;
+
 0.58 Swagger 2.0
-    * Add support for Swagger 2.0;
+    * Add support for a Swagger 2.0;
     * Minor fixes;
     * Improve a coverage;
 
 0.57 Fix
     * Fix `t/unit/plugin/format/*` tests;
-    * New `t/unit/api.t` test;
+    * A new `t/unit/api.t` test;
     * New `t/unit/integration` tests;
     * Small fixes in `API`, `Entity` & `Param`;
 
 0.56 Fix
-    * Skip t/unit/plugin/logger.t;
+    * Skip a `t/unit/plugin/logger.t` test;
 
 0.55 Tests & Fixes
     - Drop support for old routes syntax;

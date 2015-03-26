@@ -132,6 +132,7 @@ sub psgi {
         $self->hook('before_validation')->($self);
 
         # Validation and coercion of a declared params
+        # TODO: declared
         if (not $req->prepare_params($route->params, $route->named)) {
             $res->render_error(400, 'Invalid params!');
             return $res->finalize;
@@ -375,7 +376,9 @@ Raisin is a REST API micro framework for Perl.
 It's designed to run on Plack, providing a simple DSL to easily develop RESTful APIs.
 It was inspired by L<Grape|https://github.com/intridea/grape>.
 
-=for HTML <a href="https://travis-ci.org/khrt/Raisin"><img src="https://travis-ci.org/khrt/Raisin.svg?branch=master"></a>
+=for HTML
+<a href="https://travis-ci.org/khrt/Raisin"><img src="https://travis-ci.org/khrt/Raisin.svg?branch=master"></a>
+<a href="http://badge.fury.io/pl/Raisin"><img src="https://badge.fury.io/pl/Raisin.svg" alt="CPAN version" height="18"></a>
 
 =head1 FUNCTIONS
 
@@ -597,7 +600,7 @@ For details see examples in I<examples/music-app> and L<Raisin::Entity>.
 
 =head1 PARAMETERS
 
-A request parameters are available through the C<params> C<HASH>. This includes
+Request parameters are available through the C<params> C<HASH>. This includes
 GET, POST and PUT parameters, along with any named parameters you specify in
 your route strings.
 
@@ -606,14 +609,11 @@ on C<POST> and C<PUT> for form input, C<JSON> and C<YAML> content-types.
 
 The request:
 
-    curl -d '{"id": "14"}' 'http://localhost:5000/data' -H Content-Type:application/json -v
+    curl localhost:5000/data -H Content-Type:application/json -d '{"id": "14"}'
 
 The Raisin endpoint:
 
-    post data => sub {
-        my $params = shift;
-        $params{id};
-    }
+    post data => sub { param('id') };
 
 Multipart C<POST>s and C<PUT>s are supported as well.
 
@@ -632,6 +632,77 @@ In the case of conflict between either of:
 route string parameters will have precedence.
 
 Query string and body parameters will be merged (see L<Plack::Request/parameters>)
+
+=head2 Declared parameters
+
+Raisin allows you to access only the parameters that have been declared by your
+L<Raisin/params> block.
+
+By default you can get all declared parameter as a first argument passed to your
+route subroutine.
+
+Application:
+
+    api_format 'json';
+
+    post data => sub {
+        my $params = shift;
+        { data => $params };
+    };
+
+Request:
+
+    curl -X POST -H "Content-Type: application/json" localhost:5000/signup -d '{"id": 42}'
+
+Response:
+
+    { "data": nil }
+
+Once we add parameters requirements, Raisin will start returning only
+the declared params.
+
+Application:
+
+    api_format 'json';
+
+    params
+        required => { name => 'id', type => Int };
+        optional => { name => 'email', type => Str };
+    post data => sub {
+        my $params = shift;
+        { data => $params };
+    };
+
+Request:
+
+    curl -X POST -H "Content-Type: application/json" localhost:5000/signup -d '{"id": 42, "key": "value"}'
+
+Response:
+
+    { "data": { "id": 42 } }
+
+By default declared parameters doesn't contain parameters that has C<undef> value.
+If you want to return all parameters you can use the C<include_missing> function.
+
+Application:
+
+    api_format 'json';
+
+    params
+        required => { name => 'id', type => Int },
+        optional => { name => 'email', type => Str };
+    post data => sub {
+        my $params = shift;
+        { data => include_missing($params) };
+    };
+
+Request:
+
+    curl -X POST -H "Content-Type: application/json" localhost:5000/signup -d '{"id": 42, "key": "value"}'
+
+Response:
+
+    { "data": { "id": 42, "email": null } }
 
 =head2 Validation and coercion
 
@@ -935,11 +1006,15 @@ Shows an example of complex application.
 
 =over
 
-=item * Endpoint's hooks: C<after>, C<before>;
+=item * OPTIONS/Allow support;
+
+=item * Support for hypermedia (L<HAL|http://stateless.co/hal_specification.html>, L<Link headers|http://www.w3.org/wiki/LinkHeader>);
+
+=item * Versioning support;
+
+=item * Nested params declaration;
 
 =item * Mount API's in any place of C<resource> block;
-
-=item * C<declared> keyword which should be applicable to C<param> and supports for C<missing> keyword;
 
 =back
 

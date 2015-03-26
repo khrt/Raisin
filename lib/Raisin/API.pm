@@ -170,6 +170,20 @@ sub present {
     return;
 }
 
+# TODO:
+sub include_missing {
+    my ($p, %params) = @_;
+
+    # missing: 1
+    if ($params{missing}) {
+        # undef for an every declared and missing param
+    }
+    # missing: 0
+    elsif (defined $params{missing}) {
+        # skip all missed params
+    }
+}
+
 #
 # System
 #
@@ -178,7 +192,9 @@ sub plugin { $app->load_plugin(@_) }
 sub api_default_format { $app->api_default_format(@_) }
 sub api_format { $app->api_format(@_) }
 
-# TODO: add namespace with version name/number
+# TODO:
+# prepend a resource with a version number
+# http://example.com/api/1
 sub api_version { $app->api_version(@_) }
 
 #
