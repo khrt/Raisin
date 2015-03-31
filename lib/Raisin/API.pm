@@ -15,7 +15,7 @@ my @APP_EXEC_METHODS = qw(new run);
 my @APP_METHODS = qw(req res param session present error);
 my @HOOKS_METHODS = qw(before before_validation after_validation after);
 my @HTTP_METHODS = qw(del get head options patch post put);
-my @ROUTES_METHODS = qw(resource namespace route_param params);
+my @ROUTES_METHODS = qw(resource namespace route_param params include_missing);
 
 my @SWAGGER_MERTHODS = qw(desc summary tags);
 
@@ -126,7 +126,13 @@ sub _add_route {
     my $code = pop @params;
 
     my ($method, $path) = @params;
-    $path = resource() . ($path ? "/$path" : '');
+    my $r = resource();
+    if ($r eq '/' && $path) {
+        $path = $r . $path;
+    }
+    else {
+        $path = $r . ($path ? "/$path" : '');
+    }
 
     $app->add_route(
         code    => $code,
@@ -170,18 +176,10 @@ sub present {
     return;
 }
 
-# TODO:
 sub include_missing {
-    my ($p, %params) = @_;
-
-    # missing: 1
-    if ($params{missing}) {
-        # undef for an every declared and missing param
-    }
-    # missing: 0
-    elsif (defined $params{missing}) {
-        # skip all missed params
-    }
+    my $p = shift;
+    my %pp = map { $_->name, $p->{ $_->name } } @{ $app->req->{'raisin.declared'} };
+    \%pp;
 }
 
 #
