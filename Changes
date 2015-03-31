@@ -1,4 +1,4 @@
-<next> Fix
+0.59 Include missing
     * Fix examples;
     * Fix a `t/unit/plugin/format/text.t` test;
     * Add an `include_missing` function;

@@ -11,7 +11,7 @@ use Raisin::Response;
 use Raisin::Routes;
 use Raisin::Util;
 
-our $VERSION = '0.58';
+our $VERSION = '0.59';
 
 sub new {
     my ($class, %args) = @_;
