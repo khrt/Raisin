@@ -16,7 +16,6 @@
    "no_index" : {
       "directory" : [
          "t",
-         "xt",
          "examples"
       ]
    },
@@ -62,6 +61,6 @@
          "web" : "https://github.com/khrt/Raisin"
       }
    },
-   "version" : "0.58"
+   "version" : "0.59"
 }
 

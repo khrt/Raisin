@@ -344,7 +344,7 @@ For details see examples in _examples/music-app_ and [Raisin::Entity](https://me
 
 # PARAMETERS
 
-A request parameters are available through the `params` `HASH`. This includes
+Request parameters are available through the `params` `HASH`. This includes
 GET, POST and PUT parameters, along with any named parameters you specify in
 your route strings.
 
@@ -353,14 +353,11 @@ on `POST` and `PUT` for form input, `JSON` and `YAML` content-types.
 
 The request:
 
-    curl -d '{"id": "14"}' 'http://localhost:5000/data' -H Content-Type:application/json -v
+    curl localhost:5000/data -H Content-Type:application/json -d '{"id": "14"}'
 
 The Raisin endpoint:
 
-    post data => sub {
-        my $params = shift;
-        $params{id};
-    }
+    post data => sub { param('id') };
 
 Multipart `POST`s and `PUT`s are supported as well.
 
@@ -373,6 +370,77 @@ In the case of conflict between either of:
 route string parameters will have precedence.
 
 Query string and body parameters will be merged (see ["parameters" in Plack::Request](https://metacpan.org/pod/Plack::Request#parameters))
+
+## Declared parameters
+
+Raisin allows you to access only the parameters that have been declared by your
+["params" in Raisin](https://metacpan.org/pod/Raisin#params) block.
+
+By default you can get all declared parameter as a first argument passed to your
+route subroutine.
+
+Application:
+
+    api_format 'json';
+
+    post data => sub {
+        my $params = shift;
+        { data => $params };
+    };
+
+Request:
+
+    curl -X POST -H "Content-Type: application/json" localhost:5000/signup -d '{"id": 42}'
+
+Response:
+
+    { "data": nil }
+
+Once we add parameters requirements, Raisin will start returning only
+the declared params.
+
+Application:
+
+    api_format 'json';
+
+    params
+        required => { name => 'id', type => Int };
+        optional => { name => 'email', type => Str };
+    post data => sub {
+        my $params = shift;
+        { data => $params };
+    };
+
+Request:
+
+    curl -X POST -H "Content-Type: application/json" localhost:5000/signup -d '{"id": 42, "key": "value"}'
+
+Response:
+
+    { "data": { "id": 42 } }
+
+By default declared parameters doesn't contain parameters that has `undef` value.
+If you want to return all parameters you can use the `include_missing` function.
+
+Application:
+
+    api_format 'json';
+
+    params
+        required => { name => 'id', type => Int },
+        optional => { name => 'email', type => Str };
+    post data => sub {
+        my $params = shift;
+        { data => include_missing($params) };
+    };
+
+Request:
+
+    curl -X POST -H "Content-Type: application/json" localhost:5000/signup -d '{"id": 42, "key": "value"}'
+
+Response:
+
+    { "data": { "id": 42, "email": null } }
 
 ## Validation and coercion
 
@@ -645,9 +713,12 @@ Raisin comes with three instance in _example_ directory:
 
 # ROADMAP
 
-- Endpoint's hooks: `after`, `before`;
+- OPTIONS/Allow support;
+- `param` doesn't work as expected;
+- Support for hypermedia ([HAL](http://stateless.co/hal_specification.html), [Link headers](http://www.w3.org/wiki/LinkHeader));
+- Versioning support;
+- Nested params declaration;
 - Mount API's in any place of `resource` block;
-- `declared` keyword which should be applicable to `param` and supports for `missing` keyword;
 
 # GITHUB
 
