@@ -74,7 +74,7 @@ sub add_hook {
 # Application
 sub run {
     my $self = shift;
-    my $app = sub { $self->psgi(@_) };
+    my $psgi = sub { $self->psgi(@_) };
 
     # Add middleware
     for my $class (keys %{ $self->{middleware} }) {
@@ -83,13 +83,13 @@ sub run {
 
         my $mw = Plack::Util::load_class($class, 'Plack::Middleware');
         my $args = $self->{middleware}{$class};
-        $app = $mw->wrap($app, @$args);
+        $psgi = $mw->wrap($psgi, @$args);
     }
 
     # load fallback logger (Raisin::Logger)
     $self->load_plugin('Logger', fallback => 1);
 
-    return $app;
+    return $psgi;
 }
 
 sub psgi {
@@ -131,16 +131,15 @@ sub psgi {
 
         $self->hook('before_validation')->($self);
 
-        # Validation and coercion of a declared params
-        # TODO: declared
-        if (not $req->prepare_params($route->params, $route->named)) {
-            $res->render_error(400, 'Invalid params!');
+        # Validation and coercion of declared params
+        if (!$req->prepare_params($route->params, $route->named)) {
+            $res->render_error(400, 'Invalid params.');
             return $res->finalize;
         }
 
         $self->hook('after_validation')->($self);
 
-        # Eval user endpoint
+        # Evaluate a user's endpoint
         my $data = $code->($req->declared_params);
         if (defined $data) {
             # TODO: delayed responses are untested
@@ -1007,6 +1006,8 @@ Shows an example of complex application.
 =over
 
 =item * OPTIONS/Allow support;
+
+=item * C<param> doesn't work as expected;
 
 =item * Support for hypermedia (L<HAL|http://stateless.co/hal_specification.html>, L<Link headers|http://www.w3.org/wiki/LinkHeader>);
 
