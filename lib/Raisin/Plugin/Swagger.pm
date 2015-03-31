@@ -18,8 +18,8 @@ sub build {
         $self->app->add_middleware(
             'CrossOrigin',
             origins => '*',
-            methods => [qw(GET POST DELETE PUT PATCH OPTIONS)],
-            headers => [qw(api_key Authorization Content-Type)]
+            methods => [qw(GET HEAD POST DELETE PUT PATCH OPTIONS)],
+            headers => [qw(api_key authorization content-type accept)]
         );
     }
 
