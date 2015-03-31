@@ -47,6 +47,8 @@ sub deserialize {
 sub prepare_params {
     my ($self, $declared, $named) = @_;
 
+    $self->{'raisin.declared'} = $declared;
+
     # Serialization / Deserialization
     my $content_params = do {
         if ($self->method =~ /POST|PUT/ && (my $content = $self->content)) {
@@ -60,15 +62,14 @@ sub prepare_params {
     };
 
     my $query_params = $self->query_parameters->mixed;
-
     my $params = { %{ $content_params || {} }, %{ $query_params || {} } };
 
     foreach my $p (@$declared) {
         my $name = $p->name;
 
-        $self->{'raisin.params'}{$name} = undef;
+        #$self->{'raisin.params'}{$name} = undef;
 
-        # Route params has more precedence than query params
+        # a route params have a precedence over query params
         my $value = $named->{$name} // $params->{$name};
 
         if (not $p->validate(\$value)) {
