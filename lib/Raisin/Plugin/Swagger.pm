@@ -231,6 +231,7 @@ sub _spec_20 {
         #externalDocs => '', # TODO
     );
 
+    # TODO: path => ^/swagger.json$
     $self->app->add_route(
         method => 'GET',
         path => '/api-docs',
