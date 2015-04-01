@@ -571,6 +571,12 @@ Returns L<Hash::MultiValue> object.
     say param('key'); # -> value
     say param(); # -> { key => 'value', foo => 'bar' }
 
+=head3 include_missing
+
+Returns all declared parameters even if there is no value for a param.
+
+See L<Raisin/Declared-parameters>.
+
 =head3 session
 
 Returns C<psgix.session> hash. When it exists, you can retrieve and store
