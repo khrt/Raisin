@@ -89,7 +89,40 @@ sub run {
     # load fallback logger (Raisin::Logger)
     $self->load_plugin('Logger', fallback => 1);
 
+    $self->generate_options_routes;
+
     return $psgi;
+}
+
+sub generate_options_routes {
+    my $self = shift;
+
+    my %general_methods;
+
+    # `options` for each `path`
+    for my $path (keys %{ $self->routes->list }) {
+        my @methods = keys %{ $self->routes->list->{$path} };
+        $general_methods{$_}++ for @methods;
+
+        $self->add_route(
+            method => 'OPTIONS',
+            path => $path,
+            code => sub {
+                $self->res->headers([Allow => join(', ', sort @methods)]);
+                undef;
+            },
+        );
+    }
+
+    # all methods which server supports
+    $self->add_route(
+        method => 'OPTIONS',
+        path => '/',
+        code => sub {
+            $self->res->headers([Allow => join(', ', sort keys %general_methods)]);
+            undef;
+        },
+    );
 }
 
 sub psgi {
@@ -1010,8 +1043,6 @@ Shows an example of complex application.
 =head1 ROADMAP
 
 =over
-
-=item * OPTIONS/Allow support;
 
 =item * C<param> doesn't work as expected;
 
