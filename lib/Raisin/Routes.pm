@@ -85,10 +85,10 @@ sub add {
         );
     push @{ $self->{routes} }, $ep;
 
-    if ($self->list->{$method}{$path}) {
+    if ($self->list->{$path}{$method}) {
         carp "Route `$path` via `$method` is redefined";
     }
-    $self->list->{$method}{$path} = scalar @{ $self->{routes} };
+    $self->list->{$path}{$method} = scalar @{ $self->{routes} };
 }
 
 sub find {
