@@ -123,11 +123,11 @@ subtest 'HTTP verbs' => sub {
     my $app = Raisin::API->app;
     my $routes = $app->routes;
 
-    ok $routes->list->{GET}{'/api'}, 'GET';
-    ok $routes->list->{POST}{'/api'}, 'POST';
+    ok $routes->list->{'/api'}{GET}, 'GET';
+    ok $routes->list->{'/api'}{POST}, 'POST';
 
-    ok $routes->list->{PUT}{'/api/:id'}, 'PUT';
-    ok $routes->list->{DELETE}{'/api/:id'}, 'DELETE';
+    ok $routes->list->{'/api/:id'}{PUT}, 'PUT';
+    ok $routes->list->{'/api/:id'}{DELETE}, 'DELETE';
 
     _clean_app();
 };

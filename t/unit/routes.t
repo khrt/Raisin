@@ -69,7 +69,7 @@ subtest 'add' => sub {
 
             is_deeply $r->cache, {}, 'Cache should be empty';
 
-            ok $r->list->{ $case->{object}{method} }{ $case->{object}{path} },
+            ok $r->list->{ $case->{object}{path} }{ $case->{object}{method} },
                 'list';
 
             subtest 'routes' => sub {
@@ -121,7 +121,7 @@ subtest 'find' => sub {
             my $cache = $r->cache;
             is_deeply $cache->{$cache_key}[0], $e, 'cache';
 
-            ok $r->list->{ $case->{object}{method} }{ $case->{object}{path} },
+            ok $r->list->{ $case->{object}{path} }{ $case->{object}{method} },
                 'list';
 
             subtest 'routes' => sub {
