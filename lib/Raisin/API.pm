@@ -50,23 +50,23 @@ sub app { $app }
 #
 # Execution
 #
-sub new { $app->run }
-sub run { $app->run }
+sub new { app->run }
+sub run { app->run }
 
 #
 # Compile
 #
-sub mount { $app->mount_package(@_) }
-sub middleware { $app->add_middleware(@_) }
+sub mount { app->mount_package(@_) }
+sub middleware { app->add_middleware(@_) }
 
 #
 # Hooks
 #
-sub before { $app->add_hook('before', shift) }
-sub before_validation { $app->add_hook('before_validation', shift) }
+sub before { app->add_hook('before', shift) }
+sub before_validation { app->add_hook('before_validation', shift) }
 
-sub after_validation { $app->add_hook('after_validation', shift) }
-sub after { $app->add_hook('after', shift) }
+sub after_validation { app->add_hook('after_validation', shift) }
+sub after { app->add_hook('after', shift) }
 
 #
 # Resource
@@ -79,7 +79,7 @@ sub resource {
         push @NS, $name;
 
         if ($SETTINGS{desc}) {
-            $app->resource_desc($NS[-1], delete $SETTINGS{desc});
+            app->resource_desc($NS[-1], delete $SETTINGS{desc});
         }
 
         my %prev_settings = %SETTINGS;
@@ -134,7 +134,7 @@ sub _add_route {
         $path = $r . ($path ? "/$path" : '');
     }
 
-    $app->add_route(
+    app->add_route(
         code    => $code,
         method  => $method,
         path    => $path,
@@ -153,14 +153,14 @@ sub _add_route {
 #
 # Request and Response shortcuts
 #
-sub req { $app->req }
-sub res { $app->res }
+sub req { app->req }
+sub res { app->res }
 sub param {
     my $name = shift;
-    return $app->req->parameters->mixed->{$name} if $name;
-    $app->req->parameters->mixed;
+    return app->req->parameters->mixed->{$name} if $name;
+    app->req->parameters->mixed;
 }
-sub session { $app->session(@_) }
+sub session { app->session(@_) }
 
 sub present {
     my ($key, $data, %params) = @_;
@@ -178,27 +178,27 @@ sub present {
 
 sub include_missing {
     my $p = shift;
-    my %pp = map { $_->name, $p->{ $_->name } } @{ $app->req->{'raisin.declared'} };
+    my %pp = map { $_->name, $p->{ $_->name } } @{ app->req->{'raisin.declared'} };
     \%pp;
 }
 
 #
 # System
 #
-sub plugin { $app->load_plugin(@_) }
+sub plugin { app->load_plugin(@_) }
 
-sub api_default_format { $app->api_default_format(@_) }
-sub api_format { $app->api_format(@_) }
+sub api_default_format { app->api_default_format(@_) }
+sub api_format { app->api_format(@_) }
 
 # TODO:
 # prepend a resource with a version number
 # http://example.com/api/1
-sub api_version { $app->api_version(@_) }
+sub api_version { app->api_version(@_) }
 
 #
 # Render
 #
-sub error { $app->res->render_error(@_) }
+sub error { app->res->render_error(@_) }
 
 1;
 
