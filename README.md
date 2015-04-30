@@ -316,6 +316,12 @@ Returns [Hash::MultiValue](https://metacpan.org/pod/Hash::MultiValue) object.
     say param('key'); # -> value
     say param(); # -> { key => 'value', foo => 'bar' }
 
+### include\_missing
+
+Returns all declared parameters even if there is no value for a param.
+
+See ["Declared-parameters" in Raisin](https://metacpan.org/pod/Raisin#Declared-parameters).
+
 ### session
 
 Returns `psgix.session` hash. When it exists, you can retrieve and store
@@ -713,7 +719,6 @@ Raisin comes with three instance in _example_ directory:
 
 # ROADMAP
 
-- OPTIONS/Allow support;
 - `param` doesn't work as expected;
 - Support for hypermedia ([HAL](http://stateless.co/hal_specification.html), [Link headers](http://www.w3.org/wiki/LinkHeader));
 - Versioning support;
