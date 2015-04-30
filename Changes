@@ -1,5 +1,6 @@
 0.60 OPTIONS
     * Add support for a HTTP OPTIONS verb;
+    * Add new intergration tests;
 
 0.59 Include missing
     * Fix examples;
