@@ -86,7 +86,7 @@ sub add {
     push @{ $self->{routes} }, $ep;
 
     if ($self->list->{$path}{$method}) {
-        carp "Route `$path` via `$method` is redefined";
+        print STDERR "Route redefined: `$method` `$path`\n";
     }
     $self->list->{$path}{$method} = scalar @{ $self->{routes} };
 }
