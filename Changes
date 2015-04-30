@@ -1,3 +1,6 @@
+0.60 OPTIONS
+    * Add support for a HTTP OPTIONS verb;
+
 0.59 Include missing
     * Fix examples;
     * Fix a `t/unit/plugin/format/text.t` test;
