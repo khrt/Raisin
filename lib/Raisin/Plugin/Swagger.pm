@@ -24,10 +24,10 @@ sub build {
     }
 
     if ($args{version} && $args{version} == 1.2) {
-        $self->register(
-            swagger_build_spec => sub { $self->_spec_12 }
-        );
-        $self->{swagger_version} = '1.0';
+        print STDERR "Will be removed in future releases\n";
+
+        $self->register(swagger_build_spec => sub { $self->_spec_12 });
+        $self->{swagger_version} = '1.2';
     }
     else {
         $self->register(
@@ -36,6 +36,179 @@ sub build {
         );
         $self->{swagger_version} = '2.0';
     }
+}
+
+# NOTE: Deprecated
+sub _spec_12 {
+    my $self = shift;
+    return 1 if $self->{built};
+
+    my $app = $self->app;
+
+    my %apis;
+
+    # Prepare API data
+    for my $r (@{ $app->routes->routes }) {
+        my @params;
+        for my $p (@{ $r->params }) {
+            my $param_type = do {
+                if    ($p->named)                 {'path'}
+                elsif ($r->method =~ /post|put/i) {'form'}
+                else                              {'query'}
+            };
+
+            push @params,
+                {
+                    allowMultiple => JSON::true,
+                    defaultValue  => $p->default // JSON::false,
+                    description   => $p->desc || '~',
+                    format        => $p->type->display_name,
+                    name          => $p->name,
+                    paramType     => $param_type,
+                    required      => $p->required ? JSON::true : JSON::false,
+                    type          => $p->type->name,
+                };
+        }
+
+        my $path = $r->path;
+
+        # :id -> {id}
+        $path =~ s#:([^/]+)#{$1}#msxg;
+
+        # look for namespace
+        my ($ns) = $path =~ m#^(/[^/]+)#;
+
+        # -> [ $ns => { ... } ]
+        push @{ $apis{$ns} },
+            {
+                path => $path,
+                description => '',
+                operations  => [{
+                    method     => $r->method,
+                    nickname   => $r->method . '_' . $path,
+                    notes      => '',
+                    parameters => \@params,
+                    summary    => $r->desc,
+                    type       => '',
+                }],
+            };
+    }
+
+    my %template = (
+        swaggerVersion => '1.2',
+    );
+    $template{apiVersion} = $self->app->api_version if $self->app->api_version;
+
+    # Prepare index
+    my %index = (%template);
+    for my $ns (keys %apis) {
+        my $desc = $app->resource_desc($ns) || "Operations about ${ \( $ns =~ m#/(.+)# ) }";
+
+        my $api = {
+            path => $ns,
+            description => $desc,
+        };
+
+        push @{ $index{apis} }, $api;
+    }
+
+    $app->add_route(
+        method => 'GET',
+        path => '/api-docs',
+        code => sub {
+            res->content_type('application/json');
+            encode_json(\%index);
+        }
+    );
+
+    for my $ns (keys %apis) {
+        my $base_path = $app->req ? $app->req->base->as_string : '';
+        $base_path =~ s#/$##msx;
+
+        my @content_type = do {
+            if ($app->api_format) {
+                ($app->api_format)
+            }
+            else {
+                qw(application/yaml application/json);
+            }
+        };
+
+        my %description = (
+            %template,
+            apis => $apis{$ns},
+            basePath => $base_path,
+            produces => [@content_type],
+            resourcePath => $ns,
+        );
+
+        $app->add_route(
+            method => 'GET',
+            path => "/api-docs${ns}",
+            code => sub {
+                res->content_type('application/json');
+                encode_json(\%description);
+            }
+        );
+    }
+
+    $self->{built} = 1;
+    1;
+}
+
+sub _spec_20 {
+    my $self = shift;
+    return 1 if $self->{built};
+    my $req = $self->app->req;
+
+    my @content_types = $self->app->api_format
+        ? $self->app->api_format
+        : qw(application/yaml application/json);
+
+    my $base_path = $req->base->as_string;
+    $base_path =~ s#http(?:s?)://[^/]+##msix;
+
+    $DEFAULTS{consumes} = \@content_types;
+    $DEFAULTS{produces} = \@content_types;
+
+    my %spec = (
+        swagger  => '2.0',
+        info     => $self->_info_object,
+        host     => $req->env->{HTTP_HOST},
+        basePath => $base_path,
+        schemes  => [$req->scheme],
+        consumes => \@content_types,
+        produces => \@content_types,
+        paths    => $self->_paths_object, #R
+        #definitions => undef,
+        #parameters => undef,
+        #responses => undef,
+        #securityDefinitions => undef,
+        #security => undef,
+        tags => $self->_tags_object,
+        #externalDocs => '', # TODO
+    );
+
+    # routes
+    $self->app->add_route(
+        method => 'GET',
+        path => '/api-docs',
+        code => sub {
+            $self->app->res->content_type('application/json');
+            print STDERR "Obsolete URL; use /swagger.json instead\n";
+            encode_json(\%spec);
+        }
+    );
+    $self->app->add_route(
+        method => 'GET',
+        path => '/swagger',
+        code => sub { \%spec }
+    );
+
+    # mark as built
+    $self->{built} = 1;
+
+    1;
 }
 
 sub _contact_object {
@@ -198,169 +371,6 @@ sub _tags_object  {
     \@tags;
 }
 
-sub _spec_20 {
-    my $self = shift;
-    return 1 if $self->{built};
-    my $req = $self->app->req;
-
-    my @content_types = $self->app->api_format
-        ? $self->app->api_format
-        : qw(application/yaml application/json);
-
-    my $base_path = $req->base->as_string;
-    $base_path =~ s#http(?:s?)://[^/]+##msix;
-
-    $DEFAULTS{consumes} = \@content_types;
-    $DEFAULTS{produces} = \@content_types;
-
-    my %spec = (
-        swagger  => '2.0',
-        info     => $self->_info_object,
-        host     => $req->env->{HTTP_HOST},
-        basePath => $base_path,
-        schemes  => [$req->scheme],
-        consumes => \@content_types,
-        produces => \@content_types,
-        paths    => $self->_paths_object, #R
-        #definitions => undef,
-        #parameters => undef,
-        #responses => undef,
-        #securityDefinitions => undef,
-        #security => undef,
-        tags => $self->_tags_object,
-        #externalDocs => '', # TODO
-    );
-
-    # TODO: path => ^/swagger.json$
-    $self->app->add_route(
-        method => 'GET',
-        path => '/api-docs',
-        code => sub {
-            #res->content_type('application/json');
-            encode_json(\%spec);
-        }
-    );
-
-    $self->{built} = 1;
-}
-
-# NOTE: Deprecated
-sub _spec_12 {
-    my $self = shift;
-    return 1 if $self->{built};
-
-    my $app = $self->app;
-
-    my %apis;
-
-    # Prepare API data
-    for my $r (@{ $app->routes->routes }) {
-        my @params;
-        for my $p (@{ $r->params }) {
-            my $param_type = do {
-                if    ($p->named)                 {'path'}
-                elsif ($r->method =~ /post|put/i) {'form'}
-                else                              {'query'}
-            };
-
-            push @params,
-                {
-                    allowMultiple => JSON::true,
-                    defaultValue  => $p->default // JSON::false,
-                    description   => $p->desc || '~',
-                    format        => $p->type->display_name,
-                    name          => $p->name,
-                    paramType     => $param_type,
-                    required      => $p->required ? JSON::true : JSON::false,
-                    type          => $p->type->name,
-                };
-        }
-
-        my $path = $r->path;
-
-        # :id -> {id}
-        $path =~ s#:([^/]+)#{$1}#msxg;
-
-        # look for namespace
-        my ($ns) = $path =~ m#^(/[^/]+)#;
-
-        # -> [ $ns => { ... } ]
-        push @{ $apis{$ns} },
-            {
-                path => $path,
-                description => '',
-                operations  => [{
-                    method     => $r->method,
-                    nickname   => $r->method . '_' . $path,
-                    notes      => '',
-                    parameters => \@params,
-                    summary    => $r->desc,
-                    type       => '',
-                }],
-            };
-    }
-
-    my %template = (
-        swaggerVersion => '1.2',
-    );
-    $template{apiVersion} = $self->app->api_version if $self->app->api_version;
-
-    # Prepare index
-    my %index = (%template);
-    for my $ns (keys %apis) {
-        my $desc = $app->resource_desc($ns) || "Operations about ${ \( $ns =~ m#/(.+)# ) }";
-
-        my $api = {
-            path => $ns,
-            description => $desc,
-        };
-
-        push @{ $index{apis} }, $api;
-    }
-
-    $app->add_route(
-        method => 'GET',
-        path => '/api-docs',
-        code => sub {
-            res->content_type('application/json');
-            encode_json(\%index);
-        }
-    );
-
-    for my $ns (keys %apis) {
-        my $base_path = $app->req ? $app->req->base->as_string : '';
-        $base_path =~ s#/$##msx;
-
-        my @content_type = do {
-            if ($app->api_format) {
-                ($app->api_format)
-            }
-            else {
-                qw(application/yaml application/json);
-            }
-        };
-
-        my %description = (
-            %template,
-            apis => $apis{$ns},
-            basePath => $base_path,
-            produces => [@content_type],
-            resourcePath => $ns,
-        );
-
-        $app->add_route(
-            method => 'GET',
-            path => "/api-docs${ns}",
-            code => sub {
-                res->content_type('application/json');
-                encode_json(\%description);
-            }
-        );
-    }
-
-    $self->{built} = 1;
-}
-
 1;
 
 __END__
@@ -375,15 +385,15 @@ Raisin::Plugin::Swagger - Generate API documentation.
 
 =head1 DESCRIPTION
 
-Generate L<Swagger|https://github.com/wordnik/swagger-core>
-compatible API documentaions.
+Generates a L<Swagger|https://github.com/wordnik/swagger-core>
+compatible API documentaion.
 
-Provides documentation in Swagger compatible format by C</api-docs> URL.
-You can use this url in L<Swagger UI|http://swagger.wordnik.com/>.
+Provides a documentation by C</swagger.json> URL.
+You can use this url in L<Swagger UI|http://petstore.swagger.io/>.
 
 =head1 CORS
 
-Cross-origin resource sharing
+Enables a cross-origin resource sharing.
 
     plugin 'Swagger', enable => 'CORS';
 
@@ -393,9 +403,13 @@ Which Swagger version to use. By default 2.0 is used, also 1.2 available.
 
     plugin 'Swagger', version => 1.2;
 
+For Swagger 1.2 there is another URL: C</api-docs>.
+
 =head1 FUNCTIONS
 
 =head3 swagger_setup
+
+Not available for Swagger 1.2.
 
     swagger_setup(
         title => 'BatAPI',
@@ -408,7 +422,7 @@ Which Swagger version to use. By default 2.0 is used, also 1.2 available.
         },
 
         license => {
-            name => 'Barman license',
+            name => 'Batman license',
             url => 'http://wayne.enterprises/licenses/',
         },
     );
