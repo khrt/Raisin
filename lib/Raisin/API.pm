@@ -157,8 +157,8 @@ sub req { app->req }
 sub res { app->res }
 sub param {
     my $name = shift;
-    return app->req->parameters->{$name} if $name;
-    app->req->parameters;
+    return app->req->raisin_parameters->{$name} if $name;
+    app->req->raisin_parameters;
 }
 sub session { app->session(@_) }
 
