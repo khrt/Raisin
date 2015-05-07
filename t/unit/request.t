@@ -273,4 +273,25 @@ subtest 'prepare_params, +declared_params' => sub {
     }
 };
 
+subtest 'parameters' => sub {
+    for my $case (@CASES) {
+        my $title = $case->{expected}{accept} || '--';
+
+        subtest $title => sub {
+            my $http_req = _make_request($case->{input});
+            my $req = _make_object($http_req);
+            isa_ok $req, 'Raisin::Request', 'request';
+
+            my $r = $case->{input}{route};
+
+            ok $r->match($req->method, $req->path), "match: ${ \$r->path }";
+
+            ok $req->prepare_params($r->params, $r->named), 'prepare_params';
+            is_deeply $req->parameters, $case->{expected}{prepare_params},
+                'parameters';
+        }
+    }
+
+};
+
 done_testing;
