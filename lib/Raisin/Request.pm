@@ -50,10 +50,10 @@ sub prepare_params {
     $self->{'raisin.declared'} = $declared;
 
     # Serialization / Deserialization
-    my $content_params = do {
+    my $body_params = do {
         if ($self->method =~ /POST|PUT/ && (my $content = $self->content)) {
             if ($self->content_type =~ m{application/x-www-form-urlencoded}imsx) {
-                $self->body_parameters->mixed;
+                $self->body_parameters->as_hashref_mixed;
             }
             else {
                 $self->deserialize($content);
@@ -61,13 +61,13 @@ sub prepare_params {
         }
     };
 
-    my $query_params = $self->query_parameters->mixed;
-    my $params = { %{ $content_params || {} }, %{ $query_params || {} } };
+    my $query_params = $self->query_parameters->as_hashref_mixed;
+    my $params = { %{ $body_params || {} }, %{ $query_params || {} } };
+
+    $self->{'raisin.parameters'} = { %$params, %{ $named || {} } };
 
     foreach my $p (@$declared) {
         my $name = $p->name;
-
-        #$self->{'raisin.params'}{$name} = undef;
 
         # a route params have a precedence over query params
         my $value = $named->{$name} // $params->{$name};
@@ -79,13 +79,18 @@ sub prepare_params {
         $value //= $p->default if defined $p->default;
         next if not defined($value);
 
-        $self->{'raisin.params'}{$name} = $value;
+        $self->{'raisin.declared_params'}{$name} = $value;
     }
 
     1;
 }
 
-sub declared_params { shift->{'raisin.params'} }
+sub declared_params { shift->{'raisin.declared_params'} }
+
+sub parameters {
+    my $self = shift;
+    $self->{'raisin.parameters'};
+}
 
 1;
 
@@ -112,6 +117,8 @@ Extends L<Plack::Request>.
 =head3 declared_params
 
 =head3 prepare_params
+
+=head3 parameters
 
 =head1 AUTHOR
 
