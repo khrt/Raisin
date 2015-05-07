@@ -157,8 +157,8 @@ sub req { app->req }
 sub res { app->res }
 sub param {
     my $name = shift;
-    return app->req->parameters->mixed->{$name} if $name;
-    app->req->parameters->mixed;
+    return app->req->parameters->{$name} if $name;
+    app->req->parameters;
 }
 sub session { app->session(@_) }
 
