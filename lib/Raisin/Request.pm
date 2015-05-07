@@ -87,7 +87,7 @@ sub prepare_params {
 
 sub declared_params { shift->{'raisin.declared_params'} }
 
-sub parameters {
+sub raisin_parameters {
     my $self = shift;
     $self->{'raisin.parameters'};
 }
@@ -118,7 +118,7 @@ Extends L<Plack::Request>.
 
 =head3 prepare_params
 
-=head3 parameters
+=head3 raisin_parameters
 
 =head1 AUTHOR
 

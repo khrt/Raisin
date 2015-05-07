@@ -273,7 +273,7 @@ subtest 'prepare_params, +declared_params' => sub {
     }
 };
 
-subtest 'parameters' => sub {
+subtest 'raisin_parameters' => sub {
     for my $case (@CASES) {
         my $title = $case->{expected}{accept} || '--';
 
@@ -287,8 +287,8 @@ subtest 'parameters' => sub {
             ok $r->match($req->method, $req->path), "match: ${ \$r->path }";
 
             ok $req->prepare_params($r->params, $r->named), 'prepare_params';
-            is_deeply $req->parameters, $case->{expected}{prepare_params},
-                'parameters';
+            is_deeply $req->raisin_parameters, $case->{expected}{prepare_params},
+                'raisin_parameters';
         }
     }
 
