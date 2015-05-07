@@ -11,7 +11,7 @@ use Raisin::Response;
 use Raisin::Routes;
 use Raisin::Util;
 
-our $VERSION = '0.60';
+our $VERSION = '0.61';
 
 sub new {
     my ($class, %args) = @_;
@@ -197,7 +197,8 @@ sub psgi {
         my $e = longmess($@);
         $self->log(error => $e);
 
-        my $msg = $ENV{PLACK_ENV} eq 'deployment' ? 'Internal error' : $e;
+        my $msg = $ENV{PLACK_ENV}
+            && $ENV{PLACK_ENV} eq 'deployment' ? 'Internal error' : $e;
         $res->render_500($msg);
     };
 
@@ -1043,8 +1044,6 @@ Shows an example of complex application.
 =head1 ROADMAP
 
 =over
-
-=item * C<param> doesn't work as expected;
 
 =item * Support for hypermedia (L<HAL|http://stateless.co/hal_specification.html>, L<Link headers|http://www.w3.org/wiki/LinkHeader>);
 
