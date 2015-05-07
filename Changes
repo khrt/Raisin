@@ -1,3 +1,8 @@
+0.61 Fixes
+    * Minor fixes;
+    * Fix `param` method;
+    * Fix & improve Swagger plugin;
+
 0.60 OPTIONS
     * Add support for a HTTP OPTIONS verb;
     * Add new intergration tests;
