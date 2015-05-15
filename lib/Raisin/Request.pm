@@ -21,8 +21,18 @@ sub accept_format {
 
     my $accept = $self->header('Accept');
     return unless $accept;
-    return if $accept eq '*/*';
-    Raisin::Util::detect_serializer($accept) || $accept;
+    my %m;
+    for my $type ( split /\s*,\s*/, $accept ) {
+        my ($media, $params) = split /\s*;\s*/, $type, 2;
+        my ($q) = defined $params ? ( $params =~ /q=([\d\.]+)/ ) : (1);
+        next
+          if $media ne '*/*'
+          && !( $media = Raisin::Util::detect_serializer($media) );
+        $m{$media} = $q;
+        last if $q == 1;
+    }
+    my ($media) = sort { $m{$b} <=> $m{$a} } keys %m;
+    !$media ? $accept : $media eq '*/*' ? undef : $media;
 }
 
 sub deserialize {

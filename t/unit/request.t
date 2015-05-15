@@ -191,6 +191,20 @@ my @CASES = (
             deserialize => undef,
             prepare_params => { %DATA_PATH, %DATA_GET, },
         },
+    },
+    # GET JSON/XML
+    {
+        input => {
+            method => 'GET',
+            headers =>
+                ['Accept' => 'application/xml;q=0.5, application/json;q=0.7'],
+            route => $route_get,
+        },
+        expected => {
+            accept => 'json',
+            deserialize => undef,
+            prepare_params => { %DATA_PATH, %DATA_GET, },
+        },
     }
 );
 
