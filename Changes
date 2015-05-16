@@ -1,7 +1,8 @@
 0.61 Fixes
-    * Minor fixes;
+    * Fix an accept header's bevahiour (RFC7231);
     * Fix `param` method;
     * Fix & improve Swagger plugin;
+    * Minor fixes;
 
 0.60 OPTIONS
     * Add support for a HTTP OPTIONS verb;
