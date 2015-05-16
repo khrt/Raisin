@@ -20,9 +20,14 @@
       ]
    },
    "prereqs" : {
+      "build" : {
+         "requires" : {
+            "Module::Build" : "0.28"
+         }
+      },
       "configure" : {
          "requires" : {
-            "Module::Build::Tiny" : "0.039"
+            "Module::Build" : "0.28"
          }
       },
       "develop" : {
@@ -61,6 +66,9 @@
          "web" : "https://github.com/khrt/Raisin"
       }
    },
-   "version" : "0.61"
+   "version" : "0.61",
+   "x_contributors" : [
+      "Vladimir Lettiev <thecrux@gmail.com>"
+   ]
 }
 
