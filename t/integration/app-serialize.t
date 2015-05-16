@@ -98,4 +98,36 @@ subtest 'text/plain' => sub {
     };
 };
 
+subtest 'unacceptable' => sub {
+    test_psgi $app, sub {
+        my $cb = shift;
+        my $res = $cb->(GET '/api', Accept => 'application/xml');
+
+        is $res->code, 406, 'status';
+    };
+
+    my $app = eval {
+        api_format 'json';
+        resource api => sub {
+            get sub { { params => \%DATA, } };
+        };
+
+        run;
+    };
+
+    test_psgi $app, sub {
+        my $cb = shift;
+        my $res = $cb->(GET '/api', Accept => 'application/yaml');
+
+        is $res->code, 406, 'status';
+    };
+
+    test_psgi $app, sub {
+        my $cb = shift;
+        my $res = $cb->(GET '/api', Accept => 'application/json');
+
+        is $res->code, 200, 'status';
+    };
+};
+
 done_testing;

@@ -148,12 +148,13 @@ sub psgi {
             return $res->finalize;
         }
 
-        if ($self->api_format && (my $type = $req->accept_format)) {
-            if ($type ne $self->api_format) {
-                $self->log(error => 'Invalid accept header');
-                $res->render_error(406, 'Invalid accept header');
-                return $res->finalize;
-            }
+        my $type = $req->accept_format;
+        if (   ($req->header('Accept') && !$type)
+            || (($self->api_format && $type) && ($self->api_format ne $type)))
+        {
+            $self->log(error => 'Content-type provided not acceptable');
+            $res->render_error(406, 'Not acceptable');
+            return $res->finalize;
         }
 
         my $code = $route->code;
