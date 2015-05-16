@@ -16,11 +16,12 @@ my @CASES = (
     { input => 'yaml', expected => 'yaml' },
     { input => 'yml', expected => 'yaml' },
 
+    { input => 'text/*', expected => 'text' },
+    { input => 'text/html', expected => undef },
     { input => 'text/plain', expected => 'text' },
     { input => 'text', expected => 'text' },
     { input => 'txt', expected => 'text' },
 
-    { input => 'text/html', expected => undef },
     { input => 'application/xml', expected => undef },
 );
 

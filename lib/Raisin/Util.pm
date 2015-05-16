@@ -14,7 +14,6 @@ my %SERIALIZERS = (
 
     text     => 'text',
     txt      => 'text',
-
     plain    => 'text',
 );
 
@@ -22,10 +21,18 @@ sub detect_serializer {
     my $type = shift;
     return unless $type;
 
-    $type =~ s{^(.+)/}{};
-    $type =~ tr{-}{_};
+    my $media = 'default';
 
-    $SERIALIZERS{$type};
+    if ($type =~ m#^([^/]+)/\*#) {
+        $media = $1;
+    }
+    else {
+        $type =~ m#(?:^[^/]+/)?(.+)#msix;
+        $media = $1;
+        $media =~ tr#-#_#;
+    }
+
+    $SERIALIZERS{$media};
 }
 
 sub make_serializer_class {
