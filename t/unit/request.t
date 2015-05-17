@@ -265,63 +265,63 @@ subtest 'accept_format' => sub {
     }
 };
 
-#subtest 'deserialize' => sub {
-#    for my $case (@CASES) {
-#        next if $case->{input}{method} eq 'GET';
-#
-#        my $http_req = _make_request($case->{input});
-#        my $req = _make_object($http_req);
-#        #isa_ok $req, 'Raisin::Request', 'request';
-#
-#        isa_ok $req->app, 'Raisin', 'raisin';
-#
-#        # XXX:
-#        next if $req->content_type eq 'application/x-www-form-urlencoded';
-#
-#        is_deeply $req->deserialize($req->content),
-#            $case->{expected}{deserialize}, 'deserialize: ' . $req->content_type;
-#    }
-#};
-#
-#subtest 'prepare_params, +declared_params' => sub {
-#    for my $case (@CASES) {
-#        my $title = "$case->{input}{method} " . ($case->{expected}{accept} || '--');
-#
-#        subtest $title => sub {
-#            my $http_req = _make_request($case->{input});
-#            my $req = _make_object($http_req);
-#            isa_ok $req, 'Raisin::Request', 'request';
-#
-#            my $r = $case->{input}{route};
-#
-#            ok $r->match($req->method, $req->path), "match: ${ \$r->path }";
-#
-#            ok $req->prepare_params($r->params, $r->named), 'prepare_params';
-#            is_deeply $req->declared_params, $case->{expected}{prepare_params},
-#                'declared params';
-#        };
-#    }
-#};
-#
-#subtest 'raisin_parameters' => sub {
-#    for my $case (@CASES) {
-#        my $title = $case->{expected}{accept} || '--';
-#
-#        subtest $title => sub {
-#            my $http_req = _make_request($case->{input});
-#            my $req = _make_object($http_req);
-#            isa_ok $req, 'Raisin::Request', 'request';
-#
-#            my $r = $case->{input}{route};
-#
-#            ok $r->match($req->method, $req->path), "match: ${ \$r->path }";
-#
-#            ok $req->prepare_params($r->params, $r->named), 'prepare_params';
-#            is_deeply $req->raisin_parameters, $case->{expected}{prepare_params},
-#                'raisin_parameters';
-#        }
-#    }
-#
-#};
+subtest 'deserialize' => sub {
+    for my $case (@CASES) {
+        next if $case->{input}{method} eq 'GET';
+
+        my $http_req = _make_request($case->{input});
+        my $req = _make_object($http_req);
+        #isa_ok $req, 'Raisin::Request', 'request';
+
+        isa_ok $req->app, 'Raisin', 'raisin';
+
+        # XXX:
+        next if $req->content_type eq 'application/x-www-form-urlencoded';
+
+        is_deeply $req->deserialize($req->content),
+            $case->{expected}{deserialize}, 'deserialize: ' . $req->content_type;
+    }
+};
+
+subtest 'prepare_params, +declared_params' => sub {
+    for my $case (@CASES) {
+        my $title = "$case->{input}{method} " . ($case->{expected}{accept} || '--');
+
+        subtest $title => sub {
+            my $http_req = _make_request($case->{input});
+            my $req = _make_object($http_req);
+            isa_ok $req, 'Raisin::Request', 'request';
+
+            my $r = $case->{input}{route};
+
+            ok $r->match($req->method, $req->path), "match: ${ \$r->path }";
+
+            ok $req->prepare_params($r->params, $r->named), 'prepare_params';
+            is_deeply $req->declared_params, $case->{expected}{prepare_params},
+                'declared params';
+        };
+    }
+};
+
+subtest 'raisin_parameters' => sub {
+    for my $case (@CASES) {
+        my $title = $case->{expected}{accept} || '--';
+
+        subtest $title => sub {
+            my $http_req = _make_request($case->{input});
+            my $req = _make_object($http_req);
+            isa_ok $req, 'Raisin::Request', 'request';
+
+            my $r = $case->{input}{route};
+
+            ok $r->match($req->method, $req->path), "match: ${ \$r->path }";
+
+            ok $req->prepare_params($r->params, $r->named), 'prepare_params';
+            is_deeply $req->raisin_parameters, $case->{expected}{prepare_params},
+                'raisin_parameters';
+        }
+    }
+
+};
 
 done_testing;
