@@ -1067,7 +1067,7 @@ which was inspired by L<Dancer>, which in its turn was inspired by Sinatra.
 
 =head1 AUTHOR
 
-Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
+Artur Khabibullin - rtkh@cpan.org
 
 =head1 LICENSE
 
