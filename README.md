@@ -735,7 +735,7 @@ which was inspired by [Dancer](https://metacpan.org/pod/Dancer), which in its tu
 
 # AUTHOR
 
-Artur Khabibullin - rtkh <at> cpan.org
+Artur Khabibullin - rtkh@cpan.org
 
 # LICENSE
 
