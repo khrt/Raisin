@@ -53,12 +53,14 @@ sub add {
 
     my @pp;
     for my $key (qw(params named)) {
-        for my $p (pairs @{ $params{$key} }) {
+        my $i = 0;
+        while ($i < scalar @{ $params{$key} || [] }) {
             push @pp, Raisin::Param->new(
                 named => $key eq 'named',
-                type => $p->[0], # -> requires/optional
-                spec => $p->[1], # -> { name => ..., type => ... }
+                type => $params{$key}[$i+0], # -> requires/optional
+                spec => $params{$key}[$i+1], # -> { name => ..., type => ... }
             );
+            $i += 2;
         }
     }
 
