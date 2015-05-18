@@ -1,7 +1,7 @@
 {
    "abstract" : "a REST API micro framework for Perl.",
    "author" : [
-      "Artur Khabibullin - rtkh <at> cpan.org"
+      "Artur Khabibullin - rtkh@cpan.org"
    ],
    "dynamic_config" : 0,
    "generated_by" : "Dist::Zilla version 5.025, CPAN::Meta::Converter version 2.142690",
@@ -33,13 +33,13 @@
       "develop" : {
          "requires" : {
             "Data::Printer" : "0.35",
+            "List::Util" : "1.29",
             "Test::Pod" : "1.41"
          }
       },
       "runtime" : {
          "requires" : {
             "JSON" : "2.90",
-            "List::Util" : "1.35",
             "Plack" : "1.0030",
             "Plack::Middleware::CrossOrigin" : "0.009",
             "Scalar::Util" : "1.38",
@@ -50,6 +50,7 @@
       },
       "test" : {
          "requires" : {
+            "List::Util" : "1.29",
             "Test::More" : "0.88"
          }
       }

@@ -15,7 +15,7 @@ my %module_build_args = (
   },
   "dist_abstract" => "a REST API micro framework for Perl.",
   "dist_author" => [
-    "Artur Khabibullin - rtkh <at> cpan.org"
+    "Artur Khabibullin - rtkh\@cpan.org"
   ],
   "dist_name" => "Raisin",
   "dist_version" => "0.61",
@@ -25,7 +25,6 @@ my %module_build_args = (
   "recursive_test_files" => 1,
   "requires" => {
     "JSON" => "2.90",
-    "List::Util" => "1.35",
     "Plack" => "1.0030",
     "Plack::Middleware::CrossOrigin" => "0.009",
     "Scalar::Util" => "1.38",
@@ -37,12 +36,14 @@ my %module_build_args = (
     "script/raisin"
   ],
   "test_requires" => {
+    "List::Util" => "1.29",
     "Test::More" => "0.88"
   }
 );
 
 
 my %fallback_build_requires = (
+  "List::Util" => "1.29",
   "Module::Build" => "0.28",
   "Test::More" => "0.88"
 );
