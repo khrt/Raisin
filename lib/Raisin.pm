@@ -149,7 +149,9 @@ sub psgi {
         }
 
         my $type = $req->accept_format;
-        if (   ($req->header('Accept') && !$type)
+        my $accept = $req->header('Accept')
+            && $req->header('Accept') eq '*/*' ? undef : $req->header('Accept');
+        if (   ($accept && !$type)
             || (($self->api_format && $type) && ($self->api_format ne $type)))
         {
             $self->log(error => 'Content-type provided not acceptable');
