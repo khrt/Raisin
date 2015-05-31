@@ -1,3 +1,7 @@
+0.62 Fixes
+    * Fix accept header;
+    * Use `while` instead of `List::Util::pairs`;
+
 0.61 Fixes
     * Fix an accept header's bevahiour (RFC7231);
     * Fix `param` method;
