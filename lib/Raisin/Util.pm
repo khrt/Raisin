@@ -14,8 +14,13 @@ my %SERIALIZERS = (
 
     text     => 'text',
     txt      => 'text',
+
     plain    => 'text',
 );
+
+sub valid_extensions {
+    keys %SERIALIZERS;
+}
 
 sub detect_serializer {
     my $type = shift;

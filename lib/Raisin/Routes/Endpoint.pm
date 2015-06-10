@@ -51,7 +51,8 @@ sub _build_regex {
             "(?<format>\.${ \$self->api_format })?";
         }
         else {
-            '(?<format>\.\w+)?';
+            my $se = join '|', Raisin::Util::valid_extensions();
+            "(?<format>(?:\.(?:$se))?)?";
         }
     };
 
@@ -65,7 +66,7 @@ sub _rep_regex {
 
     for ($switch) {
         if ($_ eq ':' || $_ eq '?') {
-            $r = $a . ($self->check->{$token} // '[^/.]+') . $b;
+            $r = $a . ($self->check->{$token} // '[^/]+?') . $b;
         }
         if ($_ eq '*') {
             $r = $a . '.+' . $b;
