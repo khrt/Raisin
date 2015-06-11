@@ -3,6 +3,7 @@ package Raisin::Routes::Endpoint;
 use strict;
 use warnings;
 
+use Raisin::Util;
 use Raisin::Attributes;
 
 has 'api_format';
