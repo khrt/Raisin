@@ -321,7 +321,6 @@ subtest 'raisin_parameters' => sub {
                 'raisin_parameters';
         }
     }
-
 };
 
 done_testing;
