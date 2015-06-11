@@ -101,8 +101,7 @@ sub match {
 
     my %captured = %+;
 
-    if ($captured{format}) {
-        my $format = delete $captured{format};
+    if (my $format = delete $captured{format}) {
         # delete prepending full stop
         $self->format(substr($format, 1));
     }
