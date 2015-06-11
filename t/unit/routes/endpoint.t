@@ -60,7 +60,7 @@ my @CASES = (
             path => '/api/user/:id',
         },
         input => { method => 'post', path => '/api/user/42.yaml' },
-        expected => undef,
+        expected => 1,
     },
     {
         object => {
@@ -109,7 +109,7 @@ subtest 'match' => sub {
             is $is_matched, $case->{expected}, 'match';
 
             # format
-            if ($is_matched && ($case->{input}{path} =~ /\.(.+)$/msix)) {
+            if ($is_matched && !$case->{object}{api_format} && ($case->{input}{path} =~ /\.(.+)$/msix)) {
                 is $e->format, $1, 'format: ' . $1;
             }
 

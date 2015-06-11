@@ -38,7 +38,7 @@ my @CASES = (
             path => '/api/user/:id',
         },
         input => { method => 'post', path => '/api/user/42.yaml' },
-        expected => undef,
+        expected => 1,
     },
     {
         object => {
