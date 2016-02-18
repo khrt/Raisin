@@ -6,6 +6,8 @@ use warnings;
 use Plack::Util;
 
 my %SERIALIZERS = (
+    default  => undef,
+
     json     => 'json',
     json_rpc => 'json',
 
@@ -26,15 +28,18 @@ sub detect_serializer {
     my $type = shift;
     return unless $type;
 
-    my $media = 'default';
+    $type = (split ';', $type)[0];
+    my ($l, $r) = ($type =~ m#^(?:([^/]+)/)?(.+)#msix);
 
-    if ($type =~ m#^([^/]+)/\*#) {
-        $media = $1;
+    my $media = 'default';
+    if ($r && $r eq '*') {
+        $media = $l;
     }
     else {
-        $type =~ m#(?:^[^/]+/)?(.+)#msix;
-        $media = $1;
+        $media = $r;
         $media =~ tr#-#_#;
+        # trim spaces
+        $media =~ s/^\s+|\s+$//gmsix;
     }
 
     $SERIALIZERS{$media};

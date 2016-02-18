@@ -23,6 +23,9 @@ my @CASES = (
     { input => 'txt', expected => 'text' },
 
     { input => 'application/xml', expected => undef },
+
+    { input => 'application/json-rpc; charset=utf-8; foo=bar', expected => 'json' },
+    { input => 'application/json-rpc ; charset=utf-8', expected => 'json' },
 );
 
 subtest 'detect_serializer' => sub {
