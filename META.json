@@ -4,19 +4,19 @@
       "Artur Khabibullin - rtkh@cpan.org"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 5.025, CPAN::Meta::Converter version 2.142690",
+   "generated_by" : "Dist::Zilla version 5.041, CPAN::Meta::Converter version 2.150005",
    "license" : [
       "perl_5"
    ],
    "meta-spec" : {
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
-      "version" : "2"
+      "version" : 2
    },
    "name" : "Raisin",
    "no_index" : {
       "directory" : [
-         "t",
-         "examples"
+         "examples",
+         "t"
       ]
    },
    "prereqs" : {
@@ -67,7 +67,7 @@
          "web" : "https://github.com/khrt/Raisin"
       }
    },
-   "version" : "0.62",
+   "version" : "0.63",
    "x_contributors" : [
       "Vladimir Lettiev <thecrux@gmail.com>"
    ]
