@@ -9,6 +9,7 @@ Raisin - a REST API micro framework for Perl.
 
     use utf8;
 
+    use List::Util qw(max);
     use Raisin::API;
     use Types::Standard qw(Any Int Str);
 
