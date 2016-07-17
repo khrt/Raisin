@@ -58,6 +58,15 @@ resource users => sub {
             my $params = shift;
             { data => UseCase::User::edit($params->{id}, %$params) }
         };
+        summary 'Edit a user';
+        params(
+            optional => { name => 'password', type => Str, desc => 'User password' },
+            optional => { name => 'email', type => Str, desc => 'User email' },
+        );
+        patch sub {
+            my $params = shift;
+            { data => UseCase::User::edit($params->{id}, %$params) }
+        };
 
         desc 'Bump a user';
         resource bump => sub {
@@ -71,6 +80,12 @@ resource users => sub {
             summary 'Bump a user';
             tags 'users', 'bump';
             put sub {
+                my $params = shift;
+                { success => UseCase::User::bump($params->{id}) }
+            };
+            summary 'Bump a user';
+            tags 'users', 'bump';
+            patch sub {
                 my $params = shift;
                 { success => UseCase::User::bump($params->{id}) }
             };

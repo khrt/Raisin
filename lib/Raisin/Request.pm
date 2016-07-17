@@ -66,7 +66,7 @@ sub prepare_params {
 
     # Serialization / Deserialization
     my $body_params = do {
-        if ($self->method =~ /POST|PUT/ && (my $content = $self->content)) {
+        if ($self->method =~ /POST|PUT|PATCH/ && (my $content = $self->content)) {
             if ($self->content_type =~ m{application/x-www-form-urlencoded}imsx) {
                 $self->body_parameters->as_hashref_mixed;
             }

@@ -51,6 +51,16 @@ resource hosts => sub {
             { data => UseCase::Host::edit($params->{id}, %$params) }
         };
 
+        summary 'Edit a host';
+        params(
+            required => { name => 'state', type => Str, desc => 'Host state' },
+        );
+        patch sub {
+            my $params = shift;
+            { data => UseCase::Host::edit($params->{id}, %$params) }
+        };
+
+
         summary 'Delete a host';
         del sub {
             my $params = shift;

@@ -95,6 +95,30 @@ for my $case (@CASES) {
             is_deeply $o->{data}, \%NEW, 'data';
         };
 
+        subtest "PATCH /api/$case->{namespace}/$IDS[-1]" => sub {
+            my $content_string = join '&',
+                map { "$_=$case->{edit}{$_}" } keys %{ $case->{edit} };
+
+            my $res = $cb->(
+                PATCH("/api/$case->{namespace}/$IDS[-1]", $content_string)
+            );
+
+            my %EDITED = (
+                %NEW,
+                id => $IDS[-1],
+                %{ $case->{edit} },
+            );
+
+            if (!is $res->code, 200) {
+                diag $res->content;
+                BAIL_OUT 'FAILED!';
+            }
+            ok my $c = $res->content, 'content';
+            ok my $o = Load($c), 'decode';
+            is_deeply $o->{data}, \%EDITED, 'data';
+        };
+
+
         subtest "PUT /api/$case->{namespace}/$IDS[-1]" => sub {
             my $content_string = join '&',
                 map { "$_=$case->{edit}{$_}" } keys %{ $case->{edit} };
@@ -172,5 +196,19 @@ for my $case (@CASES) {
         };
     };
 }
+
+
+sub PATCH {
+    my ($path, $content) = @_;
+
+    my $req = HTTP::Request->new( 'PATCH', $path );
+
+    $req->header('Content-Type' => 'application/x-www-form-urlencoded');
+
+    $req->content($content);
+
+    $req;
+}
+
 
 done_testing;
