@@ -10,7 +10,7 @@ use Test::More;
 use YAML 'Load';
 use JSON 'decode_json';
 
-use lib ("$Bin/../../examples/sample-app/lib");
+use lib ("$Bin/../../lib", "$Bin/../../examples/sample-app/lib");
 
 my $app = Plack::Util::load_psgi("$Bin/../../examples/sample-app/script/restapp.psgi");
 
