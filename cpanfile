@@ -1,4 +1,4 @@
-requires 'perl', '5.010001';
+requires 'perl', '5.010000';
 
 #requires 'Carp' => '1.20';
 #requires 'Data::Dumper' => '2.131';
