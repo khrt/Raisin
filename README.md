@@ -720,7 +720,6 @@ Raisin comes with three instance in _example_ directory:
 
 # ROADMAP
 
-- Support for hypermedia ([HAL](http://stateless.co/hal_specification.html), [Link headers](http://www.w3.org/wiki/LinkHeader));
 - Versioning support;
 - Nested params declaration;
 - Mount API's in any place of `resource` block;
