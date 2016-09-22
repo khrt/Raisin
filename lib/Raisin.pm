@@ -1048,8 +1048,6 @@ Shows an example of complex application.
 
 =over
 
-=item * Support for hypermedia (L<HAL|http://stateless.co/hal_specification.html>, L<Link headers|http://www.w3.org/wiki/LinkHeader>);
-
 =item * Versioning support;
 
 =item * Nested params declaration;
