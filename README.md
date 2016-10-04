@@ -476,6 +476,7 @@ Available arguments:
 - default
 - desc
 - regex
+- in
 
 ## Types
 
