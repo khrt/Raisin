@@ -4,20 +4,25 @@ use strict;
 use warnings;
 
 use Getopt::Long;
+use JSON qw/to_json/;
 use Plack::Util;
 use Pod::Usage;
 use Term::ANSIColor;
+use YAML qw/Dump/;
 
 use Raisin;
 
 binmode STDOUT, ":encoding(UTF-8)";
 
-my ($show_help, $show_version, $show_params);
+my ($show_help, $show_version, $show_params,
+    $show_openapi_spec, $show_openapi_spec_format);
 
 GetOptions(
-    help    => \$show_help,
-    version => \$show_version,
-    params => \$show_params,
+    'help'     => \$show_help,
+    'version'  => \$show_version,
+    'params'   => \$show_params,
+    'openapi'  => \$show_openapi_spec,
+    'format=s' => \$show_openapi_spec_format,
 );
 
 my $file = $ARGV[0] || do { $show_help = 1; '' };
@@ -28,13 +33,44 @@ if ($show_version) {
 elsif ($show_help) {
     pod2usage(1);
 }
-else {
+elsif ($show_params) {
     print_routes(with_params => $show_params);
+}
+elsif ($show_openapi_spec) {
+    print_openapi_spec();
 }
 
 exit 0;
 
 ### ###
+
+sub print_openapi_spec {
+    if (!$file || !-e $file) {
+        print "$0: file `$file` doesn't exists\n";
+        exit;
+    }
+
+    my $spec;
+    {
+        no warnings 'redefine';
+        *Raisin::run = sub {
+            my $self = shift;
+
+            $self->req(Raisin::Request->new($self, {}));
+
+            $self->load_plugin('Swagger');
+            $spec = $self->swagger_build_spec;
+        };
+    }
+    Plack::Util::load_psgi($file);
+
+    if (lc($show_openapi_spec_format) eq 'json') {
+        print to_json($spec);
+    }
+    else {
+        print Dump($spec);
+    }
+}
 
 sub print_routes {
     my %args = @_;
@@ -93,8 +129,10 @@ raisin - Raisin command script.
 
     Options:
         --help          This help text
-        --version       Show version number and quit
-        --params        Show params
+        --version       Prints version number
+        --params        Prints params
+        --openapi       Prints OpenAPI specification
+        --format        To use with `--openapi': json or yaml
 
     Required params are marked with a star.
     Default values are showed in a curly brackets.

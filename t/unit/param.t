@@ -86,6 +86,27 @@ my @CASES = (
     },
 );
 
+my @IN_CASES = (
+    {
+        test => {
+            required => 1,
+            data => { name => 'broken', type => Int, in => 'broken' },
+        },
+        input => 'dummy',
+        expected => undef,
+    },
+    map {
+        {
+            test => {
+                required => 1,
+                data => { name => $_, type => Int, in => $_ },
+            },
+            input => 'dummy',
+            expected => 1,
+        }
+    } qw/path formData body header query/,
+);
+
 sub _make_object {
     my $test = shift;
     Raisin::Param->new(
@@ -113,6 +134,24 @@ subtest 'parse, +accessors' => sub {
             is $param->named, 0, 'named';
             is $param->required, $case->{test}{required}, 'required';
             is $param->type, $case->{test}{data}{type}, 'type';
+        };
+    }
+};
+
+subtest 'parse, +in' => sub {
+    for my $case (@IN_CASES) {
+        my $name = _make_name($case);
+
+        subtest $name => sub {
+            my $param = _make_object($case->{test});
+
+            if ($case->{expected}) {
+                isa_ok $param, 'Raisin::Param', 'param';
+                is $param->in, $case->{test}{data}{in};
+            }
+            else {
+                is $param, undef;
+            }
         };
     }
 };

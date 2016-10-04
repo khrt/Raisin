@@ -59,6 +59,5 @@ $r->add(
 
 my $i = Raisin::Plugin::Swagger->new($a);
 ok $i->_spec_20;
-ok $i->_spec_12;
 
 done_testing;

@@ -6,6 +6,9 @@ use warnings;
 use Carp;
 use Raisin::Attributes;
 
+my @ATTRS = qw(name type default regex desc in);
+my @LOCATION = qw/path formData body header query/;
+
 has 'named';
 has 'required';
 
@@ -22,14 +25,37 @@ sub new {
     $self->{named} = $args{named} || 0;
     $self->{required} = $args{type} =~ /^require(s|d)$/ ? 1 : 0;
 
-    $self->_parse($args{spec});
+    return unless $self->_parse($args{spec});
 
     $self;
 }
 
 sub _parse {
     my ($self, $spec) = @_;
-    $self->{$_} = $spec->{$_} for qw(name type default regex desc);
+
+    $self->{$_} = $spec->{$_} for @ATTRS[0 .. $#ATTRS-1];
+
+    if ($spec->{in}) {
+        return $self->in($spec->{in});
+    }
+
+    return 1;
+}
+
+sub in {
+    my ($self, $value) = @_;
+
+    if (defined $value) {
+        unless (grep { $value eq $_ } @LOCATION) {
+            printf STDERR "`$self->{name}' should be one of the following: %s\n",
+                join ', ', @LOCATION;
+            return;
+        }
+
+        $self->{in} = $value;
+    }
+
+    $self->{in};
 }
 
 sub validate {
@@ -129,6 +155,10 @@ Returns C<true> if it's required parameter.
 =head3 type
 
 Returns parameter type object.
+
+=head3 in
+
+Returns the location of the parameter: B<query, header, path, formData, body>.
 
 =head3 validate
 

@@ -192,15 +192,6 @@ sub _spec_20 {
     # routes
     $self->app->add_route(
         method => 'GET',
-        path => '/api-docs',
-        code => sub {
-            $self->app->res->content_type('application/json');
-            print STDERR "Obsolete URL; use /swagger.json instead\n";
-            encode_json(\%spec);
-        }
-    );
-    $self->app->add_route(
-        method => 'GET',
         path => '/swagger',
         code => sub { \%spec }
     );
@@ -208,7 +199,7 @@ sub _spec_20 {
     # mark as built
     $self->{built} = 1;
 
-    1;
+    \%spec;
 }
 
 sub _contact_object {
@@ -252,11 +243,11 @@ sub _parameters_object {
     my @obj;
 
     for my $p (@$pp) {
-        my $position = do {
-            if    ($p->named)              {'path'}
-            elsif ($method =~ /post|put/i) {'formData'}
-            #elsif ($method =~ /post|put/i) {'body'}
-            #elsif ()                       {'header'}
+        my $location = do {
+            # Available: query, header, path, formData or body
+            if    ($p->in)                 { $p->in }
+            elsif ($p->named)              {'path'}
+            elsif ($method =~ /post|put/i) {'formData'} # can be `formData` or `body`
             else                           {'query'}
         };
 
@@ -277,7 +268,7 @@ sub _parameters_object {
 
         my %param = (
             description => $p->desc || "",
-            in          => $position, #R
+            in          => $location, #R
             name        => $p->name, #R
             required    => $p->required ? JSON::true : JSON::false,
             type        => $type, #R
@@ -403,13 +394,21 @@ Which Swagger version to use. By default 2.0 is used, also 1.2 available.
 
     plugin 'Swagger', version => 1.2;
 
-For Swagger 1.2 there is another URL: C</api-docs>.
-
 =head1 FUNCTIONS
 
 =head3 swagger_setup
 
-Not available for Swagger 1.2.
+The function configures base OpenAPI paramters, be aware it is not validating
+and will be passed as is to OpenAPI client.
+
+Properly configured section has following attributes:
+B<title>, B<description>, B<terms_service>, B<contact> and B<license>.
+
+B<Contact> has B<name>, B<url>, B<email>.
+
+B<License> has B<name> and B<url>.
+
+See an example below.
 
     swagger_setup(
         title => 'BatAPI',
@@ -427,11 +426,7 @@ Not available for Swagger 1.2.
         },
     );
 
-title, description, terms_of_service
-
-contact: name, url, email
-
-license: name, url
+B<Note>: not available for Swagger 1.2.
 
 =head1 AUTHOR
 

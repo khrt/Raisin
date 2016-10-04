@@ -785,6 +785,8 @@ Available arguments:
 
 =item * regex
 
+=item * in
+
 =back
 
 =head2 Types
