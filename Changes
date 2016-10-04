@@ -1,3 +1,6 @@
+0.67 Broken test
+    * Fix broken tests
+
 0.66 Delayed response
     * Merge pull request by `kimcognito` fixes delayed responses;
     * Adds a location option to parameter description for OpenAPI specification;

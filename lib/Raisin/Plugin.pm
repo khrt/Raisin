@@ -16,7 +16,6 @@ sub app { shift->{app} }
 
 sub build {
     my ($self, %args) = @_;
-    croak 'Dummy method';
 }
 
 sub register {
