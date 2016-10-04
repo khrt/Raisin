@@ -11,7 +11,7 @@ use Raisin::Response;
 use Raisin::Routes;
 use Raisin::Util;
 
-our $VERSION = '0.65';
+our $VERSION = '0.66';
 
 sub new {
     my ($class, %args) = @_;
@@ -168,7 +168,7 @@ sub psgi {
 
         # Validation and coercion of declared params
         if (!$req->prepare_params($route->params, $route->named)) {
-            $res->render_error(400, 'Invalid params.');
+            $res->render_error(400, 'Invalid params');
             return $res->finalize;
         }
 
@@ -177,8 +177,9 @@ sub psgi {
         # Evaluate a user's endpoint
         my $data = $code->($req->declared_params);
         if (defined $data) {
-            # TODO: delayed responses are untested
+            # Delayed responses
             return $data if ref($data) eq 'CODE';
+
             $res->body($data);
         }
 
@@ -204,9 +205,10 @@ sub psgi {
         $res->render_500($msg);
     };
 
-    if(ref($ret) eq 'CODE') {
+    if (ref($ret) eq 'CODE') {
         return $ret;
     }
+
     $self->finalize;
 }
 
@@ -932,7 +934,7 @@ L<Swagger|https://github.com/wordnik/swagger-core> compatible API documentations
 
     plugin 'Swagger';
 
-Documentation will be available on C<http://E<lt>urlE<gt>/api-docs> URL.
+Documentation will be available on C<http://E<lt>urlE<gt>/swagger.json> URL.
 So you can use this URL in Swagger UI.
 
 See L<Raisin::Plugin::Swagger>.
