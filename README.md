@@ -607,7 +607,7 @@ Including parameters:
 
     plugin 'Swagger';
 
-Documentation will be available on `http://<url>/api-docs` URL.
+Documentation will be available on `http://<url>/swagger.json` URL.
 So you can use this URL in Swagger UI.
 
 See [Raisin::Plugin::Swagger](https://metacpan.org/pod/Raisin::Plugin::Swagger).
