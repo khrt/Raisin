@@ -137,7 +137,7 @@ sub psgi {
         $self->swagger_build_spec;
     }
 
-    eval {
+    my $ret = eval {
         $self->hook('before')->($self);
 
         # Find a route
@@ -204,6 +204,9 @@ sub psgi {
         $res->render_500($msg);
     };
 
+    if(ref($ret) eq 'CODE') {
+        return $ret;
+    }
     $self->finalize;
 }
 
