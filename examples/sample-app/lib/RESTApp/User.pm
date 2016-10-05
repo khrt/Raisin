@@ -12,8 +12,8 @@ desc 'Operations about user';
 resource users => sub {
     summary 'List users';
     params(
-        optional => { name => 'start', type => Int, default => 0, desc => 'Pager start' },
-        optional => { name => 'count', type => Int, default => 10, desc => 'Pager count' },
+        optional('start', type => Int, default => 0, desc => 'Pager start'),
+        optional('count', type => Int, default => 10, desc => 'Pager count'),
     );
     get sub {
         my $params = shift;
@@ -30,9 +30,9 @@ resource users => sub {
 
     summary 'Create a new user';
     params(
-        required => { name => 'name', type => Str, desc => 'User name' },
-        required => { name => 'password', type => Str, desc => 'User password' },
-        optional => { name => 'email', type => Str, default => undef, desc => 'User email' },
+        requires('name', type => Str, desc => 'User name'),
+        requires('password', type => Str, desc => 'User password'),
+        optional('email', type => Str, default => undef, desc => 'User email'),
     );
     post sub {
         my $params = shift;
@@ -40,7 +40,7 @@ resource users => sub {
     };
 
     params(
-        requires => { name => 'id', type => Int, desc => 'User ID' },
+        requires('id', type => Int, desc => 'User ID'),
     );
     route_param id => sub {
         summary 'Show a user';
@@ -51,8 +51,8 @@ resource users => sub {
 
         summary 'Edit a user';
         params(
-            optional => { name => 'password', type => Str, desc => 'User password' },
-            optional => { name => 'email', type => Str, desc => 'User email' },
+            optional('password', type => Str, desc => 'User password'),
+            optional('email', type => Str, desc => 'User email'),
         );
         put sub {
             my $params = shift;
@@ -60,8 +60,8 @@ resource users => sub {
         };
         summary 'Edit a user';
         params(
-            optional => { name => 'password', type => Str, desc => 'User password' },
-            optional => { name => 'email', type => Str, desc => 'User email' },
+            optional('password', type => Str, desc => 'User password'),
+            optional('email', type => Str, desc => 'User email'),
         );
         patch sub {
             my $params = shift;

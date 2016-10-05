@@ -31,7 +31,7 @@ resource artists => sub {
         present count => scalar @$artists;
     };
 
-    params requires => { name => 'id', type => Int };
+    params requires('id', type => Int);
     route_param id => sub {
         get sub {
             my $params = shift;
@@ -54,7 +54,7 @@ resource albums => sub {
         present count => scalar @$albums;
     };
 
-    params requires => { name => 'id', type => Int };
+    params requires('id', type => Int);
     route_param id => sub {
         get sub {
             my $params = shift;

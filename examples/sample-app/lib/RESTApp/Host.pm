@@ -12,8 +12,8 @@ desc 'Operations about host';
 resource hosts => sub {
     summary 'List hosts';
     params(
-        optional => { name => 'start', type => Int, default => 0, desc => 'Pager start' },
-        optional => { name => 'count', type => Int, default => 10, desc => 'Pager count' },
+        optional('start', type => Int, default => 0, desc => 'Pager start'),
+        optional('count', type => Int, default => 10, desc => 'Pager count'),
     );
     get sub {
         my $params = shift;
@@ -23,9 +23,9 @@ resource hosts => sub {
 
     summary 'Create a new host';
     params(
-        required => { name => 'name', type => Str, desc => 'Host name' },
-        required => { name => 'user_id', type => Int, desc => 'Host owner' },
-        optional => { name => 'state', type => Str, desc => 'Host state' }
+        requires('name', type => Str, desc => 'Host name'),
+        requires('user_id', type => Int, desc => 'Host owner'),
+        optional('state', type => Str, desc => 'Host state')
     );
     post sub {
         my $params = shift;
@@ -33,7 +33,7 @@ resource hosts => sub {
     };
 
     params(
-        requires => { name => 'id', type => Int, desc => 'Host ID' }
+        requires('id', type => Int, desc => 'Host ID')
     );
     route_param id => sub {
         summary 'Show a host';
@@ -44,7 +44,7 @@ resource hosts => sub {
 
         summary 'Edit a host';
         params(
-            required => { name => 'state', type => Str, desc => 'Host state' },
+            requires('state', type => Str, desc => 'Host state'),
         );
         put sub {
             my $params = shift;
@@ -53,7 +53,7 @@ resource hosts => sub {
 
         summary 'Edit a host';
         params(
-            required => { name => 'state', type => Str, desc => 'Host state' },
+            requires('state', type => Str, desc => 'Host state'),
         );
         patch sub {
             my $params = shift;

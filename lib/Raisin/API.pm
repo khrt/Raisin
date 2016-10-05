@@ -12,10 +12,10 @@ use Raisin::Entity;
 
 my @APP_CONF_METHODS = qw(api_default_format api_format api_version middleware mount plugin);
 my @APP_EXEC_METHODS = qw(new run);
-my @APP_METHODS = qw(req res param session present error);
+my @APP_METHODS = qw(req res param include_missing session present error);
 my @HOOKS_METHODS = qw(before before_validation after_validation after);
 my @HTTP_METHODS = qw(del get head options patch post put);
-my @ROUTES_METHODS = qw(resource namespace route_param params include_missing);
+my @ROUTES_METHODS = qw(resource namespace route_param params requires optional);
 
 my @SWAGGER_MERTHODS = qw(desc summary tags);
 
@@ -114,6 +114,9 @@ sub post    { _add_route('post', @_) }
 sub put     { _add_route('put', @_) }
 
 sub params { $SETTINGS{params} = \@_ }
+
+sub requires { (requires => { name => @_ }) }
+sub optional { (optional => { name => @_ }) }
 
 # Swagger
 sub desc    { $SETTINGS{desc} = shift }

@@ -405,7 +405,7 @@ Raisin - a REST API micro framework for Perl.
 
     desc 'Echo API endpoint';
     resource echo => sub {
-        params(optional => { name => 'data0', type => Any, default => "ёй" });
+        params optional('data0', type => Any, default => "ёй");
         get sub { shift };
     };
 
@@ -446,15 +446,15 @@ Shortcuts to add a C<route> restricted to the corresponding HTTP method.
     del 'all' => sub { 'OK' };
 
     params(
-        requires => { name => 'id', type => Int },
-        optional => { name => 'key', type => Str },
+        requires('id', type => Int),
+        optional('key', type => Str),
     );
     get sub { 'GET' };
 
     desc 'Put data';
     params(
-        required => { name => 'id', type => Int },
-        optional => { name => 'name', type => Str },
+        required('id', type => Int),
+        optional('name', type => Str),
     );
     put 'all' => sub {
         'PUT'
@@ -497,14 +497,14 @@ Here you can define validations and coercion options for your parameters.
 Can be applied to any HTTP method and/or C<route_param> to describe parameters.
 
     params(
-        requires => { name => 'name', type => Str },
-        optional => { name => 'start', type => Int, default => 0 },
-        optional => { name => 'count', type => Int, default => 10 },
+        requires('name', type => Str),
+        optional('start', type => Int, default => 0),
+        optional('count', type => Int, default => 10),
     );
     get sub { ... };
 
     params(
-        requires => { name => 'id', type => Int, desc => 'User ID' },
+        requires('id', type => Int, desc => 'User ID'),
     );
     route_param 'id' => sub { ... };
 
@@ -712,9 +712,10 @@ Application:
 
     api_format 'json';
 
-    params
-        required => { name => 'id', type => Int };
-        optional => { name => 'email', type => Str };
+    params(
+        requires('id', type => Int),
+        optional('email', type => Str)
+    );
     post data => sub {
         my $params = shift;
         { data => $params };
@@ -735,9 +736,10 @@ Application:
 
     api_format 'json';
 
-    params
-        required => { name => 'id', type => Int },
-        optional => { name => 'email', type => Str };
+    params(
+        requires('id', type => Int),
+        optional('email', type => Str)
+    );
     post data => sub {
         my $params = shift;
         { data => include_missing($params) };
@@ -760,8 +762,8 @@ Parameters can C<requires> a value and can be an C<optional>.
 C<optional> parameters can have a default value.
 
     params(
-        requires => { name => 'name', type => Str },
-        optional => { name => 'count', type => Int, default => 10 },
+        requires('name', type => Str),
+        optional('count', type => Int, default => 10),
     );
     get sub {
         my $params = shift;
