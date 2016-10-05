@@ -55,6 +55,17 @@ sub make_tag_from_path {
     (split '/', $path)[1];
 }
 
+sub iterate_params {
+    my $params = shift;
+    my $index = 0;
+
+    return sub {
+        $index += 2;
+        ($params->[$index-2], $params->[$index-1]);
+    };
+}
+
+
 1;
 
 __END__
@@ -76,6 +87,10 @@ Returns C<Raisin::Plugin::Format::E<lt>NAMEE<gt>> class name.
 =head2 make_tag_from_path
 
 Splits a path and returns the first part of it.
+
+=head2 iterate_params
+
+Iterates over route parameters.
 
 =head1 AUTHOR
 

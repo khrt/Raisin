@@ -9,6 +9,7 @@ use List::Util 'pairs';
 use Raisin::Attributes;
 use Raisin::Param;
 use Raisin::Routes::Endpoint;
+use Raisin::Util;
 
 has 'cache';
 has 'list';
@@ -53,14 +54,15 @@ sub add {
 
     my @pp;
     for my $key (qw(params named)) {
-        my $i = 0;
-        while ($i < scalar @{ $params{$key} || [] }) {
+        my $next_param = Raisin::Util::iterate_params($params{$key} || []);
+        while (my ($type, $spec) = $next_param->()) {
+            last unless $type;
+
             push @pp, Raisin::Param->new(
                 named => $key eq 'named',
-                type => $params{$key}[$i+0], # -> requires/optional
-                spec => $params{$key}[$i+1], # -> { name => ..., type => ... }
+                type => $type, # -> requires/optional
+                spec => $spec, # -> { name => ..., type => ... }
             );
-            $i += 2;
         }
     }
 

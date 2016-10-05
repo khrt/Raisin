@@ -10,16 +10,22 @@ use lib "$FindBin::Bin/../../lib";
 
 use List::Util qw(max);
 use Raisin::API;
-use Types::Standard qw(Any Int Str);
+use Types::Standard qw(HashRef Any Int Str);
 
 my %USERS = (
     1 => {
-        name => 'Darth Wader',
+        user => {
+            first_name => 'Darth',
+            last_name => 'Wader',
+        },
         password => 'deathstar',
         email => 'darth@deathstar.com',
     },
     2 => {
-        name => 'Luke Skywalker',
+        user => {
+            first_name => 'Luke',
+            last_name => 'Skywalker',
+        },
         password => 'qwerty',
         email => 'l.skywalker@jedi.com',
     },
@@ -75,9 +81,16 @@ resource users => sub {
         { data => \@users }
     };
 
+    # requires('person', type => Dict[name => Str, age => Int]);
+    # curl -X POST -H "Content-Type: application/json" localhost:5000/users -d '{"user":{"first_name":"Joe","last_name":"Doe"},"password":"qwerty","email":"joe@doe.com"}'
     summary 'Create new user';
     params(
-        requires('name', type => Str, desc => 'User name'),
+        requires(
+            'user', type => HashRef[Any], encloses(
+                requires('first_name', type => Str, desc => 'First name'),
+                requires('last_name', type => Str, desc => 'First name'),
+            )
+        ),
         requires('password', type => Str, desc => 'User password'),
         optional('email', type => Str, default => undef, regex => qr/.+\@.+/, desc => 'User email'),
     );

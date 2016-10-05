@@ -1,3 +1,8 @@
+
+0.68 Nested params
+    * Syntax sugar: requires and optional keywords to declare parameters;
+    * Logging support in Routes;
+
 0.67 Broken test
     * Fix broken tests
 

@@ -5,8 +5,9 @@ use warnings;
 
 use Carp;
 use Raisin::Attributes;
+use Raisin::Util;
 
-my @ATTRS = qw(name type default regex desc in);
+my @ATTRIBUTES = qw(name type default regex desc);
 my @LOCATION = qw/path formData body header query/;
 
 has 'named';
@@ -17,6 +18,7 @@ has 'name';
 has 'type';
 has 'regex';
 has 'desc';
+has 'enclosed';
 
 sub new {
     my ($class, %args) = @_;
@@ -33,13 +35,43 @@ sub new {
 sub _parse {
     my ($self, $spec) = @_;
 
-    $self->{$_} = $spec->{$_} for @ATTRS[0 .. $#ATTRS-1];
+    $self->{$_} = $spec->{$_} for @ATTRIBUTES;
 
     if ($spec->{in}) {
         return unless $self->in($spec->{in});
     }
 
+    if ($spec->{encloses}) {
+        if ($self->type->name eq 'HashRef') {
+            $self->{enclosed} = _compile_enclosed($spec->{encloses});
+        }
+        else {
+            Raisin::log(
+                warn => 'Ignore enclosed parameters for `%s`, type should be `HashRef` not `%s`',
+                $self->name, $self->type->name
+            );
+        }
+    }
+
     return 1;
+}
+
+sub _compile_enclosed {
+    my $params = shift;
+
+    my @enclosed;
+    my $next_param = Raisin::Util::iterate_params($params);
+    while (my ($type, $spec) = $next_param->()) {
+        last unless $type;
+
+        push @enclosed, Raisin::Param->new(
+            named => 0,
+            type => $type, # -> requires/optional
+            spec => $spec, # -> { name => ..., type => ... }
+        );
+    }
+
+    \@enclosed;
 }
 
 sub in {
@@ -73,6 +105,8 @@ sub validate {
         Raisin::log(info => '`%s` optional and empty', $self->name);
         return 1;
     }
+
+    #####
 
     # Type check
     eval { $$ref_value = $self->type->($$ref_value) };

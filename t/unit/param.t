@@ -5,84 +5,113 @@ use warnings;
 use Test::More;
 
 use Raisin::Param;
-use Types::Standard qw(ScalarRef Any Num Str Int);
+use Types::Standard qw(ScalarRef HashRef Any Num Str Int);
 
 my $QUIET = 1;
 
 my @CASES = (
+#    {
+#        test => {
+#            required => 0,
+#            data => { name => 'str', type => Str, default => 'def', regex => qr/match/ },
+#        },
+#        input => 'match',
+#        expected => 1,
+#    },
+#    {
+#        test => {
+#            required => 0,
+#            data => { name => 'str', type => Str, default => 'def', regex => qr/match/ },
+#        },
+#        input => 'not much',
+#        expected => undef,
+#    },
+#    {
+#        test => {
+#            required => 0,
+#            data => { name => 'str', type => Str, default => 'def', regex => qr/match/ },
+#        },
+#        input => 42,
+#        expected => undef,
+#    },
+#
+#    {
+#        test => {
+#            required => 1,
+#            data => { name => 'float', type => Num, regex => qr/^\d\.\d+$/ },
+#        },
+#        input => 3.14,
+#        expected => 1,
+#    },
+#    {
+#        test => {
+#            required => 1,
+#            data => { name => 'float', type => Num, regex => qr/^\d\.\d+$/ },
+#        },
+#        input => 314,
+#        expected => undef,
+#    },
+#    {
+#        test => {
+#            required => 1,
+#            data => { name => 'float', type => Num, regex => qr/^\d\.\d+$/ },
+#        },
+#        input => 'string',
+#        expected => undef,
+#    },
+#
+#    {
+#        test => {
+#            required => 1,
+#            data => { name => 'int', type => Int },
+#        },
+#        input => 42,
+#        expected => 1,
+#    },
+#    {
+#        test => {
+#            required => 1,
+#            data => { name => 'int', type => Int },
+#        },
+#        input => 4.2,
+#        expected => undef,
+#    },
+#    {
+#        test => {
+#            required => 1,
+#            data => { name => 'int', type => Int },
+#        },
+#        input => 'string',
+#        expected => undef,
+#    },
+    # Nested
     {
         test => {
-            required => 0,
-            data => { name => 'str', type => Str, default => 'def', regex => qr/match/ },
+            required => 1,
+            data => {
+                name => 'person',
+                type => HashRef,
+                encloses => [
+                    requires => {
+                        name => 'name', type => HashRef, encloses => [
+                            requires => { name => 'first_name', type => Str },
+                            requires => { name => 'last_name', type => Str }
+                        ],
+                    },
+                    optional => { name => 'city',  type => Str },
+                ],
+            },
         },
-        input => 'match',
+        input => {
+            person => {
+                name => {
+                    first_name => 'Bruce',
+                    last_name => 'Wayne',
+                },
+                city => 'Gotham City',
+            },
+        },
         expected => 1,
-    },
-    {
-        test => {
-            required => 0,
-            data => { name => 'str', type => Str, default => 'def', regex => qr/match/ },
-        },
-        input => 'not much',
-        expected => undef,
-    },
-    {
-        test => {
-            required => 0,
-            data => { name => 'str', type => Str, default => 'def', regex => qr/match/ },
-        },
-        input => 42,
-        expected => undef,
-    },
-
-    {
-        test => {
-            required => 1,
-            data => { name => 'float', type => Num, regex => qr/^\d\.\d+$/ },
-        },
-        input => 3.14,
-        expected => 1,
-    },
-    {
-        test => {
-            required => 1,
-            data => { name => 'float', type => Num, regex => qr/^\d\.\d+$/ },
-        },
-        input => 314,
-        expected => undef,
-    },
-    {
-        test => {
-            required => 1,
-            data => { name => 'float', type => Num, regex => qr/^\d\.\d+$/ },
-        },
-        input => 'string',
-        expected => undef,
-    },
-
-    {
-        test => {
-            required => 1,
-            data => { name => 'int', type => Int },
-        },
-        input => 42,
-        expected => 1,
-    },
-    {
-        test => {
-            required => 1,
-            data => { name => 'int', type => Int },
-        },
-        input => 4.2,
-        expected => undef,
-    },
-    {
-        test => {
-            required => 1,
-            data => { name => 'int', type => Int },
-        },
-        input => 'string',
-        expected => undef,
     },
 );
 
@@ -121,53 +150,64 @@ sub _make_name {
     uc($case->{test}{data}{name}) . " " . $case->{input};
 }
 
-subtest 'parse, +accessors' => sub {
-    for my $case (@CASES) {
-        my $name = _make_name($case);
+#subtest 'parse, +accessors' => sub {
+#    for my $case (@CASES) {
+#        my $name = _make_name($case);
+#
+#        subtest $name => sub {
+#            my $param = _make_object($case->{test});
+#            isa_ok $param, 'Raisin::Param', 'param';
+#
+#            is $param->default, $case->{test}{data}{default}, 'default';
+#            is $param->name, $case->{test}{data}{name}, 'name';
+#            is $param->named, 0, 'named';
+#            is $param->required, $case->{test}{required}, 'required';
+#            is $param->type, $case->{test}{data}{type}, 'type';
+#        };
+#    }
+#};
 
-        subtest $name => sub {
-            my $param = _make_object($case->{test});
-            isa_ok $param, 'Raisin::Param', 'param';
-
-            is $param->default, $case->{test}{data}{default}, 'default';
-            is $param->name, $case->{test}{data}{name}, 'name';
-            is $param->named, 0, 'named';
-            is $param->required, $case->{test}{required}, 'required';
-            is $param->type, $case->{test}{data}{type}, 'type';
-        };
-    }
-};
-
-subtest 'parse, +in' => sub {
-    {
-        no strict 'refs';
-        *Raisin::log = sub {};
-    }
-
-    for my $case (@IN_CASES) {
-        my $name = _make_name($case);
-
-        subtest $name => sub {
-            my $param = _make_object($case->{test});
-
-            if ($case->{expected}) {
-                isa_ok $param, 'Raisin::Param', 'param';
-                is $param->in, $case->{test}{data}{in};
-            }
-            else {
-                is $param, undef;
-            }
-        };
-    }
-};
+#subtest 'parse, +in' => sub {
+#    {
+#        no strict 'refs';
+#        *Raisin::log = sub {};
+#    }
+#
+#    for my $case (@IN_CASES) {
+#        my $name = _make_name($case);
+#
+#        subtest $name => sub {
+#            my $param = _make_object($case->{test});
+#
+#            if ($case->{expected}) {
+#                isa_ok $param, 'Raisin::Param', 'param';
+#                is $param->in, $case->{test}{data}{in};
+#            }
+#            else {
+#                is $param, undef;
+#            }
+#        };
+#    }
+#};
 
 subtest 'validate' => sub {
+    {
+        no strict 'refs';
+        *Raisin::log = sub { diag(join ',', @_) };
+    }
+
     for my $case (@CASES) {
         my $name = _make_name($case);
 
         subtest $name => sub {
             my $param = _make_object($case->{test});
             isa_ok $param, 'Raisin::Param', 'param';
+
+            use DDP;
+            p $param->enclosed->[0]->name;
+            p $param->enclosed->[0]->enclosed->[0]->name;
+            p $param->enclosed->[0]->enclosed->[1]->name;
+            p $param->enclosed->[1]->name;
 
             my $test = $case->{input};
             is $param->validate(\$test, $QUIET), $case->{expected}, "validate: $case->{input}";
