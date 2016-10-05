@@ -29,7 +29,7 @@ my @CASES = (
     {
         test => {
             required => 0,
-            data => { name => 'str', type => Str, default => 'def', regex  => qr/match/ },
+            data => { name => 'str', type => Str, default => 'def', regex => qr/match/ },
         },
         input => 42,
         expected => undef,
@@ -139,6 +139,11 @@ subtest 'parse, +accessors' => sub {
 };
 
 subtest 'parse, +in' => sub {
+    {
+        no strict 'refs';
+        *Raisin::log = sub {};
+    }
+
     for my $case (@IN_CASES) {
         my $name = _make_name($case);
 

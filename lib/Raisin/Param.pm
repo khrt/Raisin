@@ -36,7 +36,7 @@ sub _parse {
     $self->{$_} = $spec->{$_} for @ATTRS[0 .. $#ATTRS-1];
 
     if ($spec->{in}) {
-        return $self->in($spec->{in});
+        return unless $self->in($spec->{in});
     }
 
     return 1;
@@ -47,8 +47,8 @@ sub in {
 
     if (defined $value) {
         unless (grep { $value eq $_ } @LOCATION) {
-            printf STDERR "`$self->{name}' should be one of the following: %s\n",
-                join ', ', @LOCATION;
+            Raisin::log(warn => '`%s` should be one of: %s',
+                $self->name, join ', ', @LOCATION);
             return;
         }
 
@@ -64,54 +64,34 @@ sub validate {
     # Required
     # Only optional parameters can has default value
     if ($self->required && !defined($$ref_value)) {
-        #TODO: $self->app->log($e);
-        print STDERR "`$self->{name}' is required but empty!\n" unless $quiet;
+        Raisin::log(warn => '`%s` is required', $self->name) unless $quiet;
         return;
     }
 
     # Optional and empty
-    if (!defined($$ref_value) && !$self->required) {
-        #carp STDERR "$self->{name} optional and empty.";
+    if (!$self->required && !defined($$ref_value)) {
+        Raisin::log(info => '`%s` optional and empty', $self->name);
         return 1;
     }
 
-    # TODO: validate HASHes
-    if ($$ref_value && ref $$ref_value && ref $$ref_value ne 'ARRAY') {
-        #TODO: $self->app->log($e);
-        #print STDERR "`$self->{name}' \$ref_value should be SCALAR or ARRAYREF\n" unless $quiet;
-        return 1;
-    }
-
-    my $was_scalar;
-    if (ref $$ref_value ne 'ARRAY') {
-        $was_scalar = 1;
-        $$ref_value = [$$ref_value];
-    }
-
-    for my $v (@$$ref_value) {
-        # Type check
-        eval { $v = $self->type->($v) };
-        if (my $e = $@) {
-            unless ($quiet) {
-                #TODO: $self->app->log($e);
-                printf STDERR "Param `%s' didn't pass type constraint `%s' with value \"%s\".\n",
-                    $self->name, $self->type->name, $v;
-            }
-            return;
+    # Type check
+    eval { $$ref_value = $self->type->($$ref_value) };
+    if (my $e = $@) {
+        unless ($quiet) {
+            Raisin::log(warn => 'Param `%s` didn\'t pass constraint `%s` with value "%s"',
+                $self->name, $self->type->name, $$ref_value);
         }
-
-        # Param check
-        if ($self->regex && $v !~ $self->regex) {
-            unless ($quiet) {
-                #TODO: $self->app->log($e);
-                printf STDERR "Param `%s' didn't pass regex constraint `%s' with value \"%s\".\n",
-                    $self->name, $self->regex, $v;
-            }
-            return;
-        }
+        return;
     }
 
-    $$ref_value = $$ref_value->[0] if $was_scalar;
+    # Parameter check
+    if ($self->regex && $$ref_value !~ $self->regex) {
+        unless ($quiet) {
+            Raisin::log(warn => 'Param `%s` didn\'t match regex `%s` with value "%s"',
+                $self->name, $self->regex, $$ref_value);
+        }
+        return;
+    }
 
     1;
 }

@@ -65,13 +65,12 @@ sub add {
     }
 
     if (ref($path) && ref($path) ne 'Regexp') {
-        carp "Route `$path` should be SCALAR or Regexp";
+        print STDERR "Route `$path` should be SCALAR or Regexp\n";
         return;
     }
 
-    if (!ref($path)) {
-        $path =~ s{(.+)/$}{$1};
-    }
+    # Cut off last slash from the path
+    $path =~ s#(.+)/$#$1# if !ref($path);
 
     my $ep
         = Raisin::Routes::Endpoint->new(
