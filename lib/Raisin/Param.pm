@@ -8,7 +8,7 @@ use Raisin::Attributes;
 use Raisin::Util;
 
 my @ATTRIBUTES = qw(name type default regex desc);
-my @LOCATION = qw/path formData body header query/;
+my @LOCATIONS = qw(path formData body header query);
 
 has 'named';
 has 'required';
@@ -47,7 +47,7 @@ sub _parse {
         }
         else {
             Raisin::log(
-                warn => 'Ignore enclosed parameters for `%s`, type should be `HashRef` not `%s`',
+                warn => 'Ignoring enclosed parameters for `%s`, type should be `HashRef` not `%s`',
                 $self->name, $self->type->name
             );
         }
@@ -78,9 +78,9 @@ sub in {
     my ($self, $value) = @_;
 
     if (defined $value) {
-        unless (grep { $value eq $_ } @LOCATION) {
+        unless (grep { $value eq $_ } @LOCATIONS) {
             Raisin::log(warn => '`%s` should be one of: %s',
-                $self->name, join ', ', @LOCATION);
+                $self->name, join ', ', @LOCATIONS);
             return;
         }
 
@@ -106,8 +106,6 @@ sub validate {
         return 1;
     }
 
-    #####
-
     # Type check
     eval { $$ref_value = $self->type->($$ref_value) };
     if (my $e = $@) {
@@ -118,8 +116,21 @@ sub validate {
         return;
     }
 
-    # Parameter check
-    if ($self->regex && $$ref_value !~ $self->regex) {
+    # Nested
+    if ($self->type->name eq 'HashRef' && $self->enclosed) {
+        for my $p (@{ $self->enclosed }) {
+            my $v = $$ref_value->{ $self->name };
+
+            if ($p->type->name ne 'HashRef' && ref($$ref_value) eq 'HASH') {
+                return unless ref($v) eq 'HASH';
+                $v = $v->{ $p->name };
+            }
+
+            return unless $p->validate(\$v, $quiet);
+        }
+    }
+    # Regex
+    elsif ($self->regex && $$ref_value !~ $self->regex) {
         unless ($quiet) {
             Raisin::log(warn => 'Param `%s` didn\'t match regex `%s` with value "%s"',
                 $self->name, $self->regex, $$ref_value);
