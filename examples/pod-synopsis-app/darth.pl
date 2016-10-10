@@ -86,9 +86,9 @@ resource users => sub {
     summary 'Create new user';
     params(
         requires(
-            'user', type => HashRef[Any], encloses(
+            'user', type => HashRef, encloses(
                 requires('first_name', type => Str, desc => 'First name'),
-                requires('last_name', type => Str, desc => 'First name'),
+                requires('last_name', type => Str, desc => 'Last name'),
             )
         ),
         requires('password', type => Str, desc => 'User password'),

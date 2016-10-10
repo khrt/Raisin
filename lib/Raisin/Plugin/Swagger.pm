@@ -5,7 +5,9 @@ use warnings;
 
 use parent 'Raisin::Plugin';
 
-use JSON 'encode_json';
+use Data::Dumper;
+use Digest::MD5 qw/md5_hex/;
+use JSON qw/encode_json/;
 
 my %SETTINGS;
 my %DEFAULTS;
@@ -23,146 +25,23 @@ sub build {
         );
     }
 
-    if ($args{version} && $args{version} == 1.2) {
-        print STDERR "Will be removed in future releases\n";
-
-        $self->register(swagger_build_spec => sub { $self->_spec_12 });
-        $self->{swagger_version} = '1.2';
-    }
-    else {
-        $self->register(
-            swagger_build_spec => sub { $self->_spec_20 },
-            swagger_setup => sub { %SETTINGS = @_ },
-        );
-        $self->{swagger_version} = '2.0';
-    }
-}
-
-# NOTE: Deprecated
-sub _spec_12 {
-    my $self = shift;
-    return 1 if $self->{built};
-
-    my $app = $self->app;
-
-    my %apis;
-
-    # Prepare API data
-    for my $r (@{ $app->routes->routes }) {
-        my @params;
-        for my $p (@{ $r->params }) {
-            my $param_type = do {
-                if    ($p->named)                 {'path'}
-                elsif ($r->method =~ /post|put/i) {'form'}
-                else                              {'query'}
-            };
-
-            push @params,
-                {
-                    allowMultiple => JSON::true,
-                    defaultValue  => $p->default // JSON::false,
-                    description   => $p->desc || '~',
-                    format        => $p->type->display_name,
-                    name          => $p->name,
-                    paramType     => $param_type,
-                    required      => $p->required ? JSON::true : JSON::false,
-                    type          => $p->type->name,
-                };
-        }
-
-        my $path = $r->path;
-
-        # :id -> {id}
-        $path =~ s#:([^/]+)#{$1}#msxg;
-
-        # look for namespace
-        my ($ns) = $path =~ m#^(/[^/]+)#;
-
-        # -> [ $ns => { ... } ]
-        push @{ $apis{$ns} },
-            {
-                path => $path,
-                description => '',
-                operations  => [{
-                    method     => $r->method,
-                    nickname   => $r->method . '_' . $path,
-                    notes      => '',
-                    parameters => \@params,
-                    summary    => $r->desc,
-                    type       => '',
-                }],
-            };
-    }
-
-    my %template = (
-        swaggerVersion => '1.2',
+    $self->register(
+        swagger_build_spec => sub { $self->_spec_20 },
+        swagger_setup => sub { %SETTINGS = @_ },
     );
-    $template{apiVersion} = $self->app->api_version if $self->app->api_version;
-
-    # Prepare index
-    my %index = (%template);
-    for my $ns (keys %apis) {
-        my $desc = $app->resource_desc($ns) || "Operations about ${ \( $ns =~ m#/(.+)# ) }";
-
-        my $api = {
-            path => $ns,
-            description => $desc,
-        };
-
-        push @{ $index{apis} }, $api;
-    }
-
-    $app->add_route(
-        method => 'GET',
-        path => '/api-docs',
-        code => sub {
-            res->content_type('application/json');
-            encode_json(\%index);
-        }
-    );
-
-    for my $ns (keys %apis) {
-        my $base_path = $app->req ? $app->req->base->as_string : '';
-        $base_path =~ s#/$##msx;
-
-        my @content_type = do {
-            if ($app->api_format) {
-                ($app->api_format)
-            }
-            else {
-                qw(application/yaml application/json);
-            }
-        };
-
-        my %description = (
-            %template,
-            apis => $apis{$ns},
-            basePath => $base_path,
-            produces => [@content_type],
-            resourcePath => $ns,
-        );
-
-        $app->add_route(
-            method => 'GET',
-            path => "/api-docs${ns}",
-            code => sub {
-                res->content_type('application/json');
-                encode_json(\%description);
-            }
-        );
-    }
-
-    $self->{built} = 1;
-    1;
+    $self->{swagger_version} = '2.0';
 }
 
 sub _spec_20 {
     my $self = shift;
     return 1 if $self->{built};
-    my $req = $self->app->req;
 
-    my @content_types = $self->app->api_format
-        ? $self->app->api_format
+    my $app = $self->app;
+    my $req = $app->req;
+    my $routes = $app->routes->routes;
+
+    my @content_types = $app->api_format
+        ? $app->api_format
         : qw(application/yaml application/json);
 
     my $base_path = $req->base->as_string;
@@ -173,19 +52,19 @@ sub _spec_20 {
 
     my %spec = (
         swagger  => '2.0',
-        info     => $self->_info_object,
+        info     => _info_object($app),
         host     => $req->env->{HTTP_HOST},
         basePath => $base_path,
         schemes  => [$req->scheme],
         consumes => \@content_types,
         produces => \@content_types,
-        paths    => $self->_paths_object, #R
-        #definitions => undef,
+        paths    => _paths_object($routes), #R
+        definitions => _definitions_object($routes),
         #parameters => undef,
         #responses => undef,
         #securityDefinitions => undef,
         #security => undef,
-        tags => $self->_tags_object,
+        tags => _tags_object($self->app),
         #externalDocs => '', # TODO
     );
 
@@ -221,11 +100,11 @@ sub _license_object {
 }
 
 sub _info_object {
-    my $self = shift;
+    my $app = shift;
 
     my %obj = (
         title => $SETTINGS{title} || 'API', #R
-        version => $self->app->api_version || '0.0.1', #R
+        version => $app->api_version || '0.0.1', #R
     );
 
     $obj{description} = $SETTINGS{description} if $SETTINGS{description};
@@ -241,29 +120,16 @@ sub _parameters_object {
     my ($method, $pp) = @_;
 
     my @obj;
-
     for my $p (@$pp) {
-        my $location = do {
-            # Available: query, header, path, formData or body
-            if    ($p->in)                 { $p->in }
-            elsif ($p->named)              {'path'}
-            elsif ($method =~ /post|put/i) {'formData'} # can be `formData` or `body`
-            else                           {'query'}
-        };
+        my ($type, $format) = _param_type($p->type);
 
-        my ($type, $format) = do {
-            if    ($p->type->name =~ /int/i)            { 'integer', 'int32' }
-            elsif ($p->type->name =~ /long/i)           { 'integer', 'int64' }
-            elsif ($p->type->name =~ /num|float|real/i) { 'number',  'float' }
-            elsif ($p->type->name =~ /double/i)         { 'number',  'double' }
-            elsif ($p->type->name =~ /str/i)            { 'string',  undef }
-            elsif ($p->type->name =~ /byte/i)           { 'string',  'byte' }
-            elsif ($p->type->name =~ /bool/i)           { 'boolean', undef }
-            elsif ($p->type->name =~ /datetime/i)       { 'string',  'date-time' }
-            elsif ($p->type->name =~ /date/i)           { 'string',  'date' }
-            # fallback
-            else { 'string', undef }
-            # TODO string, number, integer, boolean, array, file
+        # Available: query, header, path, formData or body
+        my $location = do {
+            if    ($p->in)                       { $p->in }
+            elsif ($p->named)                    {'path'}
+            elsif ($type eq 'object')            {'body'}
+            elsif ($method =~ /patch|post|put/i) {'formData'}
+            else                                 {'query'}
         };
 
         my %param = (
@@ -271,20 +137,74 @@ sub _parameters_object {
             in          => $location, #R
             name        => $p->name, #R
             required    => $p->required ? JSON::true : JSON::false,
-            type        => $type, #R
         );
         $param{default} = $p->default if defined $p->default;
-        $param{format} = $format if $format;
 
-        #if ($type eq 'array') {
-        #    $param{items} = ''; #R if is array
-        #    $param{collectionFormat} = ''; # if is array
-        #}
+        if ($type eq 'object') {
+            $param{schema} = {
+                '$ref' => sprintf('#/definitions/%s', _name_for_object($p)),
+            };
+        }
+        else {
+            $param{type} = $type; #R
+            $param{format} = $format if $format;
+        }
 
         push @obj, \%param;
     }
 
     \@obj;
+}
+
+sub _definitions_object {
+    my $routes = shift;
+
+    my @objects;
+    for my $r (@$routes) {
+        my @pp = @{ $r->params };
+
+        while (my $p = pop @pp) {
+            next if $p->type->name ne 'HashRef';
+
+            push @pp, @{ $p->enclosed };
+            push @objects, $p;
+        }
+    }
+
+    my %definitions = map { %{ _schema_object($_) } } @objects;
+    \%definitions;
+}
+
+sub _schema_object {
+    my $p = shift;
+    return if $p->type->name ne 'HashRef';
+
+    my (@required, %properties);
+
+    for my $pp (@{ $p->enclosed }) {
+        if ($pp->type->name eq 'HashRef') {
+            $properties{ $pp->name } = {
+                '$ref' => sprintf('#/definitions/%s', _name_for_object($pp)),
+            };
+        }
+        else {
+            my ($type, $format) = _param_type($pp->type);
+            $properties{ $pp->name }{type} = $type;
+            $properties{ $pp->name }{format} = $format if $format;
+        }
+
+        push @required, $pp->name if $pp->required;
+    }
+
+    my %object = (
+        _name_for_object($p) => {
+            type => 'object',
+            required => \@required,
+            properties => \%properties,
+        }
+    );
+
+    \%object;
 }
 
 sub _operation_object {
@@ -305,13 +225,13 @@ sub _operation_object {
         # TODO:
         responses => { #R
             500 => { #R
-                description => 'server exception', #R
+                description => 'Server exception', #R
                 #schema => '',
                 #headers => '',
                 #examples => '',
             },
         },
-        #schemes => [''],
+        #schemes => [],
         #deprecated => 'false', # TODO
         #security => '',
     );
@@ -324,11 +244,10 @@ sub _operation_object {
 }
 
 sub _paths_object {
-    my $self = shift;
+    my $routes = shift;
 
     my %obj;
-
-    for my $r (sort { $a->path cmp $b->path } @{ $self->app->routes->routes }) {
+    for my $r (sort { $a->path cmp $b->path } @$routes) {
         my $path = $r->path;
         $path =~ s#:([^/]+)#{$1}#msix;
 
@@ -339,10 +258,10 @@ sub _paths_object {
 }
 
 sub _tags_object  {
-    my $self = shift;
+    my $app = shift;
 
     my %tags;
-    for my $r (@{ $self->app->routes->routes }) {
+    for my $r (@{ $app->routes->routes }) {
         $tags{ $_ }++ for @{ $r->tags };
     }
 
@@ -350,7 +269,7 @@ sub _tags_object  {
     for my $t (keys %tags) {
         my $tag = {
             name => $t, #R
-            description => $self->app->resource_desc($t),
+            description => $app->resource_desc($t),
             #externalDocs => {
             #    description => '',
             #    url => '', #R
@@ -361,6 +280,45 @@ sub _tags_object  {
 
     \@tags;
 }
+
+sub _param_type {
+    my $t = shift;
+
+    if    ($t->name =~ /int/i)            { 'integer', 'int32' }
+    elsif ($t->name =~ /long/i)           { 'integer', 'int64' }
+    elsif ($t->name =~ /num|float|real/i) { 'number',  'float' }
+    elsif ($t->name =~ /double/i)         { 'number',  'double' }
+    elsif ($t->name =~ /str/i)            { 'string',  undef }
+    elsif ($t->name =~ /byte/i)           { 'string',  'byte' }
+    elsif ($t->name =~ /bool/i)           { 'boolean', undef }
+    elsif ($t->name =~ /datetime/i)       { 'string',  'date-time' }
+    elsif ($t->name =~ /date/i)           { 'string',  'date' }
+    elsif ($t->name =~ /password/i)       { 'string',  'password' }
+    elsif ($t->name =~ /hashref/i)        { 'object',  undef }
+    else {
+        if   ($t->display_name =~ /ArrayRef/) { 'array',  undef }
+        else                                  { 'string', undef }    # fallback
+    }
+}
+
+sub _name_for_object {
+    my $obj = shift;
+    sprintf '%s-%s', ucfirst($obj->name), _fingerprint($obj);
+}
+
+sub _fingerprint {
+    my $obj = shift;
+
+    local $Data::Dumper::Deparse = 1;
+    local $Data::Dumper::Indent = 0;
+    local $Data::Dumper::Maxdepth = 2;
+    local $Data::Dumper::Purity = 0;
+    local $Data::Dumper::Sortkeys = 1;
+    local $Data::Dumper::Terse = 1;
+
+    uc(substr(md5_hex(Data::Dumper->Dump([$obj], [qw/obj/])), 0, 10));
+}
+
 
 1;
 
@@ -390,9 +348,8 @@ Enables a cross-origin resource sharing.
 
 =head1 VERSION
 
-Which Swagger version to use. By default 2.0 is used, also 1.2 available.
+Supports only version 2.0 of Swagger.
 
-    plugin 'Swagger', version => 1.2;
 
 =head1 FUNCTIONS
 
@@ -425,8 +382,6 @@ See an example below.
             url => 'http://wayne.enterprises/licenses/',
         },
     );
-
-B<Note>: not available for Swagger 1.2.
 
 =head1 AUTHOR
 
