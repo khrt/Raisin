@@ -15,7 +15,7 @@ my @APP_EXEC_METHODS = qw(new run);
 my @APP_METHODS = qw(req res param include_missing session present error);
 my @HOOKS_METHODS = qw(before before_validation after_validation after);
 my @HTTP_METHODS = qw(del get head options patch post put);
-my @ROUTES_METHODS = qw(resource namespace route_param params requires optional encloses);
+my @ROUTES_METHODS = qw(resource namespace route_param params requires optional group);
 
 my @SWAGGER_MERTHODS = qw(desc summary tags);
 
@@ -117,7 +117,8 @@ sub params { $SETTINGS{params} = \@_ }
 
 sub requires { (requires => { name => @_ }) }
 sub optional { (optional => { name => @_ }) }
-sub encloses { (encloses => \@_) }
+
+sub group(&) { (encloses => [shift->()]) }
 
 # Swagger
 sub desc    { $SETTINGS{desc} = shift }
