@@ -191,9 +191,8 @@ sub _schema_object {
     for my $pp (@{ $p->enclosed }) {
 
         if ($pp->type->name eq 'HashRef') {
-            $properties{ $pp->name }{schema} = {
-                '$ref' => sprintf('#/definitions/%s', _name_for_object($pp)),
-            };
+            $properties{ $pp->name }{'$ref'} =
+                sprintf('#/definitions/%s', _name_for_object($pp));
         }
         elsif ($pp->type->display_name =~ /^ArrayRef/) {
             $properties{ $pp->name }{type} = 'array';

@@ -14,18 +14,14 @@ use Types::Standard qw(HashRef Any Int Str);
 
 my %USERS = (
     1 => {
-        user => {
-            first_name => 'Darth',
-            last_name => 'Wader',
-        },
+        first_name => 'Darth',
+        last_name => 'Wader',
         password => 'deathstar',
         email => 'darth@deathstar.com',
     },
     2 => {
-        user => {
-            first_name => 'Luke',
-            last_name => 'Skywalker',
-        },
+        first_name => 'Luke',
+        last_name => 'Skywalker',
         password => 'qwerty',
         email => 'l.skywalker@jedi.com',
     },
@@ -81,24 +77,24 @@ resource users => sub {
         { data => \@users }
     };
 
-    # requires('person', type => Dict[name => Str, age => Int]);
-    # curl -X POST -H "Content-Type: application/json" localhost:5000/users -d '{"user":{"first_name":"Joe","last_name":"Doe"},"password":"qwerty","email":"joe@doe.com"}'
+    # curl -X POST \
+    #   -H "Content-Type: application/json" \
+    #   -d '{"user":{"first_name":"Joe","last_name":"Doe","password":"qwerty","email":"joe@doe.com"}}'
+    #   localhost:5000/users
     summary 'Create new user';
     params(
-        requires(
-            'user', type => HashRef, encloses(
-                requires('first_name', type => Str, desc => 'First name'),
-                requires('last_name', type => Str, desc => 'Last name'),
-            )
-        ),
-        requires('password', type => Str, desc => 'User password'),
-        optional('email', type => Str, default => undef, regex => qr/.+\@.+/, desc => 'User email'),
+        requires('user', type => HashRef, desc => 'User object', group {
+            requires('first_name', type => Str, desc => 'First name'),
+            requires('last_name', type => Str, desc => 'Last name'),
+            requires('password', type => Str, desc => 'User password'),
+            optional('email', type => Str, default => undef, regex => qr/.+\@.+/, desc => 'User email'),
+        }),
     );
     post sub {
         my $params = shift;
 
         my $id = max(keys %USERS) + 1;
-        $USERS{$id} = $params;
+        $USERS{$id} = $params->{user};
 
         { success => 1 }
     };
@@ -118,15 +114,6 @@ resource users => sub {
             { success => delete $USERS{ $params->{id} } };
         };
     };
-
-    summary 'NOP';
-    get nop => sub { };
-};
-
-desc 'Echo API endpoint';
-resource echo => sub {
-    params optional('data0', type => Any, default => "ёй");
-    get sub { shift };
 };
 
 run;
