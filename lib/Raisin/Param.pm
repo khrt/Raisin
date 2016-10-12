@@ -93,7 +93,7 @@ sub in {
 sub validate {
     my ($self, $ref_value, $quiet) = @_;
 
-    # Required
+    # Required and empty
     # Only optional parameters can has default value
     if ($self->required && !defined($$ref_value)) {
         Raisin::log(warn => '`%s` is required', $self->name) unless $quiet;
@@ -119,10 +119,9 @@ sub validate {
     # Nested
     if ($self->type->name eq 'HashRef' && $self->enclosed) {
         for my $p (@{ $self->enclosed }) {
-            my $v = $$ref_value->{ $self->name };
+            my $v = $$ref_value;
 
-            if ($p->type->name ne 'HashRef' && ref($$ref_value) eq 'HASH') {
-                return unless ref($v) eq 'HASH';
+            if ($self->type->name eq 'HashRef') {
                 $v = $v->{ $p->name };
             }
 

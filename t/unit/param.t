@@ -84,6 +84,7 @@ my @CASES = (
         input => 'string',
         expected => undef,
     },
+
     # Nested
     {
         test => {
@@ -104,13 +105,11 @@ my @CASES = (
             },
         },
         input => {
-            person => {
-                name => {
-                    first_name => 'Bruce',
-                    last_name => 'Wayne',
-                },
-                city => 'Gotham City',
+            name => {
+                first_name => 'Bruce',
+                last_name => 'Wayne',
             },
+            city => 'Gotham City',
         },
         expected => 1,
     },
@@ -133,13 +132,12 @@ my @CASES = (
             },
         },
         input => {
-            person => {
-                name => 'Bruce Wayne',
-                city => 'Gotham City',
-            },
+            name => 'Bruce Wayne',
+            city => 'Gotham City',
         },
         expected => undef,
     },
+
     {
         test => {
             required => 1,
@@ -159,11 +157,32 @@ my @CASES = (
             },
         },
         input => {
-            person => {
-                name => 'Bruce Wayne',
-                city => 'Gotham City',
+            name => 'Bruce Wayne',
+            city => 'Gotham City',
+        },
+        expected => 1,
+    },
+
+    {
+        test => {
+            required => 1,
+            data => {
+                name => 'lvl0',
+                type => HashRef,
+                encloses => [
+                    requires => {
+                        name => 'lvl1', type => HashRef, encloses => [
+                            requires => {
+                                name => 'lvl2', type => HashRef, encloses => [
+                                    requires => { name => 'lvl3', type => Str },
+                                ],
+                            },
+                        ],
+                    },
+                ],
             },
         },
+        input => { lvl1 => { lvl2 => { lvl3 => 'value', }, }, },
         expected => 1,
     },
     {
@@ -185,30 +204,31 @@ my @CASES = (
                 ],
             },
         },
-        input => { lvl0 => { lvl1 => { lvl2 => { lvl3 => 'value', }, }, }, },
-        expected => 1,
-    },
-    {
-        test => {
-            required => 1,
-            data => {
-                name => 'lvl0',
-                type => HashRef,
-                encloses => [
-                    requires => {
-                        name => 'lvl1', type => HashRef, encloses => [
-                            requires => {
-                                name => 'lvl2', type => HashRef, encloses => [
-                                    requires => { name => 'lvl3', type => Str },
-                                ],
-                            },
-                        ],
-                    },
-                ],
-            },
-        },
-        input => { lvl0 => { lvl1 => { lvl2 => { }, }, }, },
+        input => { lvl1 => { lvl2 => { }, }, },
         expected => undef,
+    },
+
+    {
+        test => {
+            required => 1,
+            data => {
+                name => 'user',
+                type => HashRef,
+                encloses => [
+                    requires => { name => 'first_name', type => Str, desc => 'First name' },
+                    requires => { name => 'last_name', type => Str, desc => 'Last name' },
+                    requires => { name => 'password', type => Str, desc => 'User password' },
+                    optional => { name => 'email', type => Str, default => undef, regex => qr/.+\@.+/, desc => 'User email' },
+                ]
+            },
+        },
+        input => {
+            first_name => 'Bruce',
+            last_name => 'Wayne',
+            password => 'qwerty',
+            email => 'joe@doe.com',
+        },
+        expected => 1,
     },
 );
 
