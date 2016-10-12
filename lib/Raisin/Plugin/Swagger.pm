@@ -145,6 +145,13 @@ sub _parameters_object {
                 '$ref' => sprintf('#/definitions/%s', _name_for_object($p)),
             };
         }
+        elsif ($type eq 'array') {
+            $param{type} = $type;
+
+            my ($items_type, $items_format) = _param_type($p->type->type_parameter);
+            $param{items}{type} = $items_type;
+            $param{items}{format} = $items_format if $items_format;
+        }
         else {
             $param{type} = $type; #R
             $param{format} = $format if $format;
@@ -182,10 +189,18 @@ sub _schema_object {
     my (@required, %properties);
 
     for my $pp (@{ $p->enclosed }) {
+
         if ($pp->type->name eq 'HashRef') {
-            $properties{ $pp->name } = {
+            $properties{ $pp->name }{schema} = {
                 '$ref' => sprintf('#/definitions/%s', _name_for_object($pp)),
             };
+        }
+        elsif ($pp->type->display_name =~ /^ArrayRef/) {
+            $properties{ $pp->name }{type} = 'array';
+
+            my ($items_type, $items_format) = _param_type($pp->type->type_parameter);
+            $properties{ $pp->name }{items}{type} = $items_type;
+            $properties{ $pp->name }{items}{format} = $items_format if $items_format;
         }
         else {
             my ($type, $format) = _param_type($pp->type);
@@ -223,13 +238,16 @@ sub _operation_object {
         consumes => $DEFAULTS{consumes},
         produces => $DEFAULTS{produces},
         # TODO:
-        responses => { #R
-            500 => { #R
-                description => 'Server exception', #R
+        responses => {
+            500 => {
+                description => 'Server exception',
                 #schema => '',
                 #headers => '',
                 #examples => '',
             },
+            400 => {
+                description => 'Invalid parameters',
+            }
         },
         #schemes => [],
         #deprecated => 'false', # TODO
