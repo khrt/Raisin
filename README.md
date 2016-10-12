@@ -9,25 +9,30 @@ Raisin - a REST API micro framework for Perl.
 
     use utf8;
 
+    use FindBin;
+    use lib "$FindBin::Bin/../../lib";
+
     use List::Util qw(max);
     use Raisin::API;
-    use Types::Standard qw(Any Int Str);
+    use Types::Standard qw(HashRef Any Int Str);
 
     my %USERS = (
         1 => {
-            name => 'Darth Wader',
+            first_name => 'Darth',
+            last_name => 'Wader',
             password => 'deathstar',
             email => 'darth@deathstar.com',
         },
         2 => {
-            name => 'Luke Skywalker',
+            first_name => 'Luke',
+            last_name => 'Skywalker',
             password => 'qwerty',
             email => 'l.skywalker@jedi.com',
         },
     );
 
     plugin 'Swagger', enable => 'CORS';
-    api_format 'json';
+    #api_format 'json';
 
     swagger_setup(
         title => 'A POD synopsis API',
@@ -50,8 +55,8 @@ Raisin - a REST API micro framework for Perl.
     resource users => sub {
         summary 'List users';
         params(
-            optional => { name => 'start', type => Int, default => 0, desc => 'Pager (start)' },
-            optional => { name => 'count', type => Int, default => 10, desc => 'Pager (count)' },
+            optional('start', type => Int, default => 0, desc => 'Pager (start)'),
+            optional('count', type => Int, default => 10, desc => 'Pager (count)'),
         );
         get sub {
             my $params = shift;
@@ -78,21 +83,24 @@ Raisin - a REST API micro framework for Perl.
 
         summary 'Create new user';
         params(
-            requires => { name => 'name', type => Str, desc => 'User name' },
-            requires => { name => 'password', type => Str, desc => 'User password' },
-            optional => { name => 'email', type => Str, default => undef, regex => qr/.+\@.+/, desc => 'User email' },
+            requires('user', type => HashRef, desc => 'User object', group {
+                requires('first_name', type => Str, desc => 'First name'),
+                requires('last_name', type => Str, desc => 'Last name'),
+                requires('password', type => Str, desc => 'User password'),
+                optional('email', type => Str, default => undef, regex => qr/.+\@.+/, desc => 'User email'),
+            }),
         );
         post sub {
             my $params = shift;
 
             my $id = max(keys %USERS) + 1;
-            $USERS{$id} = $params;
+            $USERS{$id} = $params->{user};
 
             { success => 1 }
         };
 
         desc 'Actions on the user';
-        params requires => { name => 'id', type => Int, desc => 'User ID' };
+        params requires('id', type => Int, desc => 'User ID');
         route_param 'id' => sub {
             summary 'Show user';
             get sub {
@@ -106,15 +114,6 @@ Raisin - a REST API micro framework for Perl.
                 { success => delete $USERS{ $params->{id} } };
             };
         };
-
-        summary 'NOP';
-        get nop => sub { };
-    };
-
-    desc 'Echo API endpoint';
-    resource echo => sub {
-        params optional('data0', type => Any, default => "ёй");
-        get sub { shift };
     };
 
     run;
@@ -380,7 +379,7 @@ Query string and body parameters will be merged (see ["parameters" in Plack::Req
 
 ## Declared parameters
 
-Raisin allows you to access only the parameters that have been declared by your
+Raisin allows you to access only the parameters that have been declared by you in
 ["params" in Raisin](https://metacpan.org/pod/Raisin#params) block.
 
 By default you can get all declared parameter as a first argument passed to your
@@ -403,8 +402,7 @@ Response:
 
     { "data": nil }
 
-Once we add parameters requirements, Raisin will start returning only
-the declared params.
+Once we add parameters block, Raisin will start return only the declared parameters.
 
 Application:
 
@@ -427,7 +425,7 @@ Response:
 
     { "data": { "id": 42 } }
 
-By default declared parameters doesn't contain parameters that has `undef` value.
+By default declared parameters don't contain parameters which have no value.
 If you want to return all parameters you can use the `include_missing` function.
 
 Application:
@@ -456,8 +454,8 @@ Response:
 You can define validations and coercion options for your parameters using a
 ["params" in Raisin](https://metacpan.org/pod/Raisin#params) block.
 
-Parameters can `requires` a value and can be an `optional`.
-`optional` parameters can have a default value.
+Parameters can `requires` value or can be `optional`.
+`optional` parameters can have default value.
 
     params(
         requires('name', type => Str),
@@ -479,6 +477,26 @@ Available arguments:
 - desc
 - regex
 - in
+
+## Nested Parameters
+
+### Hash
+
+Use a keyword `group` to define a group of parameters which is enclosed to
+the parent `HashRef` parameter.
+
+    params(
+        requires('name', type => HashRef, group {
+            requires('first_name', type => Str),
+            requires('last_name', type => Str),
+        })
+    )
+
+### Array
+
+Use `ArrayRef[*]` types from your compatible type library to define arrays.
+
+    requires('list', type => ArrayRef[Int], desc => 'List of integers')
 
 ## Types
 
@@ -604,9 +622,9 @@ Including parameters:
     GET     /echo
       *data Any{ёй}
 
-## Swagger
+## OpenAPI/Swagger
 
-[Swagger](https://github.com/wordnik/swagger-core) compatible API documentations.
+[Swagger](http://swagger.io) compatible API documentations.
 
     plugin 'Swagger';
 

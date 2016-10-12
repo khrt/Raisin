@@ -1,5 +1,8 @@
 
-0.68 Nested params
+0.68 Nested parameters
+    * Nested parameters:
+        - Parameters by itself;
+        - Swagger/OpenAPI support;
     * Syntax sugar: requires and optional keywords to declare parameters;
     * Logging support in Routes;
 
