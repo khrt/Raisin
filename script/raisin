@@ -46,7 +46,7 @@ exit 0;
 
 sub print_openapi_spec {
     if (!$file || !-e $file) {
-        print "$0: file `$file` doesn't exists\n";
+        print "$0: file `$file` doesn't exist\n";
         exit;
     }
 
@@ -76,7 +76,7 @@ sub print_routes {
     my %args = @_;
 
     if (!$file || !-e $file) {
-        print "$0: file `$file` doesn't exists\n";
+        print "$0: file `$file` doesn't exist\n";
         exit;
     }
 
@@ -105,13 +105,11 @@ sub print_routes {
                     }
                 };
 
-                printf "  %s%-${longest}s %s%s",
+                printf "  %s%-${longest}s %s%s\n",
                     $p->required ? colored(['cyan'], '*') : ' ',
                     $p->name,
                     colored(['yellow'], $p->type->name),
                     $default_str;
-
-                print "\n";
             }
         }
     }
