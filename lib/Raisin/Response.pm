@@ -60,7 +60,13 @@ sub render {
     my $self = shift;
 
     my $body = $self->body;
-    $self->status(200) if not $self->status;
+
+    if (!$self->status && !$body) {
+        $self->status(204);
+    }
+    elsif (!$self->status) {
+        $self->status(200);
+    }
 
     if (ref $body) {
         $body = $self->serialize($self->format, $body);
@@ -72,10 +78,6 @@ sub render {
 
     $self;
 }
-
-sub render_401 { shift->render_error(401, shift || 'Unauthorized') }
-sub render_404 { shift->render_error(404, shift || 'Nothing found') }
-sub render_500 { shift->render_error(500, shift || 'Internal error') }
 
 sub render_error {
     my ($self, $code, $message) = @_;
@@ -94,7 +96,10 @@ Raisin::Response - Response class for Raisin.
 
 =head1 SYNOPSIS
 
-    Raisin::Response->new;
+    my $res = Raisin::Response->new;
+    $res->status(200);
+    $res->body('Raisin');
+    $res->finalize;
 
 =head1 DESCRIPTION
 
@@ -109,12 +114,6 @@ Extends L<Plack::Response>.
 =head3 rendered
 
 =head3 render
-
-=head3 render_401
-
-=head3 render_404
-
-=head3 render_500
 
 =head3 render_error
 

@@ -76,6 +76,8 @@ sub run {
     my $self = shift;
     my $psgi = sub { $self->psgi(@_) };
 
+    $self->{allowed_methods} = $self->generate_allowed_methods;
+
     # Add middleware
     for my $class (keys %{ $self->{middleware} }) {
         # Make sure the middleware was not already loaded
@@ -89,40 +91,32 @@ sub run {
     # load fallback logger (Raisin::Logger)
     $self->load_plugin('Logger', fallback => 1);
 
-    $self->generate_options_routes;
-
     return $psgi;
 }
 
-sub generate_options_routes {
+sub generate_allowed_methods {
     my $self = shift;
 
-    my %general_methods;
+    my %allowed_methods_by_endpoint;
 
     # `options` for each `path`
     for my $path (keys %{ $self->routes->list }) {
-        my @methods = keys %{ $self->routes->list->{$path} };
-        $general_methods{$_}++ for @methods;
+        my $methods = join ', ',
+            sort(keys(%{ $self->routes->list->{$path} }), 'OPTIONS');
 
         $self->add_route(
             method => 'OPTIONS',
             path => $path,
             code => sub {
-                $self->res->headers([Allow => join(', ', sort @methods)]);
+                $self->res->headers([Allow => $methods]);
                 undef;
             },
         );
+
+        $allowed_methods_by_endpoint{$path} = $methods;
     }
 
-    # all methods which server supports
-    $self->add_route(
-        method => 'OPTIONS',
-        path => '/',
-        code => sub {
-            $self->res->headers([Allow => join(', ', sort keys %general_methods)]);
-            undef;
-        },
-    );
+    \%allowed_methods_by_endpoint;
 }
 
 sub psgi {
@@ -142,9 +136,14 @@ sub psgi {
 
         # Find a route
         my $route = $self->routes->find($req->method, $req->path);
-
-        if (!$route) {
-            $res->render_404;
+        # The requested path exists but requested method not
+        if (!$route && $self->{allowed_methods}{ $req->path }) {
+            $res->status(405); # Method Not Allowed
+            return $res->finalize;
+        }
+        # Nothing found
+        elsif (!$route) {
+            $res->status(404);
             return $res->finalize;
         }
 
@@ -154,13 +153,14 @@ sub psgi {
             || (($self->api_format && $type) && ($self->api_format ne $type)))
         {
             $self->log(error => 'Content-type provided not acceptable');
-            $res->render_error(406, 'Not acceptable');
+            $res->status(406);
             return $res->finalize;
         }
 
         my $code = $route->code;
         if (!$code || ($code && ref($code) ne 'CODE')) {
-            $res->render_500('Invalid endpoint for ' . $req->path);
+            $res->status(500);
+            $res->body('Invalid Endpoint For ' . $req->path);
             return $res->finalize;
         }
 
@@ -168,7 +168,8 @@ sub psgi {
 
         # Validation and coercion of declared params
         if (!$req->prepare_params($route->params, $route->named)) {
-            $res->render_error(400, 'Invalid parameters');
+            $res->status(400);
+            $res->body('Invalid Parameters');
             return $res->finalize;
         }
 
@@ -201,8 +202,10 @@ sub psgi {
         $self->log(error => $e);
 
         my $msg = $ENV{PLACK_ENV}
-            && $ENV{PLACK_ENV} eq 'deployment' ? 'Internal error' : $e;
-        $res->render_500($msg);
+            && $ENV{PLACK_ENV} eq 'deployment' ? 'Internal Error' : $e;
+
+        $res->status(500);
+        $res->body($msg);
     };
 
     if (ref($ret) eq 'CODE') {
@@ -490,9 +493,19 @@ or any other qualifier.
 By default tags are added automatically based on it's namespace but you always
 can overwrite it using a C<tags> function.
 
+=head3 entity
+
+Entity keyword allows to declare response object which will be used to generate
+OpenAPI specification.
+
+    entity 'MusicApp::Entity::Album', is => ArrayRef;
+
+
+TODO
+
 =head3 params
 
-Here you can define validations and coercion options for your parameters.
+Defines validations and coercion options for your parameters.
 Can be applied to any HTTP method and/or C<route_param> to describe parameters.
 
     params(
@@ -643,6 +656,47 @@ include C<with> key, which is defined the entity to expose. See L<Raisin::Entity
 L<Raisin::Entity> supports L<DBIx::Class> and L<Rose::DB::Object>.
 
 For details see examples in I<examples/music-app> and L<Raisin::Entity>.
+
+=head1 ALLOWED METHODS
+
+When you add a route for a resource, a route for the OPTIONS method will also be
+added. The response to an OPTIONS request will include an "Allow" header listing
+the supported methods.
+
+    get 'count' => sub {
+        { count => $count };
+    };
+
+    params(
+        requires('num', type => Int, desc => 'Value to add to the count.'),
+    );
+    put 'count' => sub {
+        my $params = shift;
+        $count += $params->{num};
+        { count: $count };
+    };
+
+
+    curl -v -X OPTIONS http://localhost:5000/count
+
+    > OPTIONS /count HTTP/1.1
+    > Host: localhost:5000
+    >
+    * HTTP 1.0, assume close after body
+    < HTTP/1.1 204 No Content
+    < Allow: GET, OPTOINS, PUT
+
+If a request for a resource is made with an unsupported HTTP method, an HTTP 405
+(Method Not Allowed) response will be returned.
+
+    curl -X DELETE -v http://localhost:3000/count
+
+    > DELETE /count HTTP/1.1
+    > Host: localhost:5000
+    >
+    * HTTP 1.0, assume close after body
+    < HTTP/1.1 405 Method Not Allowed
+    < Allow: OPTIONS, GET, PUT
 
 =head1 PARAMETERS
 
