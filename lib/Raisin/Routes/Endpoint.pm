@@ -10,6 +10,7 @@ has 'api_format';
 has 'check' => {};
 has 'code';
 has 'desc';
+has 'entity';
 has 'format';
 has 'method';
 has 'named';

@@ -5,6 +5,7 @@ use warnings;
 use Test::More;
 
 use Raisin::API;
+use Raisin::Entity::Object;
 use Raisin::Response;
 use Raisin::Routes;
 
@@ -212,7 +213,9 @@ subtest 'present' => sub {
     {
         no strict 'refs';
         no warnings 'once';
-        @Raisin::API::Entity::Test::EXPOSE = ({ name => 'key0', alias => 'key' });
+        @Raisin::API::Entity::Test::EXPOSE = (
+            Raisin::Entity::Object->new('key0', as => 'key')
+        );
     }
 
     $app->res(Raisin::Response->new($app));

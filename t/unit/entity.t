@@ -18,11 +18,7 @@ my @CASES = (
             compile => { basic_array => [qw(a b c d)], },
             exposition => [],
             expose => {
-                alias => undef,
-                condition => undef,
                 name => 'basic_array',
-                runtime => undef,
-                using => undef,
             },
         },
     },
@@ -33,11 +29,7 @@ my @CASES = (
             compile => { basic_hash => { key0 => 'value0', key1 => 'value1' }, },
             exposition => [],
             expose => {
-                alias => undef,
-                condition => undef,
                 name => 'basic_hash',
-                runtime => undef,
-                using => undef,
             },
         },
     },
@@ -48,11 +40,7 @@ my @CASES = (
             compile => { basic_array_of_hashes => [{ key0 => 'value0' }, { key1 => 'value1' }], },
             exposition => [],
             expose => {
-                alias => undef,
-                condition => undef,
                 name => 'basic_array_of_hashes',
-                runtime => undef,
-                using => undef,
             },
         },
     },
@@ -64,11 +52,7 @@ my @CASES = (
             compile => { basic => 'abcd-basic', },
             exposition => [],#[{ name => 'basic' }],
             expose => {
-                alias => undef,
-                condition => undef,
                 name => 'basic',
-                runtime => undef,
-                using => undef,
             },
         },
     },
@@ -79,10 +63,7 @@ my @CASES = (
             compile => { presenter => { id => 1, name => 'use', } },
             exposition => [],#[{ name => 'data' }, { name => 'presenter' }],
             expose => {
-                alias => undef,
-                condition => undef,
                 name => 'presenter',
-                runtime => undef,
                 using => 'Raisin::Entity',
             },
         },
@@ -94,11 +75,8 @@ my @CASES = (
             compile => { condition => 'set' },
             exposition => [],#[{ name => 'condition' }, { name => 'data' }],
             expose => {
-                alias => undef,
-                condition => $CONDITION,
+                if => $CONDITION,
                 name => 'condition',
-                runtime => undef,
-                using => undef,
             },
         },
     },
@@ -109,11 +87,8 @@ my @CASES = (
             compile => { nested => { id => 'abcd' } },
             exposition => [],#[{ name => 'id' }],
             expose => {
-                alias => undef,
-                condition => undef,
                 name => 'nested',
                 runtime => $NESTED,
-                using => undef,
             },
         },
     },
@@ -124,11 +99,8 @@ my @CASES = (
             compile => { runtime => 'abcd' },
             exposition => [],#[{ name => 'data' }],
             expose => {
-                alias => undef,
-                condition => undef,
                 name => 'runtime',
                 runtime => $RUNTIME,
-                using => undef,
             },
         },
     },
@@ -139,29 +111,11 @@ my @CASES = (
             compile => { 'i-am-an-alias' => 'aliased-data', },
             exposition => [],#[{ name => 'alias' }],
             expose => {
-                alias => 'i-am-an-alias',
-                condition => undef,
+                as => 'i-am-an-alias',
                 name => 'alias',
-                runtime => undef,
-                using => undef,
             },
         },
     },
-    # TODO: documentation
-    #{
-    #    params => ['documentation', documentation => { ... }],
-    #    input => {},
-    #    expected => {
-    #        compile => {},
-    #        exposition => [],#[{ name =>  }],
-    #        expose => {
-    #            alias => undef,
-    #            condition => undef,
-    #            name => 'documentation',
-    #            runtime => undef,
-    #            using => undef,
-    #        },
-    #},
 );
 
 ok scalar(main->can('expose')), 'can expose';

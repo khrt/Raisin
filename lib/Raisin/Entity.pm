@@ -3,45 +3,52 @@ package Raisin::Entity;
 use strict;
 use warnings;
 
+use parent 'Exporter';
+
 use Carp;
 use Scalar::Util qw(blessed);
+use Types::Standard qw/HashRef/;
 
-use parent 'Exporter';
+use Raisin::Entity::Object;
 
 our @EXPORT = qw(expose);
 
-my $SUBNAME_PREFIX = 'Raisin::Entity::Nested';
 my @SUBNAME;
+
+sub import {
+    {
+        no strict 'refs';
+
+        my $class = caller;
+
+        *{ "${class}::name" } = sub { $class };
+        # A kind of a workaround for OpenAPI
+        # Every entity has a HashRef type even if it is not, so it could cause
+        # issues for users in OpenAPI specification.
+        *{ "${class}::type" } = sub { HashRef };
+        *{ "${class}::enclosed" } = sub {
+            no strict 'refs';
+            \@{ "${class}::EXPOSE" };
+        };
+    }
+
+    Raisin::Entity->export_to_level(1, @_);
+}
 
 sub expose {
     my ($name, @params) = @_;
 
-    my $runtime;
-    if (scalar(@params) % 2 && ref($params[-1]) eq 'CODE') {
-        $runtime = delete $params[-1];
-    }
-
-    my %params = @params;
-    my %settings = (
-        alias         => $params{as},
-        condition     => $params{if},
-        name          => $name,
-        runtime       => $runtime,
-        using         => $params{using},
-    );
-
-    #documentation => $params{documentation}, # TODO
-
     my $class = caller;
-    $class = $SUBNAME_PREFIX . '::' . $SUBNAME[-1] if scalar @SUBNAME;
+    if (scalar @SUBNAME) {
+        $class = 'Raisin::Entity::Nested::' . join('', @SUBNAME);
+    }
 
     {
         no strict 'refs';
-        push @{ "${class}::EXPOSE" }, \%settings;
+        push @{ "${class}::EXPOSE" }, Raisin::Entity::Object->new($name, @params);
     }
 
     return $class if scalar @SUBNAME;
-    return;
 }
 
 sub compile {
@@ -49,7 +56,7 @@ sub compile {
 
     my @expose = do {
         no strict 'refs';
-        @{"${entity}::EXPOSE"};
+        @{ "${entity}::EXPOSE" };
     };
 
     @expose = _make_exposition($data) unless @expose;
@@ -58,23 +65,18 @@ sub compile {
     my $result;
 
     # Rose::DB::Object::Iterator, DBIx::Class::ResultSet
-    # Array
-    #
-    # Hash, Rose::DB::Object, DBIx::Class::Core
-    #
-    # Scalar, everything else
-
-    if (blessed($data) && $data->can('next'))
-    {
+    if (blessed($data) && $data->can('next')) {
         while (my $i = $data->next) {
             push @$result, _compile_column($entity, $i, \@expose);
         }
     }
+    # Array
     elsif (ref($data) eq 'ARRAY') {
         for my $i (@$data) {
             push @$result, _compile_column($entity, $i, \@expose);
         }
     }
+    # Hash, Rose::DB::Object, DBIx::Class::Core
     elsif (ref($data) eq 'HASH'
            || (blessed($data)
                && (   $data->isa('Rose::DB::Object')
@@ -82,6 +84,7 @@ sub compile {
     {
         $result = _compile_column($entity, $data, \@expose);
     }
+    # Scalar, everything else
     else {
         $result = $data;
     }
@@ -93,14 +96,15 @@ sub _compile_column {
     my ($entity, $data, $settings) = @_;
     my %result;
 
-    for my $i (@$settings) {
-        next if $i->{condition} && !$i->{condition}->($data);
+    for my $obj (@$settings) {
+        next if $obj->condition && !$obj->condition->($data);
 
-        my $column = $i->{name};
+        my $column = $obj->name;
 
-        my $key = $i->{alias} || $i->{name};
+        my $key = $obj->display_name;
         my $value = do {
-            if (my $runtime = $i->{runtime}) {
+            if (my $runtime = $obj->runtime) {
+
                 push @SUBNAME, "${entity}::$column";
                 my $retval = $runtime->($data);
                 pop @SUBNAME;
@@ -111,7 +115,7 @@ sub _compile_column {
 
                 $retval;
             }
-            elsif (my $e = $i->{using}) {
+            elsif (my $e = $obj->using) {
                 my $in = blessed($data) ? $data->$column : $data->{$column};
                 __PACKAGE__->compile($e, $in);
             }
@@ -267,20 +271,14 @@ Expose under an alias with C<as>.
 
     expose 'name', as => 'artist';
 
-=head3 Documentation
-
-NOT IMPLEMENTED!
-
-Expose documentation with the field.
-Is used in a L<Raisin::Plugin::Swagger> API documentation systems.
+=head3 Type
 
     expose 'name', documentation => { type => 'String', desc => 'Artists name' };
 
-All available keys for C<documentation> you could find in the L<Raisin::Plugin::Swagger>.
+=head2 OpenAPI
 
-=head2 compile
-
-Compile an entity.
+OpenAPI compatible specification generates automatically if OpenAPI/Swagger
+plugin enabled.
 
 =head1 AUTHOR
 

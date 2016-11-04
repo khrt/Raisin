@@ -26,14 +26,6 @@ sub new {
     $self;
 }
 
-# *method => ''
-# *path => ''
-# *code => sub {}
-#
-# api_format => ''
-# desc => ''
-# named => []
-# params => []
 sub add {
     my ($self, %params) = @_;
 
@@ -82,9 +74,10 @@ sub add {
             params => \@pp,
             path => $path,
 
-            desc => $params{desc},
+            desc    => $params{desc},
+            entity  => $params{entity},
             summary => $params{summary},
-            tags => $params{tags},
+            tags    => $params{tags},
         );
     push @{ $self->{routes} }, $ep;
 
