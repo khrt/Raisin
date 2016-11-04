@@ -22,7 +22,8 @@ api_default_format 'yaml';
 
 desc 'Artist API';
 resource artists => sub {
-    summary 'List';
+    summary 'Returns all artists';
+    entity 'MusicApp::Entity::Artist';
     get sub {
         my $params = shift;
         my $artists = MusicApp::RDBO::Artist->get_artists;
@@ -33,6 +34,8 @@ resource artists => sub {
 
     params requires('id', type => Int);
     route_param id => sub {
+        summary 'Returns an artist';
+        entity 'MusicApp::Entity::Artist';
         get sub {
             my $params = shift;
             my $artist = MusicApp::RDBO::Artist->new(id => $params->{id});
@@ -45,7 +48,8 @@ resource artists => sub {
 
 desc 'Albums API';
 resource albums => sub {
-    summary 'List';
+    summary 'Returns all albums';
+    entity 'MusicApp::Entity::Album';
     get sub {
         my $params = shift;
         my $albums = MusicApp::RDBO::Album->get_albums;
@@ -56,6 +60,8 @@ resource albums => sub {
 
     params requires('id', type => Int);
     route_param id => sub {
+        summary 'Returns an album';
+        entity 'MusicApp::Entity::Album';
         get sub {
             my $params = shift;
             my $album = MusicApp::RDBO::Album->new(id => $params->{id});

@@ -53,7 +53,7 @@ sub _spec_20 {
     my %spec = (
         swagger  => '2.0',
         info     => _info_object($app),
-        host     => $req->env->{HTTP_HOST},
+        host     => $req->env->{SERVER_NAME} || $req->env->{HTTP_HOST},
         basePath => $base_path,
         schemes  => [$req->scheme],
         consumes => \@content_types,
@@ -116,6 +116,76 @@ sub _info_object {
     \%obj;
 }
 
+sub _paths_object {
+    my $routes = shift;
+
+    my %obj;
+    for my $r (sort { $a->path cmp $b->path } @$routes) {
+        next if lc($r->method) eq 'options';
+
+        my $path = $r->path;
+        $path =~ s#:([^/]+)#{$1}#msix;
+
+        $obj{ $path }{ lc($r->method) } = _operation_object($r);
+    }
+
+    \%obj;
+}
+
+sub _operation_object {
+    my $r = shift;
+
+    my $path = $r->path;
+    $path =~ tr#/:#_#;
+    my $operation_id = lc($r->method) . $path;
+
+    my %obj = (
+        consumes => $DEFAULTS{consumes},
+        #deprecated => 'false', # TODO
+        description => $r->desc || '',
+        #externalDocs => '',
+        operationId => $operation_id,
+        produces => $DEFAULTS{produces},
+        responses => {
+            default => {
+                description => 'Unexpected error',
+                #examples => '',
+                #headers => '',
+                #schema => '',
+            },
+            # Adds a response object from route's entity if it exists
+            %{ _response_object($r) },
+        },
+        #schemes => [],
+        #security => '',
+        summary => $r->summary || '',
+        tags => $r->tags,
+    );
+
+    my $params = _parameters_object($r->method, $r->params);
+    $obj{parameters} = $params if scalar @$params;
+
+    \%obj;
+}
+
+sub _response_object {
+    my $r = shift;
+    return {} unless $r->entity;
+
+    my $name = $r->entity;
+
+    my %obj = (
+        (split /::/, $name)[-1] => {
+            description => $r->desc || $r->summary || '',
+            schema => {
+                '$ref' => sprintf('#/definitions/%s', _name_for_object($name)),
+            }
+        },
+    );
+
+    \%obj;
+}
+
 sub _parameters_object {
     my ($method, $pp) = @_;
 
@@ -163,12 +233,36 @@ sub _parameters_object {
     \@obj;
 }
 
+sub _param_type {
+    my $t = shift;
+
+    if    ($t->name =~ /int/i)            { 'integer', 'int32' }
+    elsif ($t->name =~ /long/i)           { 'integer', 'int64' }
+    elsif ($t->name =~ /num|float|real/i) { 'number',  'float' }
+    elsif ($t->name =~ /double/i)         { 'number',  'double' }
+    elsif ($t->name =~ /str/i)            { 'string',  undef }
+    elsif ($t->name =~ /byte/i)           { 'string',  'byte' }
+    elsif ($t->name =~ /bool/i)           { 'boolean', undef }
+    elsif ($t->name =~ /datetime/i)       { 'string',  'date-time' }
+    elsif ($t->name =~ /date/i)           { 'string',  'date' }
+    elsif ($t->name =~ /password/i)       { 'string',  'password' }
+    elsif ($t->name =~ /hashref/i)        { 'object',  undef }
+    else {
+        if   ($t->display_name =~ /ArrayRef/) { 'array',  undef }
+        else                                  { 'string', undef }    # fallback
+    }
+}
+
 sub _definitions_object {
     my $routes = shift;
 
     my @objects;
     for my $r (@$routes) {
         my @pp = @{ $r->params };
+
+        if ($r->entity) {
+            push @objects, $r->entity;
+        }
 
         while (my $p = pop @pp) {
             next if $p->type->name ne 'HashRef';
@@ -221,59 +315,6 @@ sub _schema_object {
     \%object;
 }
 
-sub _operation_object {
-    my $r = shift;
-
-    my $path = $r->path;
-    $path =~ tr#/:#_#;
-    my $operation_id = lc($r->method) . $path;
-
-    my %obj = (
-        tags => $r->tags,
-        summary => $r->summary || "",
-        description => $r->desc || "",
-        #externalDocs => '',
-        operationId => $operation_id,
-        consumes => $DEFAULTS{consumes},
-        produces => $DEFAULTS{produces},
-        # TODO:
-        responses => {
-            500 => {
-                description => 'Server exception',
-                #schema => '',
-                #headers => '',
-                #examples => '',
-            },
-            400 => {
-                description => 'Invalid parameters',
-            }
-        },
-        #schemes => [],
-        #deprecated => 'false', # TODO
-        #security => '',
-    );
-
-    my $params = _parameters_object($r->method, $r->params);
-
-    $obj{parameters} = $params if scalar @$params;
-
-    \%obj;
-}
-
-sub _paths_object {
-    my $routes = shift;
-
-    my %obj;
-    for my $r (sort { $a->path cmp $b->path } @$routes) {
-        my $path = $r->path;
-        $path =~ s#:([^/]+)#{$1}#msix;
-
-        $obj{ $path }{ lc($r->method) } = _operation_object($r);
-    }
-
-    \%obj;
-}
-
 sub _tags_object  {
     my $app = shift;
 
@@ -298,32 +339,7 @@ sub _tags_object  {
     \@tags;
 }
 
-sub _param_type {
-    my $t = shift;
-
-    if    ($t->name =~ /int/i)            { 'integer', 'int32' }
-    elsif ($t->name =~ /long/i)           { 'integer', 'int64' }
-    elsif ($t->name =~ /num|float|real/i) { 'number',  'float' }
-    elsif ($t->name =~ /double/i)         { 'number',  'double' }
-    elsif ($t->name =~ /str/i)            { 'string',  undef }
-    elsif ($t->name =~ /byte/i)           { 'string',  'byte' }
-    elsif ($t->name =~ /bool/i)           { 'boolean', undef }
-    elsif ($t->name =~ /datetime/i)       { 'string',  'date-time' }
-    elsif ($t->name =~ /date/i)           { 'string',  'date' }
-    elsif ($t->name =~ /password/i)       { 'string',  'password' }
-    elsif ($t->name =~ /hashref/i)        { 'object',  undef }
-    else {
-        if   ($t->display_name =~ /ArrayRef/) { 'array',  undef }
-        else                                  { 'string', undef }    # fallback
-    }
-}
-
 sub _name_for_object {
-    my $obj = shift;
-    sprintf '%s-%s', ucfirst($obj->name), _fingerprint($obj);
-}
-
-sub _fingerprint {
     my $obj = shift;
 
     local $Data::Dumper::Deparse = 1;
@@ -333,9 +349,10 @@ sub _fingerprint {
     local $Data::Dumper::Sortkeys = 1;
     local $Data::Dumper::Terse = 1;
 
-    uc(substr(md5_hex(Data::Dumper->Dump([$obj], [qw/obj/])), 0, 10));
-}
+    my $fingerprint = md5_hex(Data::Dumper->Dump([$obj], [qw/obj/]));
 
+    sprintf '%s-%s', ucfirst($obj->name), uc(substr($fingerprint, 0, 10));
+}
 
 1;
 

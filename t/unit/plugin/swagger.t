@@ -10,6 +10,7 @@ use Raisin;
 use Raisin::Param;
 use Raisin::Plugin::Swagger;
 use Raisin::Routes;
+use Raisin::Routes::Endpoint;
 
 my @INFO_CASES = (
     {
@@ -197,6 +198,46 @@ subtest '_info_object' => sub {
         swagger_setup(%{ $case->{settings} });
         is_deeply Raisin::Plugin::Swagger::_info_object($z->app), $case->{expected};
     }
+};
+
+subtest '_response_object' => sub {
+
+    {
+        package Entity::Simple;
+
+        use Raisin::Entity;
+        use Types::Standard qw/Any Str/;
+
+        expose 'id', type => Any;
+        expose 'name', as => 'artist', type => Str;
+
+        package Entity::Nested;
+
+        use Raisin::Entity;
+
+        expose 'id';
+        expose 'albums', using => 'MusicApp::Entity::Album';
+    }
+
+    my $r = Raisin::Routes::Endpoint->new(
+            api_format => 'json',
+            desc => 'Test endpoint',
+            entity => 'Entity::Simple',
+            method => 'GET',
+            path => '/user/:id',
+        );
+    my $ro = Raisin::Plugin::Swagger::_response_object($r);
+
+    my %expected = (
+        Simple => {
+            description => 'Test endpoint',
+            schema => {
+                '$ref' => sprintf('#/definitions/%s', Raisin::Plugin::Swagger::_name_for_object($r->entity)),
+            }
+        },
+    );
+
+    is_deeply $ro, \%expected, 'response object is correct';
 };
 
 subtest '_parameters_object' => sub {
