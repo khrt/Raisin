@@ -136,33 +136,6 @@ subtest 'render' => sub {
     }
 };
 
-subtest 'render_401' => sub {
-    my $resp = _make_object;
-    ok $resp->render_401;
-
-    is $resp->status, 401, 'status';
-    is $resp->body, 'Unauthorized', 'body';
-    ok $resp->rendered, 'rendered';
-};
-
-subtest 'render_404' => sub {
-    my $resp = _make_object;
-    ok $resp->render_404;
-
-    is $resp->status, 404, 'status';
-    is $resp->body, 'Nothing found', 'body';
-    ok $resp->rendered, 'rendered';
-};
-
-subtest 'render_500' => sub {
-    my $resp = _make_object;
-    ok $resp->render_500;
-
-    is $resp->status, 500, 'status';
-    is $resp->body, 'Internal error', 'body';
-    ok $resp->rendered, 'rendered';
-};
-
 subtest 'render_error' => sub {
     my $resp = _make_object;
     ok $resp->render_error('403', 'Forbiden?'), 'render_error: 403 Forbiden?';
