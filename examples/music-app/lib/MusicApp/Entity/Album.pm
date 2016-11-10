@@ -3,10 +3,11 @@ package MusicApp::Entity::Album;
 use strict;
 use warnings;
 
+use Types::Standard qw/Int Str/;
 use Raisin::Entity;
 
-expose 'id';
-expose 'title';
-expose 'year';
+expose 'id',    type => Int, desc => 'ID';
+expose 'title', type => Str, desc => 'Title';
+expose 'year',  type => Int, desc => 'Year';
 
 1;
