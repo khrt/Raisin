@@ -74,6 +74,8 @@ sub _compile_enclosed {
     \@enclosed;
 }
 
+sub display_name { shift->name }
+
 sub in {
     my ($self, $value) = @_;
 
@@ -163,6 +165,10 @@ Returns parameter description.
 =head3 name
 
 Returns parameter name.
+
+=head3 display_name
+
+An alias to L<Raisin::Param/name>.
 
 =head3 named
 

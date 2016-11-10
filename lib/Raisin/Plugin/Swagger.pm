@@ -12,6 +12,8 @@ use JSON qw/encode_json/;
 my %SETTINGS;
 my %DEFAULTS;
 
+my $HTTP_OK = 200;
+
 sub build {
     my ($self, %args) = @_;
 
@@ -58,14 +60,14 @@ sub _spec_20 {
         schemes  => [$req->scheme],
         consumes => \@content_types,
         produces => \@content_types,
-        paths    => _paths_object($routes), #R
+        paths    => _paths_object($routes),
         definitions => _definitions_object($routes),
         #parameters => undef,
         #responses => undef,
         #securityDefinitions => undef,
         #security => undef,
         tags => _tags_object($self->app),
-        #externalDocs => '', # TODO
+        #externalDocs => '',
     );
 
     # routes
@@ -93,7 +95,7 @@ sub _contact_object {
 sub _license_object {
     my $license = shift;
     my %obj = (
-        name => $license->{name}, #R
+        name => $license->{name},
     );
     $obj{url} = $license->{url} if $license->{url};
     \%obj;
@@ -103,8 +105,8 @@ sub _info_object {
     my $app = shift;
 
     my %obj = (
-        title => $SETTINGS{title} || 'API', #R
-        version => $app->api_version || '0.0.1', #R
+        title => $SETTINGS{title} || 'API',
+        version => $app->api_version || '0.0.1',
     );
 
     $obj{description} = $SETTINGS{description} if $SETTINGS{description};
@@ -141,7 +143,7 @@ sub _operation_object {
 
     my %obj = (
         consumes => $DEFAULTS{consumes},
-        #deprecated => 'false', # TODO
+        #deprecated => 'false',
         description => $r->desc || '',
         #externalDocs => '',
         operationId => $operation_id,
@@ -175,7 +177,7 @@ sub _response_object {
     my $name = $r->entity;
 
     my %obj = (
-        (split /::/, $name)[-1] => {
+        $HTTP_OK => {
             description => $r->desc || $r->summary || '',
             schema => {
                 '$ref' => sprintf('#/definitions/%s', _name_for_object($name)),
@@ -191,41 +193,31 @@ sub _parameters_object {
 
     my @obj;
     for my $p (@$pp) {
-        my ($type, $format) = _param_type($p->type);
+        my ($type) = _param_type($p->type);
 
         # Available: query, header, path, formData or body
         my $location = do {
             if    ($p->in)                       { $p->in }
-            elsif ($p->named)                    {'path'}
-            elsif ($type eq 'object')            {'body'}
-            elsif ($method =~ /patch|post|put/i) {'formData'}
-            else                                 {'query'}
+            elsif ($p->named)                    { 'path' }
+            elsif ($type eq 'object')            { 'body' }
+            elsif ($method =~ /patch|post|put/i) { 'formData' }
+            else                                 { 'query' }
         };
 
+        my $ptype = _param_type_object($p);
+        if ($p->type->name eq 'HashRef') {
+            $ptype->{schema}{'$ref'} = delete $ptype->{'$ref'};
+        }
+
         my %param = (
-            description => $p->desc || "",
-            in          => $location, #R
-            name        => $p->name, #R
+            description => $p->desc || '',
+            in          => $location,
+            name        => $p->name,
             required    => $p->required ? JSON::true : JSON::false,
+            %$ptype,
         );
         $param{default} = $p->default if defined $p->default;
 
-        if ($type eq 'object') {
-            $param{schema} = {
-                '$ref' => sprintf('#/definitions/%s', _name_for_object($p)),
-            };
-        }
-        elsif ($type eq 'array') {
-            $param{type} = $type;
-
-            my ($items_type, $items_format) = _param_type($p->type->type_parameter);
-            $param{items}{type} = $items_type;
-            $param{items}{format} = $items_format if $items_format;
-        }
-        else {
-            $param{type} = $type; #R
-            $param{format} = $format if $format;
-        }
 
         push @obj, \%param;
     }
@@ -233,37 +225,16 @@ sub _parameters_object {
     \@obj;
 }
 
-sub _param_type {
-    my $t = shift;
-
-    if    ($t->name =~ /int/i)            { 'integer', 'int32' }
-    elsif ($t->name =~ /long/i)           { 'integer', 'int64' }
-    elsif ($t->name =~ /num|float|real/i) { 'number',  'float' }
-    elsif ($t->name =~ /double/i)         { 'number',  'double' }
-    elsif ($t->name =~ /str/i)            { 'string',  undef }
-    elsif ($t->name =~ /byte/i)           { 'string',  'byte' }
-    elsif ($t->name =~ /bool/i)           { 'boolean', undef }
-    elsif ($t->name =~ /datetime/i)       { 'string',  'date-time' }
-    elsif ($t->name =~ /date/i)           { 'string',  'date' }
-    elsif ($t->name =~ /password/i)       { 'string',  'password' }
-    elsif ($t->name =~ /hashref/i)        { 'object',  undef }
-    else {
-        if   ($t->display_name =~ /ArrayRef/) { 'array',  undef }
-        else                                  { 'string', undef }    # fallback
-    }
-}
-
 sub _definitions_object {
     my $routes = shift;
 
     my @objects;
     for my $r (@$routes) {
-        my @pp = @{ $r->params };
-
         if ($r->entity) {
             push @objects, $r->entity;
         }
 
+        my @pp = @{ $r->params };
         while (my $p = pop @pp) {
             next if $p->type->name ne 'HashRef';
 
@@ -283,25 +254,9 @@ sub _schema_object {
     my (@required, %properties);
 
     for my $pp (@{ $p->enclosed }) {
+        $properties{ $pp->display_name } = _param_type_object($pp);
 
-        if ($pp->type->name eq 'HashRef') {
-            $properties{ $pp->name }{'$ref'} =
-                sprintf('#/definitions/%s', _name_for_object($pp));
-        }
-        elsif ($pp->type->display_name =~ /^ArrayRef/) {
-            $properties{ $pp->name }{type} = 'array';
-
-            my ($items_type, $items_format) = _param_type($pp->type->type_parameter);
-            $properties{ $pp->name }{items}{type} = $items_type;
-            $properties{ $pp->name }{items}{format} = $items_format if $items_format;
-        }
-        else {
-            my ($type, $format) = _param_type($pp->type);
-            $properties{ $pp->name }{type} = $type;
-            $properties{ $pp->name }{format} = $format if $format;
-        }
-
-        push @required, $pp->name if $pp->required;
+        push @required, $pp->display_name if $pp->required;
     }
 
     my %object = (
@@ -326,7 +281,7 @@ sub _tags_object  {
     my @tags;
     for my $t (keys %tags) {
         my $tag = {
-            name => $t, #R
+            name => $t,
             description => $app->resource_desc($t),
             #externalDocs => {
             #    description => '',
@@ -337,6 +292,62 @@ sub _tags_object  {
     }
 
     \@tags;
+}
+
+sub _param_type_object {
+    my $p = shift;
+
+    my %item;
+
+    if ($p->type->name eq 'HashRef') {
+        $item{'$ref'} = sprintf('#/definitions/%s', _name_for_object($p));
+    }
+    elsif ($p->type->display_name =~ /^ArrayRef/) {
+        $item{type} = 'array';
+
+        my ($type, $format) = _param_type($p->type->type_parameter);
+        if ($type eq 'object') {
+            my $ref = do {
+                if   ($p->can('using') && $p->using) { $p->using }
+                else { $p }
+            };
+
+            $item{items}{'$ref'} = sprintf('#/definitions/%s', _name_for_object($ref));
+        }
+        else {
+            $item{type} = $type;
+            $item{format} = $format if $format;
+            $item{description} = $p->desc if $p->desc;
+        }
+    }
+    else {
+        my ($type, $format) = _param_type($p->type);
+        $item{type} = $type;
+        $item{format} = $format if $format;
+        $item{description} = $p->desc if $p->desc;
+    }
+
+    \%item;
+}
+
+sub _param_type {
+    my $t = shift;
+
+    if    ($t->name =~ /int/i)            { 'integer', 'int32' }
+    elsif ($t->name =~ /long/i)           { 'integer', 'int64' }
+    elsif ($t->name =~ /num|float|real/i) { 'number',  'float' }
+    elsif ($t->name =~ /double/i)         { 'number',  'double' }
+    elsif ($t->name =~ /str/i)            { 'string',  undef }
+    elsif ($t->name =~ /byte/i)           { 'string',  'byte' }
+    elsif ($t->name =~ /bool/i)           { 'boolean', undef }
+    elsif ($t->name =~ /datetime/i)       { 'string',  'date-time' }
+    elsif ($t->name =~ /date/i)           { 'string',  'date' }
+    elsif ($t->name =~ /password/i)       { 'string',  'password' }
+    elsif ($t->name =~ /hashref/i)        { 'object',  undef }
+    else {
+        if   ($t->display_name =~ /ArrayRef/) { 'array',  undef }
+        else                                  { 'string', undef }    # fallback
+    }
 }
 
 sub _name_for_object {

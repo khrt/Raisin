@@ -173,6 +173,23 @@ my @PARAMETERS_CASES = (
     },
 );
 
+{
+    package Entity::Simple;
+
+    use Raisin::Entity;
+    use Types::Standard qw/Any Str/;
+
+    expose 'id', type => Any;
+    expose 'name', as => 'alias', type => Str;
+
+    package Entity::Nested;
+
+    use Raisin::Entity;
+
+    expose 'id';
+    expose 'simple', using => 'Entity::Simple';
+}
+
 sub _make_object {
     my (%args) = @_;
 
@@ -201,24 +218,6 @@ subtest '_info_object' => sub {
 };
 
 subtest '_response_object' => sub {
-
-    {
-        package Entity::Simple;
-
-        use Raisin::Entity;
-        use Types::Standard qw/Any Str/;
-
-        expose 'id', type => Any;
-        expose 'name', as => 'artist', type => Str;
-
-        package Entity::Nested;
-
-        use Raisin::Entity;
-
-        expose 'id';
-        expose 'albums', using => 'MusicApp::Entity::Album';
-    }
-
     my $r = Raisin::Routes::Endpoint->new(
             api_format => 'json',
             desc => 'Test endpoint',
@@ -226,7 +225,7 @@ subtest '_response_object' => sub {
             method => 'GET',
             path => '/user/:id',
         );
-    my $ro = Raisin::Plugin::Swagger::_response_object($r);
+    my $resp = Raisin::Plugin::Swagger::_response_object($r);
 
     my %expected = (
         Simple => {
@@ -237,7 +236,7 @@ subtest '_response_object' => sub {
         },
     );
 
-    is_deeply $ro, \%expected, 'response object is correct';
+    is_deeply $resp, \%expected, 'response object is correct';
 };
 
 subtest '_parameters_object' => sub {
@@ -262,6 +261,7 @@ subtest '_definitions_object' => sub {
         code => sub {1},
         api_format => 'json',
         desc => 'Test endpoint',
+        entity => 'Entity::Nested',
         method => 'POST',
         params =>  [
             requires => {
@@ -371,6 +371,18 @@ subtest '_schema_object' => sub {
 
 subtest '_operation_object' => sub {
     plan skip_all => 'TODO';
+
+#    my $rn = Raisin::Routes::Endpoint->new(
+#            api_format => 'json',
+#            desc => 'Test endpoint',
+#            entity => 'Entity::Nested',
+#            method => 'GET',
+#            path => '/user/:id',
+#        );
+#
+#    my $rno = Raisin::Plugin::Swagger::_operation_object($rn);
+#    use DDP;
+#    p $rno;
 };
 
 subtest '_paths_object' => sub {
