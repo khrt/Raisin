@@ -5,11 +5,7 @@ use warnings;
 
 my $FH = *STDERR;
 
-sub new {
-    my $class = shift;
-    my $self = bless { }, $class;
-    $self;
-}
+sub new { bless {}, shift }
 
 sub log {
     my ($self, %args) = @_;

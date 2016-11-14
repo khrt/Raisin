@@ -34,14 +34,14 @@ sub message {
     my ($self, $level, $message, @args) = @_;
 
     my $t = time;
-    my $ts = strftime '%Y-%m-%dT%H:%M:%S', localtime $t;
-    $ts .= sprintf '.%03d', ($t - int($t)) * 1000;
+    my $time = strftime '%Y-%m-%dT%H:%M:%S', localtime $t;
+    $time .= sprintf '.%03d', ($t - int($t)) * 1000;
 
-    my $str = ref($message) ? Dumper($message) : $message;
+    $message = ref($message) ? Dumper($message) : $message;
 
     $self->{logger}->log(
         level   => $level,
-        message => "$ts $str\n",
+        message => sprintf "$time $message\n", @args,
     );
 }
 
