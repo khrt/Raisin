@@ -11,7 +11,7 @@ use Raisin::Response;
 use Raisin::Routes;
 use Raisin::Util;
 
-our $VERSION = '0.68';
+our $VERSION = '0.69';
 
 sub new {
     my ($class, %args) = @_;
@@ -495,13 +495,15 @@ can overwrite it using a C<tags> function.
 
 =head3 entity
 
-Entity keyword allows to declare response object which will be used to generate
+Entity keyword allows to describe response object which will be used to generate
 OpenAPI specification.
 
-    entity 'MusicApp::Entity::Album', is => ArrayRef;
+    entity 'MusicApp::Entity::Album';
+    get {
+        my $albums = $schema->resultset('Album');
+        present data => $albums, with => 'MusicApp::Entity::Album';
+    };
 
-
-TODO
 
 =head3 params
 

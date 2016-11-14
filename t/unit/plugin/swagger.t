@@ -201,10 +201,7 @@ sub _make_object {
 
     $module;
 }
-my $z = _make_object(enable => 'CORS');
-
-is $z->{swagger_version}, '2.0', 'Swagger 2.0 docs';
-ok defined $z->app->{middleware}{CrossOrigin}, 'CORS OK';
+my $z = _make_object();
 
 subtest '_info_object' => sub {
     # + _contact_object, _license_object
@@ -228,7 +225,7 @@ subtest '_response_object' => sub {
     my $resp = Raisin::Plugin::Swagger::_response_object($r);
 
     my %expected = (
-        Simple => {
+        200 => {
             description => 'Test endpoint',
             schema => {
                 '$ref' => sprintf('#/definitions/%s', Raisin::Plugin::Swagger::_name_for_object($r->entity)),

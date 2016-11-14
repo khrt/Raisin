@@ -5,33 +5,72 @@ use warnings;
 
 use parent 'Raisin::Plugin';
 
+use Carp 'croak';
 use Data::Dumper;
 use Digest::MD5 qw/md5_hex/;
 use JSON qw/encode_json/;
+use List::Util qw/pairmap/;
 
-my %SETTINGS;
 my %DEFAULTS;
+my %SETTINGS;
 
 my $HTTP_OK = 200;
 
 sub build {
-    my ($self, %args) = @_;
-
-    # Enable CORS
-    if ($args{enable} && lc($args{enable}) eq 'cors') {
-        $self->app->add_middleware(
-            'CrossOrigin',
-            origins => '*',
-            methods => [qw(GET HEAD POST DELETE PUT PATCH OPTIONS)],
-            headers => [qw(api_key authorization content-type accept)]
-        );
-    }
+    my $self = shift;
 
     $self->register(
         swagger_build_spec => sub { $self->_spec_20 },
         swagger_setup => sub { %SETTINGS = @_ },
+        swagger_security => \&swagger_security,
     );
-    $self->{swagger_version} = '2.0';
+
+    1;
+}
+
+sub swagger_security {
+    my %p = @_;
+
+    croak 'Invalid `type`' unless grep { $p{type} eq $_ } qw/basic api_key oauth2/;
+
+    my %security;
+
+    if ($p{type} eq 'basic') {
+        $security{ $p{name} } = {
+            type => 'basic',
+        };
+    }
+    elsif ($p{type} eq 'api_key') {
+        croak 'Invalid `in`' unless grep { $p{in} eq $_ } qw/query header/;
+
+        $security{ $p{name} } = {
+            type => 'apiKey',
+            name => $p{name},
+            in => $p{in},
+        };
+    }
+    elsif ($p{type} eq 'oauth2') {
+        croak 'Invalid `flow`' unless grep { $p{flow} eq $_ } qw/implicit password application accessCode/;
+
+        $security{ $p{name} } = {
+            type => 'oauth2',
+            flow => $p{flow},
+            scopes => $p{scopes},
+        };
+
+        if (grep { $p{flow} eq $_ } qw/implicit accessCode/) {
+            $security{ $p{name} }{authorizationUrl} = $p{authorization_url};
+        }
+
+        if (grep { $p{flow} eq $_ } qw/password application accessCode/) {
+            $security{ $p{name} }{tokenUrl} = $p{token_url};
+        }
+    }
+
+    $SETTINGS{security} = {
+        %{ $SETTINGS{security} || {} },
+        %security,
+    };
 }
 
 sub _spec_20 {
@@ -53,21 +92,21 @@ sub _spec_20 {
     $DEFAULTS{produces} = \@content_types;
 
     my %spec = (
-        swagger  => '2.0',
-        info     => _info_object($app),
-        host     => $req->env->{SERVER_NAME} || $req->env->{HTTP_HOST},
+        swagger => '2.0',
+        info => _info_object($app),
+        host => $req->env->{SERVER_NAME} || $req->env->{HTTP_HOST},
         basePath => $base_path,
-        schemes  => [$req->scheme],
+        schemes => [$req->scheme],
         consumes => \@content_types,
         produces => \@content_types,
-        paths    => _paths_object($routes),
+        paths => _paths_object($routes),
         definitions => _definitions_object($routes),
         #parameters => undef,
         #responses => undef,
-        #securityDefinitions => undef,
-        #security => undef,
+        securityDefinitions => _security_definitions_object(),
+        security => _security_object(),
         tags => _tags_object($self->app),
-        #externalDocs => '',
+        #externalDocs => undef,
     );
 
     # routes
@@ -118,6 +157,13 @@ sub _info_object {
     \%obj;
 }
 
+sub _security_object {
+    my @obj = map { { $_->{name} => $_->{scopes} || [] } } values %{ $SETTINGS{security} };
+    \@obj;
+}
+
+sub _security_definitions_object { $SETTINGS{security} || {} }
+
 sub _paths_object {
     my $routes = shift;
 
@@ -159,7 +205,7 @@ sub _operation_object {
             %{ _response_object($r) },
         },
         #schemes => [],
-        #security => '',
+        #security => {}, # TODO per operation permissions
         summary => $r->summary || '',
         tags => $r->tags,
     );
@@ -379,29 +425,104 @@ Raisin::Plugin::Swagger - Generate API documentation.
 
 =head1 DESCRIPTION
 
-Generates a L<Swagger|https://github.com/wordnik/swagger-core>
-compatible API documentaion.
+Generates an API description of application.
 
-Provides a documentation by C</swagger.json> URL.
-You can use this url in L<Swagger UI|http://petstore.swagger.io/>.
+=head1 SPECIFICATION
+
+Compatible with
+L<Swagger|http://swagger.io/>/L<OpenAPI|https://www.openapis.org/> Spec 2.0.
 
 =head1 CORS
 
-Enables a cross-origin resource sharing.
+To enable L<Cross-Origin HTTP Requests|https://developer.mozilla.org/en/docs/Web/HTTP/Access_control_CORS>
+you should enable a L<Plack::Middleware::CrossOrigin> middleware with all the
+parameters you need (like origins, methods, headers, etc.).
 
-    plugin 'Swagger', enable => 'CORS';
+    middleware 'CrossOrigin',
+        origins => '*',
+        methods => [qw/DELETE GET HEAD OPTIONS PATCH POST PUT/],
+        headers => [qw/accept authorization content-type api_key_token/];
 
-=head1 VERSION
+Alternatively you can set CORS headers in a L<before|Raisin/HOOKS> hook.
 
-Supports only version 2.0 of Swagger.
+=head1 SECURITY
 
+L<Raisin> has a limited support of OpenAPI security objects. To make it generate
+security objects configure it in the way it described below.
+
+Add a B<api_key> security via B<stoken> header.
+
+    swagger_security(name => 'stoken', in => 'header', type => 'api_key');
+
+Add the header name to L<Raisin::Plugin::Swagger/CORS> headers if you use B<api_key>.
+
+    middleware 'CrossOrigin',
+        origins => '*',
+        methods => [qw/DELETE GET HEAD OPTIONS PATCH POST PUT/],
+        headers => [qw/stoken accept authorization content-type/];
+
+=head3 Limitations
+
+=over
+
+=item * L<Raisin> doesn't support per operation security.
+
+=item * L<Raisin> doesn't support B<oauth2>, only B<basic> and B<api_key> are supported.
+
+=back
+
+=head3 Example Application
+
+Example of a secured application.
+
+    use strict;
+    use warnings;
+
+    middleware '+MyAuthMiddleware';
+
+    middleware 'CrossOrigin',
+        origins => '*',
+        methods => [qw/DELETE GET HEAD OPTIONS PATCH POST PUT/],
+        headers => [qw/stoken accept authorization content-type/];
+
+    plugin 'Swagger';
+    swagger_security(name => 'stoken', in => 'header', type => 'api_key');
+
+    get sub { { data => 'ok' } };
+
+    run;
+
+Example of a middleware used in the application.
+
+    package Auth;
+
+    use strict;
+    use warnings;
+
+    use parent 'Plack::Middleware';
+    use Plack::Request;
+
+    sub call {
+        my ($self, $env) = @_;
+
+        my $req = Plack::Request->new($env);
+
+        if (($req->header('stoken') // '') eq 'secret' || $req->path eq '/swagger.json') {
+            $self->app->($env);
+        }
+        else {
+            [403, [], ['forbidden']];
+        }
+    }
+
+    1;
 
 =head1 FUNCTIONS
 
 =head3 swagger_setup
 
-The function configures base OpenAPI paramters, be aware it is not validating
-and will be passed as is to OpenAPI client.
+Configures base OpenAPI parameters, be aware they aren't validating
+and passing to the specification as is.
 
 Properly configured section has following attributes:
 B<title>, B<description>, B<terms_service>, B<contact> and B<license>.
@@ -409,8 +530,6 @@ B<title>, B<description>, B<terms_service>, B<contact> and B<license>.
 B<Contact> has B<name>, B<url>, B<email>.
 
 B<License> has B<name> and B<url>.
-
-See an example below.
 
     swagger_setup(
         title => 'BatAPI',
@@ -427,6 +546,14 @@ See an example below.
             url => 'http://wayne.enterprises/licenses/',
         },
     );
+
+=head3 swagger_security
+
+Configures OpenAPI security options.
+
+Allowed types are B<basic>, B<api_key> and B<oauth2>.
+
+For more information please check OpenAPI specification and L<Raisin::Plugin::Swagger/SECURITY>.
 
 =head1 AUTHOR
 

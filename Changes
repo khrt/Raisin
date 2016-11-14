@@ -1,6 +1,10 @@
 
 0.69 Documented responses
     * Fixes
+    * Plack::Middleware::CrossOrigin has been removed from Swagger plugin;
+    * Improvements for raisin script to make it generate clean OpenAPI spec;
+    * Documented responses via entity keyword;
+    * Limited support of OpenAPI security (basic & apiKey);
 
 0.68 Nested parameters
     * Nested parameters:

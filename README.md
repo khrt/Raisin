@@ -194,9 +194,22 @@ or any other qualifier.
 By default tags are added automatically based on it's namespace but you always
 can overwrite it using a `tags` function.
 
+### entity
+
+Entity keyword allows to describe response object which will be used to generate
+OpenAPI specification.
+
+    entity 'MusicApp::Entity::Album';
+    get {
+        my $albums = $schema->resultset('Album');
+        present data => $albums, with => 'MusicApp::Entity::Album';
+    };
+
+TODO
+
 ### params
 
-Here you can define validations and coercion options for your parameters.
+Defines validations and coercion options for your parameters.
 Can be applied to any HTTP method and/or `route_param` to describe parameters.
 
     params(
@@ -347,6 +360,47 @@ include `with` key, which is defined the entity to expose. See [Raisin::Entity](
 [Raisin::Entity](https://metacpan.org/pod/Raisin::Entity) supports [DBIx::Class](https://metacpan.org/pod/DBIx::Class) and [Rose::DB::Object](https://metacpan.org/pod/Rose::DB::Object).
 
 For details see examples in _examples/music-app_ and [Raisin::Entity](https://metacpan.org/pod/Raisin::Entity).
+
+# ALLOWED METHODS
+
+When you add a route for a resource, a route for the OPTIONS method will also be
+added. The response to an OPTIONS request will include an "Allow" header listing
+the supported methods.
+
+    get 'count' => sub {
+        { count => $count };
+    };
+
+    params(
+        requires('num', type => Int, desc => 'Value to add to the count.'),
+    );
+    put 'count' => sub {
+        my $params = shift;
+        $count += $params->{num};
+        { count: $count };
+    };
+
+
+    curl -v -X OPTIONS http://localhost:5000/count
+
+    > OPTIONS /count HTTP/1.1
+    > Host: localhost:5000
+    >
+    * HTTP 1.0, assume close after body
+    < HTTP/1.1 204 No Content
+    < Allow: GET, OPTOINS, PUT
+
+If a request for a resource is made with an unsupported HTTP method, an HTTP 405
+(Method Not Allowed) response will be returned.
+
+    curl -X DELETE -v http://localhost:3000/count
+
+    > DELETE /count HTTP/1.1
+    > Host: localhost:5000
+    >
+    * HTTP 1.0, assume close after body
+    < HTTP/1.1 405 Method Not Allowed
+    < Allow: OPTIONS, GET, PUT
 
 # PARAMETERS
 

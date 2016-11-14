@@ -56,7 +56,7 @@ __END__
 
 Raisin::Entity::Object - An expose object.
 
-=head DESCRIPTION
+=head1 DESCRIPTION
 
 An internal object used in L<Raisin::Plugin::Swagger> and L<Raisin::Entity>.
 
