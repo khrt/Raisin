@@ -6,6 +6,7 @@ use warnings;
 use parent 'Raisin::Plugin';
 
 use Carp qw(carp);
+use Data::Dumper qw(Dumper);
 use POSIX qw(strftime);
 use Plack::Util;
 use Time::HiRes qw(time);
