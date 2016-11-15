@@ -57,13 +57,14 @@ sub print_openapi_spec {
             my $self = shift;
 
             my %env = (
-                PATH_INFO       => "/",
-                QUERY_STRING    => "",
-                REQUEST_METHOD  => "GET",
-                REQUEST_URI     => "/",
-                SERVER_NAME     => "localhost",
+                'psgi.url_scheme' => 'http',
+                PATH_INFO       => '/',
+                QUERY_STRING    => '',
+                REQUEST_METHOD  => 'GET',
+                REQUEST_URI     => '/',
+                SERVER_NAME     => 'localhost',
                 SERVER_PORT     => 5000,
-                SERVER_PROTOCOL => "HTTP/1.1"
+                SERVER_PROTOCOL => 'HTTP/1.1'
             );
 
             $self->req(Raisin::Request->new($self, \%env));
