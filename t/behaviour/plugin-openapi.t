@@ -5,15 +5,15 @@ use warnings;
 use HTTP::Message::PSGI;
 use HTTP::Request;
 use Test::More;
-
-use Raisin::Plugin::Swagger;
-use Raisin::Routes;
-use Raisin;
 use Types::Standard qw(Int Str);
 
-my $a = Raisin->new;
-my $req = Raisin::Request->new($a, req_to_psgi(HTTP::Request->new('GET', '/')));
+use Raisin;
+use Raisin::Plugin::Swagger;
+use Raisin::Routes;
 
+my $req = Raisin::Request->new(req_to_psgi(HTTP::Request->new('GET', '/')));
+
+my $a = Raisin->new;
 $a->api_version('1.23');
 $a->req($req);
 

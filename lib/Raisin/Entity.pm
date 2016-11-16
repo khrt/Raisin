@@ -171,7 +171,7 @@ __END__
 
 =head1 NAME
 
-Raisin::Entity - Simple facade to use with your API.
+Raisin::Entity - A simple facade to use with your API.
 
 =head1 SYNOPSIS
 

@@ -6,33 +6,18 @@ use Test::More;
 
 use Raisin::Util;
 
-my @CASES = (
-    { input => 'application/json-rpc', expected => 'json' },
-    { input => 'application/json', expected => 'json' },
-    { input => 'json', expected => 'json' },
+subtest 'make_tag_from_path' => sub {
+    is Raisin::Util::make_tag_from_path('/tank/dev/web'), 'web';
+    is Raisin::Util::make_tag_from_path('/str'), 'str';
+    is Raisin::Util::make_tag_from_path('/'), undef;
+};
 
-    { input => 'application/yaml', expected => 'yaml' },
-    { input => 'application/yml', expected => 'yaml' },
-    { input => 'yaml', expected => 'yaml' },
-    { input => 'yml', expected => 'yaml' },
-
-    { input => 'text/*', expected => 'text' },
-    { input => 'text/html', expected => undef },
-    { input => 'text/plain', expected => 'text' },
-    { input => 'text', expected => 'text' },
-    { input => 'txt', expected => 'text' },
-
-    { input => 'application/xml', expected => undef },
-
-    { input => 'application/json-rpc; charset=utf-8; foo=bar', expected => 'json' },
-    { input => 'application/json-rpc ; charset=utf-8', expected => 'json' },
-);
-
-subtest 'detect_serializer' => sub {
-    for my $case (@CASES) {
-        my $title = 'Detect: ' . ($case->{expected} || '*');
-        is Raisin::Util::detect_serializer($case->{input}), $case->{expected}, $title;
-    }
+subtest 'iterate_params' => sub {
+    my $i = Raisin::Util::iterate_params([qw/key0 val0 key1 val1 key2 val2/]);
+    is_deeply [$i->()], [qw/key0 val0/];
+    is_deeply [$i->()], [qw/key1 val1/];
+    is_deeply [$i->()], [qw/key2 val2/];
+    is_deeply [$i->()], [undef, undef];
 };
 
 done_testing;

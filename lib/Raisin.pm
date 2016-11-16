@@ -4,22 +4,40 @@ use strict;
 use warnings;
 
 use Carp qw(croak carp longmess);
+use HTTP::Status qw(:constants);
+use Plack::Response;
 use Plack::Util;
 
 use Raisin::Request;
-use Raisin::Response;
 use Raisin::Routes;
 use Raisin::Util;
 
-our $VERSION = '0.69';
+use Raisin::Middleware::Formatter;
+use Raisin::Encoder;
+use Raisin::Decoder;
+
+use Plack::Util::Accessor qw(
+    middleware
+    mounted
+    routes
+
+    decoder
+    encoder
+);
+
+our $VERSION = '0.70';
 
 sub new {
     my ($class, %args) = @_;
+
     my $self = bless { %args }, $class;
 
-    $self->{routes} = Raisin::Routes->new;
-    $self->{mounted} = [];
-    $self->{middleware} = {};
+    $self->routes(Raisin::Routes->new);
+    $self->mounted([]);
+    $self->middleware({});
+
+    $self->decoder(Raisin::Decoder->new);
+    $self->encoder(Raisin::Encoder->new);
 
     $self;
 }
@@ -46,10 +64,8 @@ sub add_middleware {
 }
 
 # Routes
-sub routes { shift->{routes} }
 sub add_route {
     my ($self, %params) = @_;
-    $params{api_format} = $self->api_format if $self->api_format;
     $self->routes->add(%params);
 }
 
@@ -88,6 +104,14 @@ sub run {
         $psgi = $mw->wrap($psgi, @$args);
     }
 
+    $psgi = Raisin::Middleware::Formatter->wrap(
+        $psgi,
+        default_format => $self->default_format,
+        format => $self->format,
+        decoder => $self->decoder,
+        encoder => $self->encoder
+    );
+
     # load fallback logger (Raisin::Logger)
     $self->load_plugin('Logger', fallback => 1);
 
@@ -122,11 +146,11 @@ sub generate_allowed_methods {
 sub psgi {
     my ($self, $env) = @_;
 
-    # Diffrent for each response
-    my $req = $self->req(Raisin::Request->new($self, $env));
-    my $res = $self->res(Raisin::Response->new($self));
+    # New for each response
+    my $req = $self->req(Raisin::Request->new($env));
+    my $res = $self->res(Plack::Response->new);
 
-    # Build API docs
+    # Generate API description
     if ($self->can('swagger_build_spec')) {
         $self->swagger_build_spec;
     }
@@ -138,29 +162,22 @@ sub psgi {
         my $route = $self->routes->find($req->method, $req->path);
         # The requested path exists but requested method not
         if (!$route && $self->{allowed_methods}{ $req->path }) {
-            $res->status(405); # Method Not Allowed
+            $res->status(HTTP_METHOD_NOT_ALLOWED);
             return $res->finalize;
         }
         # Nothing found
         elsif (!$route) {
-            $res->status(404);
-            return $res->finalize;
-        }
-
-        my $type = $req->accept_format;
-        my $accept = $req->header('Accept');
-        if (   ($accept && $accept ne '*/*' && !$type)
-            || (($self->api_format && $type) && ($self->api_format ne $type)))
-        {
-            $self->log(error => 'Content-type provided not acceptable');
-            $res->status(406);
+            $res->status(HTTP_NOT_FOUND);
             return $res->finalize;
         }
 
         my $code = $route->code;
         if (!$code || ($code && ref($code) ne 'CODE')) {
-            $res->status(500);
-            $res->body('Invalid Endpoint For ' . $req->path);
+            $self->log(error => "route ${ \$req->path } returns nothing or not CODE");
+
+            $res->status(HTTP_INTERNAL_SERVER_ERROR);
+            $res->body('Internal error');
+
             return $res->finalize;
         }
 
@@ -168,33 +185,23 @@ sub psgi {
 
         # Validation and coercion of declared params
         if (!$req->prepare_params($route->params, $route->named)) {
-            $res->status(400);
+            $res->status(HTTP_BAD_REQUEST);
             $res->body('Invalid Parameters');
             return $res->finalize;
         }
 
         $self->hook('after_validation')->($self);
 
-        # Evaluate a user's endpoint
+        # Evaluate an endpoint
         my $data = $code->($req->declared_params);
         if (defined $data) {
-            # Delayed responses
+            # Delayed response
             return $data if ref($data) eq 'CODE';
 
             $res->body($data);
         }
 
-        if (!$res->rendered) {
-            my $format = $route->format || $req->header('Accept');
-            $res->format($format);
-            $res->render;
-        }
-
         $self->hook('after')->($self);
-
-        if (!$res->rendered) {
-            $self->log(error => 'Nothing rendered');
-        }
 
         1;
     } or do {
@@ -204,7 +211,7 @@ sub psgi {
         my $msg = $ENV{PLACK_ENV}
             && $ENV{PLACK_ENV} eq 'deployment' ? 'Internal Error' : $e;
 
-        $res->status(500);
+        $res->status(HTTP_INTERNAL_SERVER_ERROR);
         $res->body($msg);
     };
 
@@ -218,6 +225,8 @@ sub psgi {
 # Finalize response
 sub before_finalize {
     my $self = shift;
+
+    $self->res->status(HTTP_OK) unless $self->res->status;
     $self->res->header('X-Framework' => "Raisin $VERSION");
 
     if ($self->api_version) {
@@ -232,28 +241,33 @@ sub finalize {
 }
 
 # Application defaults
-sub api_default_format {
+sub default_format {
     my ($self, $format) = @_;
 
     if ($format) {
-        $self->{api_default_format} = Raisin::Util::make_serializer_class($format);
+        $self->{default_format} = $format;
     }
 
-    $self->{api_default_format} || Raisin::Util::make_serializer_class('yaml');
+    $self->{default_format} || 'yaml';
 }
 
-sub api_format {
+sub format {
     my ($self, $format) = @_;
 
-    if ($format && grep { lc($format) eq $_ } qw(json yaml)) {
-        $self->{api_format} = lc $format;
-        $self->api_default_format(lc $format);
-    }
-    elsif ($format) {
-        carp "Can't use specified format. Currently supported only JSON and YAML.";
+    # TODO: test
+    if ($format) {
+        my @decoders = keys %{ $self->decoder->all };
+
+        if (grep { lc($format) eq $_ } @decoders) {
+            $self->{format} = lc $format;
+            $self->default_format(lc $format);
+        }
+        else {
+            carp 'Invalid format, choose one of: ', join(', ', @decoders);
+        }
     }
 
-    $self->{api_format};
+    $self->{format};
 }
 
 sub api_version {
@@ -274,8 +288,6 @@ sub res {
     $self->{res} = $res if $res;
     $self->{res};
 }
-
-sub param { shift->req->parameters->mixed }
 
 sub session {
     my $self = shift;
@@ -524,7 +536,7 @@ Can be applied to any HTTP method and/or C<route_param> to describe parameters.
 
 For more see L<Raisin/Validation-and-coercion>.
 
-=head3 api_default_format
+=head3 default_format
 
 Specifies default API format mode when formatter doesn't specified by API user.
 E.g. URI is asked without an extension (C<json>, C<yaml>) or C<Accept> header
@@ -532,7 +544,7 @@ isn't specified.
 
 Default value: C<YAML>.
 
-    api_default_format 'json';
+    default_format 'json';
 
 See also L<Raisin/API-FORMATS>.
 

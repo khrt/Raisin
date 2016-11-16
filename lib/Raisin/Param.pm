@@ -96,7 +96,7 @@ sub validate {
     my ($self, $ref_value, $quiet) = @_;
 
     # Required and empty
-    # Only optional parameters can has default value
+    # Only optional parameters can have default value
     if ($self->required && !defined($$ref_value)) {
         Raisin::log(warn => '`%s` is required', $self->name) unless $quiet;
         return;

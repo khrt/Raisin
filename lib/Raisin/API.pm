@@ -103,6 +103,19 @@ sub route_param {
 }
 
 #
+# Serialization
+#
+sub register_decoder {
+    my ($format, $class) = @_;
+    app->decoder->register($format => $class);
+}
+
+sub register_encoder {
+    my ($format, $class) = @_;
+    app->encoder->register($format => $class);
+}
+
+#
 # Actions
 #
 sub del     { _add_route('delete', @_) }
@@ -185,6 +198,7 @@ sub present {
 
 sub include_missing {
     my $p = shift;
+    # TODO: replace app->req->{'raisin.declared'}, if it is possible, to app->route->params
     my %pp = map { $_->name, $p->{ $_->name } } @{ app->req->{'raisin.declared'} };
     \%pp;
 }
@@ -194,8 +208,8 @@ sub include_missing {
 #
 sub plugin { app->load_plugin(@_) }
 
-sub api_default_format { app->api_default_format(@_) }
-sub api_format { app->api_format(@_) }
+sub api_default_format { app->default_format(@_) }
+sub api_format { app->format(@_) }
 
 # TODO:
 # prepend a resource with a version number
@@ -205,7 +219,11 @@ sub api_version { app->api_version(@_) }
 #
 # Render
 #
-sub error { app->res->render_error(@_) }
+sub error {
+    my ($code, $message) = @_;
+    app->res->status($code);
+    app->res->body($message);
+}
 
 1;
 

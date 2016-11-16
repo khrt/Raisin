@@ -3,15 +3,20 @@ use strict;
 use warnings;
 
 use Test::More;
-
 use Types::Standard qw(Int);
 
 use Raisin::Routes;
 
+{
+    no strict 'refs';
+    *Raisin::log = sub { note(sprintf $_[1], @_[2 .. $#_]) };
+}
+
+# TODO: add pathes with extensions
+
 my @CASES = (
     {
         object => {
-            api_format => 'json',
             desc => 'Test endpoint',
             method => 'POST',
             named => [requires => { name => 'id', type => Int },],
@@ -23,7 +28,6 @@ my @CASES = (
     },
     {
         object => {
-            api_format => 'json',
             method => 'PUT',
             path => '/api/item/:id',
         },
@@ -33,7 +37,6 @@ my @CASES = (
 
     {
         object => {
-            api_format => 'json',
             method => 'POST',
             path => '/api/user/:id',
         },

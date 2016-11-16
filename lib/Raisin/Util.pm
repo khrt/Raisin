@@ -5,54 +5,9 @@ use warnings;
 
 use Plack::Util;
 
-my %SERIALIZERS = (
-    default  => undef,
-
-    json     => 'json',
-    json_rpc => 'json',
-
-    yaml     => 'yaml',
-    yml      => 'yaml',
-
-    text     => 'text',
-    txt      => 'text',
-
-    plain    => 'text',
-);
-
-sub valid_extensions {
-    keys %SERIALIZERS;
-}
-
-sub detect_serializer {
-    my $type = shift;
-    return unless $type;
-
-    $type = (split ';', $type)[0];
-    my ($l, $r) = ($type =~ m#^(?:([^/]+)/)?(.+)#msix);
-
-    my $media = 'default';
-    if ($r && $r eq '*') {
-        $media = $l;
-    }
-    else {
-        $media = $r;
-        $media =~ tr#-#_#;
-        # trim spaces
-        $media =~ s/^\s+|\s+$//gmsix;
-    }
-
-    $SERIALIZERS{$media};
-}
-
-sub make_serializer_class {
-    my $format = shift;
-    'Raisin::Plugin::Format::' . uc($format);
-}
-
 sub make_tag_from_path {
     my $path = shift;
-    (split '/', $path)[1];
+    (split '/', $path)[-1];
 }
 
 sub iterate_params {
@@ -75,14 +30,6 @@ __END__
 Raisin::Util - Utility subroutine for Raisin.
 
 =head1 FUNCTIONS
-
-=head2 detect_serializer
-
-Detects serializer by content type or extension.
-
-=head2 make_serializer_class
-
-Returns C<Raisin::Plugin::Format::E<lt>NAMEE<gt>> class name.
 
 =head2 make_tag_from_path
 

@@ -4,16 +4,15 @@ use strict;
 use warnings;
 
 use Carp;
-use List::Util 'pairs';
+use Plack::Util::Accessor qw(
+    cache
+    list
+    routes
+);
 
-use Raisin::Attributes;
 use Raisin::Param;
 use Raisin::Routes::Endpoint;
 use Raisin::Util;
-
-has 'cache';
-has 'list';
-has 'routes';
 
 sub new {
     my $class = shift;
@@ -38,7 +37,7 @@ sub add {
     }
 
     my $code = $params{code};
-    # Support only code as route destination
+    # Supports only CODE as route destination
     if (!$code || !(ref($code) eq 'CODE')) {
         carp "Invalid route params for $method $path";
         return;
@@ -63,27 +62,26 @@ sub add {
         return;
     }
 
-    # Cut off last slash from the path
+    # Cut off the last slash from a path
     $path =~ s#(.+)/$#$1# if !ref($path);
 
-    my $ep
-        = Raisin::Routes::Endpoint->new(
-            api_format => $params{api_format},
-            code => $code,
-            method => $method,
-            params => \@pp,
-            path => $path,
+    my $ep = Raisin::Routes::Endpoint->new(
+        code => $code,
+        method => $method,
+        params => \@pp,
+        path => $path,
 
-            desc    => $params{desc},
-            entity  => $params{entity},
-            summary => $params{summary},
-            tags    => $params{tags},
-        );
+        desc => $params{desc},
+        entity => $params{entity},
+        summary => $params{summary},
+        tags => $params{tags},
+    );
     push @{ $self->{routes} }, $ep;
 
     if ($self->list->{$path}{$method}) {
-        print STDERR "Route redefined: `$method` `$path`\n";
+        Raisin::log(warn => "route has been redefined: $method $path");
     }
+
     $self->list->{$path}{$method} = scalar @{ $self->{routes} };
 }
 
@@ -98,6 +96,10 @@ sub find {
 
     my @found = grep { $_->match($method, $path) } @$routes;
 
+    if (scalar @found > 1) {
+        Raisin::log(warn => "more then one route has been found: $method $path");
+    }
+
     $self->cache->{$cache_key} = \@found;
     $found[0];
 }
@@ -108,7 +110,7 @@ __END__
 
 =head1 NAME
 
-Raisin::Routes - Routing class for Raisin.
+Raisin::Routes - A routing class for Raisin.
 
 =head1 SYNOPSIS
 

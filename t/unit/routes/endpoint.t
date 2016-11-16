@@ -12,7 +12,6 @@ use Raisin::Routes::Endpoint;
 my @CASES = (
     {
         object => {
-            api_format => 'json',
             desc => 'Test endpoint',
             method => 'POST',
             params => [
@@ -29,7 +28,6 @@ my @CASES = (
     },
     {
         object => {
-            api_format => 'json',
             method => 'POST',
             path => '/api/user/:id',
         },
@@ -55,7 +53,6 @@ my @CASES = (
 
     {
         object => {
-            api_format => 'json',
             method => 'POST',
             path => '/api/user/:id',
         },
@@ -107,11 +104,6 @@ subtest 'match' => sub {
             my $is_matched = $e->match($case->{input}{method}, $case->{input}{path});
 
             is $is_matched, $case->{expected}, 'match';
-
-            # format
-            if ($is_matched && !$case->{object}{api_format} && ($case->{input}{path} =~ /\.(.+)$/msix)) {
-                is $e->format, $1, 'format: ' . $1;
-            }
 
             # named params
             if ($is_matched && @{ $e->params }) {

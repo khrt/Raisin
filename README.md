@@ -224,7 +224,7 @@ Can be applied to any HTTP method and/or `route_param` to describe parameters.
 
 For more see ["Validation-and-coercion" in Raisin](https://metacpan.org/pod/Raisin#Validation-and-coercion).
 
-### api\_default\_format
+### default\_format
 
 Specifies default API format mode when formatter doesn't specified by API user.
 E.g. URI is asked without an extension (`json`, `yaml`) or `Accept` header
@@ -232,7 +232,7 @@ isn't specified.
 
 Default value: `YAML`.
 
-    api_default_format 'json';
+    default_format 'json';
 
 See also ["API-FORMATS" in Raisin](https://metacpan.org/pod/Raisin#API-FORMATS).
 

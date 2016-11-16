@@ -4,11 +4,12 @@ use warnings;
 
 use FindBin '$Bin';
 use HTTP::Request::Common qw(GET POST PUT DELETE);
+use HTTP::Status qw(:constants);
+use JSON 'decode_json';
 use Plack::Test;
 use Plack::Util;
 use Test::More;
-use YAML 'Load';
-use JSON 'decode_json';
+use YAML qw(Dump Load);
 
 use lib ("$Bin/../../examples/sample-app/lib");
 
@@ -39,69 +40,87 @@ my @CASES = (
     },
 );
 
-for my $case (@CASES) {
-    my @IDS = ();
-    my %NEW = %{ $case->{object} };
+test_psgi $app, sub {
+    my $cb = shift;
 
-    test_psgi $app, sub {
-        my $cb  = shift;
+    for my $case (@CASES) {
+        my @IDS = ();
+        my %NEW = %{ $case->{object} };
 
         subtest "GET /api/$case->{namespace}" => sub {
             my $res = $cb->(GET "/api/$case->{namespace}");
+
             if (!is $res->code, 200) {
                 diag $res->content;
                 BAIL_OUT 'FAILED!';
             }
-            is $res->content_type, 'application/yaml';
+
+            is $res->content_type, 'application/x-yaml';
             ok my $c = $res->content, 'content';
             ok my $o = Load($c), 'decode';
-            @IDS = map { $_->{id} } grep { $_ } @{ $o->{data} };
+
+            @IDS = map { $_->{id} } grep {$_} @{ $o->{data} };
+
             ok scalar @IDS, 'data';
         };
 
         subtest "GET /api/$case->{namespace}.json" => sub {
             my $res = $cb->(GET "/api/$case->{namespace}.json");
+
             if (!is $res->code, 200) {
                 diag $res->content;
                 BAIL_OUT 'FAILED!';
             }
+
             is $res->content_type, 'application/json';
             ok my $c = $res->content, 'content';
             ok my $o = decode_json($c), 'decode';
-            @IDS = map { $_->{id} } grep { $_ } @{ $o->{data} };
+
+            @IDS = map { $_->{id} } grep {$_} @{ $o->{data} };
+
             ok scalar @IDS, 'data';
         };
 
         subtest "POST /api/$case->{namespace}" => sub {
             my $res = $cb->(POST "/api/$case->{namespace}", [%NEW]);
+            is $res->code, HTTP_UNSUPPORTED_MEDIA_TYPE;
+        };
+
+        subtest "POST /api/$case->{namespace}" => sub {
+            my $res = $cb->(
+                POST "/api/$case->{namespace}",
+                Content_Type => 'application/x-yaml',
+                Content      => Dump(\%NEW)
+            );
+
             if (!is $res->code, 200) {
                 diag $res->content;
                 BAIL_OUT 'FAILED!';
             }
+
             ok my $c = $res->content, 'content';
             ok my $o = Load($c), 'decode';
             is $o->{success}, $IDS[-1] + 1, 'success';
+
             push @IDS, $o->{success};
         };
 
         subtest "GET /api/$case->{namespace}/$IDS[-1]" => sub {
             my $res = $cb->(GET "/api/$case->{namespace}/$IDS[-1]");
+
             if (!is $res->code, 200) {
                 diag $res->content;
                 BAIL_OUT 'FAILED!';
             }
+
             ok my $c = $res->content, 'content';
             ok my $o = Load($c), 'decode';
             is_deeply $o->{data}, \%NEW, 'data';
         };
 
         subtest "PATCH /api/$case->{namespace}/$IDS[-1]" => sub {
-            my $content_string = join '&',
-                map { "$_=$case->{edit}{$_}" } keys %{ $case->{edit} };
-
-            my $res = $cb->(
-                PATCH("/api/$case->{namespace}/$IDS[-1]", $content_string)
-            );
+            my $res =
+                $cb->(PATCH("/api/$case->{namespace}/$IDS[-1]", $case->{edit}));
 
             my %EDITED = (
                 %NEW,
@@ -120,13 +139,10 @@ for my $case (@CASES) {
 
 
         subtest "PUT /api/$case->{namespace}/$IDS[-1]" => sub {
-            my $content_string = join '&',
-                map { "$_=$case->{edit}{$_}" } keys %{ $case->{edit} };
-
             my $res = $cb->(
                 PUT "/api/$case->{namespace}/$IDS[-1]",
-                Content => $content_string,
-                Content_Type => 'application/x-www-form-urlencoded'
+                Content      => Dump($case->{edit}),
+                Content_Type => 'application/x-yaml'
             );
 
             my %EDITED = (
@@ -150,7 +166,7 @@ for my $case (@CASES) {
                 is $res->code, 200;
                 ok my $c = $res->content, 'content';
                 ok my $o = Load($c), 'decode';
-                @IDS = map { $_->{id} } grep { $_ } @{ $o->{data} };
+                @IDS = map { $_->{id} } grep {$_} @{ $o->{data} };
                 ok scalar @IDS, 'data';
             };
 
@@ -191,24 +207,19 @@ for my $case (@CASES) {
 
         subtest 'GET /404' => sub {
             my $res = $cb->(GET '/404');
+
             #note explain $res->content;
             is $res->code, 404;
         };
-    };
-}
-
+    }
+};
 
 sub PATCH {
     my ($path, $content) = @_;
-
-    my $req = HTTP::Request->new( 'PATCH', $path );
-
-    $req->header('Content-Type' => 'application/x-www-form-urlencoded');
-
-    $req->content($content);
-
+    my $req = HTTP::Request->new('PATCH', $path);
+    $req->header('Content-Type' => 'application/x-yaml');
+    $req->content(Dump($content));
     $req;
 }
-
 
 done_testing;

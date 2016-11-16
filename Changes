@@ -1,3 +1,5 @@
+0.70 Formatters
+    * Removes x-www-form-urlencoded support
 
 0.69 Documented responses
     * Fixes
@@ -75,7 +77,7 @@
         * delete an obsolete syntax support [array];
         * update errors format;
     - Util:
-        * fix & suplement `detect_serializer`;
+        * fix & supplement `detect_serializer`;
     - Fix Routes::Endpoint;
     - Fix Routes;
     - Cleanup Attributes;

@@ -35,6 +35,9 @@ sub accept_format {
         $media_types{$media} = $q;
         last if $q == 1;
     }
+    #use DDP;
+    #p %media_types;
+    #warn 'x' x 10;
 
     my ($media) = sort { $media_types{$b} <=> $media_types{$a} } keys %media_types;
     $media;

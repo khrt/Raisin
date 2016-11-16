@@ -6,7 +6,6 @@ use Test::More;
 
 use Raisin::API;
 use Raisin::Entity::Object;
-use Raisin::Response;
 use Raisin::Routes;
 
 sub _clean_app {
@@ -40,7 +39,7 @@ subtest 'middleware' => sub {
     is_deeply $app->{middleware},
         { '+Plack::Middleware::ContentLength' => [], }, 'added';
 
-    my $psgi_app = new;
+    my $psgi_app = run;
     is ref($psgi_app), 'CODE', 'run';
 
     is_deeply $app->{_loaded_middleware},
@@ -206,7 +205,7 @@ subtest 'present' => sub {
         key1 => 'value1',
     );
 
-    $app->res(Raisin::Response->new($app));
+    $app->res(Plack::Response->new);
     present data => \%data_hash;
     is_deeply $app->res->body, { data => \%data_hash }, 'Data';
 
@@ -218,7 +217,7 @@ subtest 'present' => sub {
         );
     }
 
-    $app->res(Raisin::Response->new($app));
+    $app->res(Plack::Response->new);
     present data => \%data_hash, with => 'Raisin::API::Entity::Test';
     is_deeply $app->res->body, { data => { key => 'value0' } }, 'Data w/ Entity';
 
@@ -236,8 +235,8 @@ subtest 'plugin' => sub {
 };
 
 subtest 'api_default_format' => sub {
-    is api_default_format('json'), 'Raisin::Plugin::Format::JSON', 'set';
-    is api_default_format(), 'Raisin::Plugin::Format::JSON', 'get';
+    is api_default_format('json'), 'json', 'set';
+    is api_default_format(), 'json', 'get';
 
     _clean_app();
 };
@@ -246,7 +245,7 @@ subtest 'api_format' => sub {
     is api_format('json'), 'json', 'set';
 
     is api_format(), 'json', 'get';
-    is api_default_format(), 'Raisin::Plugin::Format::JSON', 'get default format';
+    is api_default_format(), 'json', 'get default format';
 
     _clean_app();
 };
@@ -264,7 +263,6 @@ subtest 'error' => sub {
     my $res = Raisin::API->app->res;
     is $res->status, 501, 'status';
     is $res->body, 'Unit test!', 'body';
-    is $res->rendered, 1, 'rendered';
 
     _clean_app();
 };

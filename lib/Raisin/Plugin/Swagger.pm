@@ -81,9 +81,9 @@ sub _spec_20 {
     my $req = $app->req;
     my $routes = $app->routes->routes;
 
-    my @content_types = $app->api_format
-        ? $app->api_format
-        : qw(application/yaml application/json);
+    my @content_types = $app->format
+        ? $app->format
+        : qw(application/x-yaml application/json);
 
     my $base_path = $req->base->as_string;
     $base_path =~ s#http(?:s?)://[^/]+##msix;
@@ -417,7 +417,7 @@ __END__
 
 =head1 NAME
 
-Raisin::Plugin::Swagger - Generate API documentation.
+Raisin::Plugin::Swagger - Generates API description in Swagger 2/OpenAPI compatible format.
 
 =head1 SYNOPSIS
 

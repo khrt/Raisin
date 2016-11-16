@@ -3,35 +3,36 @@ package Raisin::Routes::Endpoint;
 use strict;
 use warnings;
 
-use Raisin::Util;
-use Raisin::Attributes;
+use Plack::Util::Accessor qw(
+    check
+    code
+    desc
+    entity
+    method
+    named
+    params
+    path
+    regex
+    summary
+);
 
-has 'api_format';
-has 'check' => {};
-has 'code';
-has 'desc';
-has 'entity';
-has 'format';
-has 'method';
-has 'named';
-has 'params' => [];
-has 'path';
-has 'regex';
-has 'summary';
+use Raisin::Util;
 
 sub new {
     my ($class, %args) = @_;
+
     my $self = bless {}, $class;
 
-    @$self{keys %args} = values %args;
+    $self->check({});
+    $self->params([]);
+
+    @$self{ keys %args } = values %args;
 
     # Populate params index
     for my $p (@{ $self->params }) {
         if ($p->named && (my $re = $p->regex)) {
-            if (my $re = $p->regex) {
-                $re =~ s/[\$^]//g;
-                $self->{check}{ $p->name } = $re;
-            }
+            $re =~ s/[\$^]//g;
+            $self->{check}{ $p->name } = $re;
         }
     }
 
@@ -48,17 +49,10 @@ sub _build_regex {
     $regex =~ s/(.?)([:*?])(\w+)/$self->_rep_regex($1, $2, $3)/eg;
     $regex =~ s/[{}]//g;
 
-    $regex .= do {
-        if ($self->api_format) {
-            "(?<format>\.${ \$self->api_format })?";
-        }
-        else {
-            my $se = join '|', Raisin::Util::valid_extensions();
-            "(?<format>(?:\.(?:$se))?)?";
-        }
-    };
+    # Allows any extensions
+    $regex .= "(?:\\\..+)?";
 
-    qr/^$regex$/;
+    qr/^$regex$/i;
 }
 
 sub _rep_regex {
@@ -94,18 +88,12 @@ sub tags {
 sub match {
     my ($self, $method, $path) = @_;
 
-    $self->{format} = undef;
     $self->{named} = undef;
 
     return if !$method || lc($method) ne lc($self->method);
     return if $path !~ $self->regex;
 
     my %captured = %+;
-
-    if (my $format = delete $captured{format}) {
-        # delete prepending full stop
-        $self->format(substr($format, 1));
-    }
 
     foreach my $p (@{ $self->params }) {
         next unless $p->named;
@@ -128,7 +116,7 @@ Raisin::Routes::Endpoint - Endpoint class for Raisin::Routes.
 
 =head1 ACKNOWLEDGEMENTS
 
-This module borrowed from L<Kelp::Routes::Pattern>.
+This module was inspired by L<Kelp::Routes::Pattern>.
 
 =head1 AUTHOR
 
