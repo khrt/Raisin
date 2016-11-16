@@ -205,8 +205,6 @@ OpenAPI specification.
         present data => $albums, with => 'MusicApp::Entity::Album';
     };
 
-TODO
-
 ### params
 
 Defines validations and coercion options for your parameters.
