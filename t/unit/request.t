@@ -2,324 +2,153 @@
 use strict;
 use warnings;
 
-use Test::More;
-
 use HTTP::Message::PSGI;
-use HTTP::Request;
-
-use Types::Standard qw(Str Int Any);
-
-use YAML qw();
-use JSON qw();
+use HTTP::Request::Common qw(GET);
+use Test::More;
+use Types::Standard qw(Int);
 
 use Raisin;
+use Raisin::Param;
 use Raisin::Request;
-use Raisin::Routes;
+use Raisin::Routes::Endpoint;
 
-my %DATA_PATH = (id => 42);
-my %DATA_GET = (param => 'ok');
-my %DATA_POST = (
-    %DATA_GET,
-    string => 'data0', array => [0, 1, 2], hash => { key => 'value' },
-);
-
-my $rr_path = '/api/:id';
-my $rr = Raisin::Routes->new;
-$rr->add(
-    method => 'GET',
-    path => $rr_path,
-    params => [
-        requires => { name => 'param', type => Str },
-    ],
-    named => [
-        require => { name => 'id', type => Int }
-    ],
-    code => sub {}
-);
-$rr->add(
-    method => 'POST',
-    path => $rr_path,
-    params => [
-        requires => { name => 'param', type => Str },
-        optional => { name => 'string', type => Any },
-        optional => { name => 'array', type => Any },
-        optional => { name => 'hash', type => Any },
-    ],
-    named => [
-        require => { name => 'id', type => Int }
-    ],
-    code => sub {}
-);
-$rr->add(
-    method => 'PUT',
-    path => $rr_path,
-    params => [
-        requires => { name => 'param', type => Str },
-        optional => { name => 'string', type => Any },
-        optional => { name => 'array', type => Any },
-        optional => { name => 'hash', type => Any },
-    ],
-    named => [
-        require => { name => 'id', type => Int }
-    ],
-    code => sub {}
-);
-my $route_get = $rr->routes->[0];
-my $route_post = $rr->routes->[1];
-my $route_put = $rr->routes->[2];
-
-my @CASES = (
-    # POST Form
-    {
-        input => {
-            method => 'POST',
-            headers => ['Accept' => '*/*', 'Content_Type' => 'application/x-www-form-urlencoded'],
-            content => \%DATA_POST,
-            route => $route_post,
-        },
-        expected => {
-            accept => undef,
-            deserialize => \%DATA_POST,
-            prepare_params => { %DATA_PATH, %DATA_POST, array => sprintf('ARRAY(0x%x)', $DATA_POST{array}), hash => sprintf('HASH(0x%x)', $DATA_POST{hash}) },
-        },
-    },
-    # POST JSON
-    {
-        input => {
-            method => 'POST',
-            headers => ['Accept' => '*/*', 'Content_Type' => 'application/json'],
-            content => \%DATA_POST,
-            route => $route_post,
-        },
-        expected => {
-            accept => undef,
-            deserialize => \%DATA_POST,
-            prepare_params => { %DATA_PATH, %DATA_POST, },
-        },
-    },
-    # POST YAML
-    {
-        input => {
-            method => 'POST',
-            headers => ['Accept' => '*/*', 'Content_Type' => 'application/yaml'],
-            content => \%DATA_POST,
-        route => $route_post,
-        },
-        expected => {
-            accept => undef,
-            deserialize => \%DATA_POST,
-            prepare_params => { %DATA_PATH, %DATA_POST, },
-        },
-    },
-
-    # PUT YAML
-    {
-        input => {
-            method => 'PUT',
-            headers => ['Accept' => '*/*', 'Content_Type' => 'application/yaml'],
-            content => \%DATA_POST,
-            route => $route_put,
-        },
-        expected => {
-            accept => undef,
-            deserialize => \%DATA_POST,
-            prepare_params => { %DATA_PATH, %DATA_POST, },
-        },
-    },
-
-    # GET *
-    {
-        input => {
-            method => 'GET',
-            headers => ['Accept' => '*/*'],
-            route => $route_get,
-        },
-        expected => {
-            accept => undef,
-            deserialize => undef,
-            prepare_params => { %DATA_PATH, %DATA_GET, },
-        },
-    },
-    # GET text/plain
-    {
-        input => {
-            method => 'GET',
-            headers => ['Accept' => 'text/plain'],
-            route => $route_get,
-        },
-        expected => {
-            accept => 'text',
-            deserialize => undef,
-            prepare_params => { %DATA_PATH, %DATA_GET, },
-        },
-    },
-    # GET JSON
-    {
-        input => {
-            method => 'GET',
-            headers => ['Accept' => 'application/json'],
-            route => $route_get,
-        },
-        expected => {
-            accept => 'json',
-            deserialize => undef,
-            prepare_params => { %DATA_PATH, %DATA_GET, },
-        },
-    },
-    # GET YAML
-    {
-        input => {
-            method => 'GET',
-            headers => ['Accept' => 'application/yaml'],
-            route => $route_get,
-        },
-        expected => {
-            accept => 'yaml',
-            deserialize => undef,
-            prepare_params => { %DATA_PATH, %DATA_GET, },
-        },
-    },
-    # GET XML
-    {
-        input => {
-            method => 'GET',
-            headers => ['Accept' => 'application/xml'],
-            route => $route_get,
-        },
-        expected => {
-            accept => undef,
-            deserialize => undef,
-            prepare_params => { %DATA_PATH, %DATA_GET, },
-        },
-    },
-    # GET JSON/XML
-    {
-        input => {
-            method => 'GET',
-            headers => [
-                'Accept' => 'application/xml;q=0.5, application/json;q=0.7'
-            ],
-            route => $route_get,
-        },
-        expected => {
-            accept => 'json',
-            deserialize => undef,
-            prepare_params => { %DATA_PATH, %DATA_GET, },
-        },
-    },
-    # GET TEXT
-    {
-        input => {
-            method => 'GET',
-            headers => [
-                'Accept' => 'text/*;q=0.3, text/html;q=0.7, text/html;level=1, text/html;level=2;q=0.4, */*;q=0.5',
-            ],
-            route => $route_get,
-        },
-        expected => {
-            accept => 'text',
-            deserialize => undef,
-            prepare_params => { %DATA_PATH, %DATA_GET, },
-        },
-    }
-);
-
-sub _make_object {
-    my $http_req = shift;
-    my $caller = caller;
-    my $app = Raisin->new(caller => $caller);
-    Raisin::Request->new($app, req_to_psgi($http_req));
+{
+    no strict 'refs';
+    *Raisin::log = sub { note(sprintf $_[1], @_[2 .. $#_]) };
 }
 
-sub _make_request {
-    my $input = shift;
+subtest 'precedence' => sub {
+    my $r = Raisin::Routes::Endpoint->new(
+        method => 'GET',
+        path => '/user/:id',
+        params => [
+            Raisin::Param->new(
+                named => 1,
+                type => 'requires',
+                spec => { name => 'id', type => Int },
+            ),
+            Raisin::Param->new(
+                named => 0,
+                type => 'optional',
+                spec => { name => 'id', type => Int },
+            ),
+        ],
+        code => sub {},
+    );
 
-    my %headers = @{ $input->{headers} };
-    my $content = $input->{content};
+    my @CASES = (
+        {
+            env => {
+                %{ GET('/user/1?id=2')->to_psgi },
+                'raisinx.body_params' => { id => 3 },
+            },
+            expected => 1,
+        },
+        {
+            env => {
+                %{ GET('/user/?id=2')->to_psgi },
+                'raisinx.body_params' => { id => 3 },
+            },
+            expected => 2,
+        },
+        {
+            env => {
+                %{ GET('/user/')->to_psgi },
+                'raisinx.body_params' => { id => 3 },
+            },
+            expected => 3,
+        },
+        {
+            env => {
+                %{ GET('/user/')->to_psgi },
+            },
+            expected => undef,
+        },
 
-    if ($content && $headers{Content_Type} =~ 'x-www-form-urlencoded') {
-        $content = join '&', map { "$_=$content->{$_}" } keys %$content;
-    }
-    elsif ($content && $headers{Content_Type} =~ 'json') {
-        $content = JSON::encode_json($content);
-    }
-    elsif ($content && $headers{Content_Type} =~ 'yaml') {
-        $content = YAML::Dump($content);
-    }
+    );
 
-    my $qs = join '&', map { "$_=$DATA_GET{$_}" } keys %DATA_GET;;
-    my $uri = "/api/$DATA_PATH{id}?$qs";
-
-    HTTP::Request->new($input->{method}, $uri, $input->{headers}, $content);
-}
-
-subtest 'accept_format' => sub {
     for my $case (@CASES) {
-        my $title = $case->{expected}{accept} || 'any';
+        my $req = Raisin::Request->new($case->{env});
 
-        my $http_req = _make_request($case->{input});
-        my $req = _make_object($http_req);
-        #isa_ok $req, 'Raisin::Request', 'request';
+        $r->match($case->{env}{REQUEST_METHOD}, $case->{env}{PATH_INFO});
+        $req->prepare_params($r->params, $r->named);
 
-        is $req->accept_format, $case->{expected}{accept}, "accept_format: $title";
+        is $req->raisin_parameters->{id}, $case->{expected};
     }
 };
 
-subtest 'deserialize' => sub {
+subtest 'validation' => sub {
+    my $r = Raisin::Routes::Endpoint->new(
+        method => 'GET',
+        path => '/user',
+        params => [
+            Raisin::Param->new(
+                type => 'required',
+                spec => { name => 'req', type => Int },
+            ),
+            Raisin::Param->new(
+                type => 'optional',
+                spec => { name => 'opt1', type => Int },
+            ),
+            Raisin::Param->new(
+                type => 'optional',
+                spec => { name => 'opt2', type => Int, default => 42 },
+            ),
+        ],
+        code => sub {},
+    );
+
+    my @CASES = (
+        # required, not set
+        # optional 1, not set
+        # optional 2, not set
+        {
+            env => GET('/user/')->to_psgi,
+            expected => {
+                ret => undef,
+                pp => {},
+            },
+        },
+        # required, set
+        # optional 1, not set
+        # optional 2, not set
+        {
+            env => GET('/user/?req=1')->to_psgi,
+            expected => {
+                ret => 1,
+                pp => { req => 1, opt2 => 42 },
+            },
+        },
+        # required, set
+        # optional 1, set
+        # optional 2, not set
+        {
+            env => GET('/user/?req=1&opt1=2')->to_psgi,
+            expected => {
+                ret => 1,
+                pp => { req => 1, opt1 => 2, opt2 => 42 },
+            },
+        },
+        # required, set
+        # optional 2, set
+        {
+            env => GET('/user/?req=1&opt2=2')->to_psgi,
+            expected => {
+                ret => 1,
+                pp => { req => 1, opt2 => 2 },
+            },
+        },
+    );
+
     for my $case (@CASES) {
-        next if $case->{input}{method} eq 'GET';
+        my $req = Raisin::Request->new($case->{env});
 
-        my $http_req = _make_request($case->{input});
-        my $req = _make_object($http_req);
-        #isa_ok $req, 'Raisin::Request', 'request';
+        $r->match($case->{env}{REQUEST_METHOD}, $case->{env}{PATH_INFO});
+        is $req->prepare_params($r->params, $r->named), $case->{expected}{ret};
 
-        isa_ok $req->app, 'Raisin', 'raisin';
+        next unless $case->{expected}{ret};
 
-        # XXX:
-        next if $req->content_type eq 'application/x-www-form-urlencoded';
-
-        is_deeply $req->deserialize($req->content),
-            $case->{expected}{deserialize}, 'deserialize: ' . $req->content_type;
-    }
-};
-
-subtest 'prepare_params, +declared_params' => sub {
-    for my $case (@CASES) {
-        my $title = "$case->{input}{method} " . ($case->{expected}{accept} || '--');
-
-        subtest $title => sub {
-            my $http_req = _make_request($case->{input});
-            my $req = _make_object($http_req);
-            isa_ok $req, 'Raisin::Request', 'request';
-
-            my $r = $case->{input}{route};
-
-            ok $r->match($req->method, $req->path), "match: ${ \$r->path }";
-
-            ok $req->prepare_params($r->params, $r->named), 'prepare_params';
-            is_deeply $req->declared_params, $case->{expected}{prepare_params},
-                'declared params';
-        };
-    }
-};
-
-subtest 'raisin_parameters' => sub {
-    for my $case (@CASES) {
-        my $title = $case->{expected}{accept} || '--';
-
-        subtest $title => sub {
-            my $http_req = _make_request($case->{input});
-            my $req = _make_object($http_req);
-            isa_ok $req, 'Raisin::Request', 'request';
-
-            my $r = $case->{input}{route};
-
-            ok $r->match($req->method, $req->path), "match: ${ \$r->path }";
-
-            ok $req->prepare_params($r->params, $r->named), 'prepare_params';
-            is_deeply $req->raisin_parameters, $case->{expected}{prepare_params},
-                'raisin_parameters';
-        }
+        is_deeply $req->declared_params, $case->{expected}{pp};
     }
 };
 

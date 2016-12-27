@@ -99,9 +99,6 @@ subtest 'call' => sub {
 };
 
 subtest 'negotiate_format' => sub {
-    my %env = (
-    );
-
     my @CASES = (
         # extension
         {

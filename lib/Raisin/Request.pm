@@ -5,90 +5,26 @@ use warnings;
 
 use parent 'Plack::Request';
 
-use Raisin::Util;
-
-sub new {
-    my ($class, $app, $env) = @_;
-    my $self = $class->SUPER::new($env);
-    $self->{app} = $app;
-    $self;
-}
-
-sub app { shift->{app} }
-
-sub accept_format {
-    my $self = shift;
-
-    my $accept = $self->header('Accept');
-    return unless $accept;
-
-    my %media_types;
-    for my $type (split /\s*,\s*/, $accept) {
-        my ($media, $params) = split /;/, $type, 2;
-
-        next
-            if $media eq '*/*'
-            || !($media = Raisin::Util::detect_serializer($media));
-
-        my $q = defined $params && $params =~ /q=([\d\.]+)/ ? $1 : 1;
-
-        $media_types{$media} = $q;
-        last if $q == 1;
-    }
-    #use DDP;
-    #p %media_types;
-    #warn 'x' x 10;
-
-    my ($media) = sort { $media_types{$b} <=> $media_types{$a} } keys %media_types;
-    $media;
-}
-
-sub deserialize {
-    my ($self, $data) = @_;
-
-    my $serializer = do {
-        if (my $f = Raisin::Util::detect_serializer($self->content_type)) {
-            Plack::Util::load_class(Raisin::Util::make_serializer_class($f));
-        }
-        elsif ($self->app->can('serializer')) {
-            $self->app->serializer;
-        }
-    };
-
-    if ($serializer) {
-        $data = $serializer->deserialize($data);
-    }
-
-    $data;
-}
-
 sub prepare_params {
     my ($self, $declared, $named) = @_;
 
     $self->{'raisin.declared'} = $declared;
 
-    # Serialization / Deserialization
-    my $body_params = do {
-        if (my $content = $self->content) {
-            if ($self->content_type =~ m{application/x-www-form-urlencoded}imsx) {
-                $self->body_parameters->as_hashref_mixed;
-            }
-            else {
-                $self->deserialize($content);
-            }
-        }
-    };
+    # PRECEDENCE:
+    #   - path
+    #   - query
+    #   - body
+    my %params = (
+        %{ $self->env->{'raisinx.body_params'} || {} },
+        %{ $self->query_parameters->as_hashref_mixed || {} },
+        %{ $named || {} },
+    );
 
-    my $query_params = $self->query_parameters->as_hashref_mixed;
-    my $params = { %{ $body_params || {} }, %{ $query_params || {} } };
-
-    $self->{'raisin.parameters'} = { %$params, %{ $named || {} } };
+    $self->{'raisin.parameters'} = \%params;
 
     foreach my $p (@$declared) {
         my $name = $p->name;
-
-        # a route params have a precedence over query params
-        my $value = $named->{$name} // $params->{$name};
+        my $value = $params{$name};
 
         if (not $p->validate(\$value)) {
             $p->required ? return : next;
@@ -104,11 +40,7 @@ sub prepare_params {
 }
 
 sub declared_params { shift->{'raisin.declared_params'} }
-
-sub raisin_parameters {
-    my $self = shift;
-    $self->{'raisin.parameters'};
-}
+sub raisin_parameters { shift->{'raisin.parameters'} }
 
 1;
 
