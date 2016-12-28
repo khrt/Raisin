@@ -4,21 +4,22 @@ use strict;
 use warnings;
 
 use Carp;
-use Raisin::Attributes;
+use Plack::Util::Accessor qw(
+    named
+    required
+
+    default
+    desc
+    enclosed
+    name
+    regex
+    type
+);
+
 use Raisin::Util;
 
 my @ATTRIBUTES = qw(name type default regex desc);
 my @LOCATIONS = qw(path formData body header query);
-
-has 'named';
-has 'required';
-
-has 'default';
-has 'name';
-has 'type';
-has 'regex';
-has 'desc';
-has 'enclosed';
 
 sub new {
     my ($class, %args) = @_;

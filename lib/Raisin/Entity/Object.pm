@@ -3,14 +3,13 @@ package Raisin::Entity::Object;
 use strict;
 use warnings;
 
-use Raisin::Attributes;
-use Types::Standard qw/Any ArrayRef HashRef/;
-
-has 'desc';
-has 'name';
-has 'required' => 1;
-has 'runtime';
-has 'using';
+use Plack::Util::Accessor qw(
+    desc
+    name
+    runtime
+    using
+);
+use Types::Standard qw(Any ArrayRef HashRef);
 
 sub new {
     my ($class, $name, @params) = @_;
@@ -22,6 +21,7 @@ sub new {
     bless { name => $name, @params }, $class;
 }
 
+sub required { 1 }
 sub alias { shift->{as} }
 sub condition { shift->{if} }
 
