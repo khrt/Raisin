@@ -7,7 +7,8 @@ use Plack::Util;
 
 sub make_tag_from_path {
     my $path = shift;
-    (split '/', $path)[-1];
+    my @c = (split '/', $path);
+    $c[-2] || $c[1];
 }
 
 sub iterate_params {

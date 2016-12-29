@@ -1,5 +1,8 @@
 0.70 Formatters
-    * Removes x-www-form-urlencoded support
+    * Introduces a Formatters middleware and Encoder/Decoder modules;
+    * Removes Raisin::Response;
+    * Simplifies Raisin::Request;
+    * Drops x-www-form-urlencoded support;
 
 0.69 Documented responses
     * Fixes

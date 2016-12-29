@@ -10,7 +10,12 @@ use lib ("$Bin/../lib", "$Bin/../../../lib");
 
 use Raisin::API;
 
-plugin 'Swagger', enable => 'CORS';
+plugin 'Swagger';
+middleware 'CrossOrigin',
+    origins => '*',
+    methods => [qw/DELETE GET HEAD OPTIONS PATCH POST PUT/],
+    headers => [qw/accept authorization content-type api_key_token/];
+
 plugin 'Logger', outputs => [['Screen', min_level => 'debug']];
 
 swagger_setup(

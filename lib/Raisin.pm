@@ -32,9 +32,9 @@ sub new {
 
     my $self = bless { %args }, $class;
 
-    $self->routes(Raisin::Routes->new);
-    $self->mounted([]);
     $self->middleware({});
+    $self->mounted([]);
+    $self->routes(Raisin::Routes->new);
 
     $self->decoder(Raisin::Decoder->new);
     $self->encoder(Raisin::Encoder->new);
@@ -254,7 +254,6 @@ sub default_format {
 sub format {
     my ($self, $format) = @_;
 
-    # TODO: test
     if ($format) {
         my @decoders = keys %{ $self->decoder->all };
 
@@ -311,14 +310,7 @@ Raisin - a REST API micro framework for Perl.
 
 =head1 SYNOPSIS
 
-    use strict;
-    use warnings;
-
-    use utf8;
-
-    use FindBin;
-    use lib "$FindBin::Bin/../../lib";
-
+    use HTTP::Status qw(:constants);
     use List::Util qw(max);
     use Raisin::API;
     use Types::Standard qw(HashRef Any Int Str);
@@ -338,8 +330,12 @@ Raisin - a REST API micro framework for Perl.
         },
     );
 
-    plugin 'Swagger', enable => 'CORS';
-    #api_format 'json';
+    middleware 'CrossOrigin',
+        origins => '*',
+        methods => [qw/DELETE GET HEAD OPTIONS PATCH POST PUT/],
+        headers => [qw/accept authorization content-type api_key_token/];
+
+    plugin 'Swagger';
 
     swagger_setup(
         title => 'A POD synopsis API',
@@ -403,6 +399,7 @@ Raisin - a REST API micro framework for Perl.
             my $id = max(keys %USERS) + 1;
             $USERS{$id} = $params->{user};
 
+            res->status(HTTP_CREATED);
             { success => 1 }
         };
 
@@ -418,7 +415,9 @@ Raisin - a REST API micro framework for Perl.
             summary 'Delete user';
             del sub {
                 my $params = shift;
-                { success => delete $USERS{ $params->{id} } };
+                delete $USERS{ $params->{id} };
+                res->status(HTTP_NO_CONTENT);
+                undef;
             };
         };
     };
@@ -447,7 +446,8 @@ Adds a route to an application.
 
 =head3 route_param
 
-Define a route parameter as a namespace C<route_param>.
+Defines a route parameter as a resource C<id> which can be anything if type
+isn't specified for it.
 
     route_param id => sub { ... };
 
@@ -476,8 +476,8 @@ Shortcuts to add a C<route> restricted to the corresponding HTTP method.
 
 =head3 desc
 
-Can be applied to C<resource> or any of the HTTP method to add a verbose
-explanation for an operation or for a resource.
+Adds a description to C<resource> or any of the HTTP methods.
+Useful for OpenAPI as it's shown there as a description of an action.
 
     desc 'Some long explanation about an action';
     put sub { ... };
@@ -487,28 +487,25 @@ explanation for an operation or for a resource.
 
 =head3 summary
 
-Can be applied to any of the HTTP method to add a short summary of
-what the operation does.
+Same as L</desc> but shorter.
 
     summary 'Some summary';
     put sub { ... };
 
 =head3 tags
 
-A list of tags for API documentation control.
 Tags can be used for logical grouping of operations by resources
-or any other qualifier.
+or any other qualifier. Using in API description.
 
     tags 'delete', 'user';
     delete sub { ... };
 
 By default tags are added automatically based on it's namespace but you always
-can overwrite it using a C<tags> function.
+can overwrite it using the function.
 
 =head3 entity
 
-Entity keyword allows to describe response object which will be used to generate
-OpenAPI specification.
+Describes response object which will be used to generate OpenAPI description.
 
     entity 'MusicApp::Entity::Album';
     get {
@@ -520,7 +517,7 @@ OpenAPI specification.
 =head3 params
 
 Defines validations and coercion options for your parameters.
-Can be applied to any HTTP method and/or C<route_param> to describe parameters.
+Can be applied to any HTTP method and/or L</route_param> to describe parameters.
 
     params(
         requires('name', type => Str),
@@ -536,15 +533,15 @@ Can be applied to any HTTP method and/or C<route_param> to describe parameters.
 
 For more see L<Raisin/Validation-and-coercion>.
 
-=head3 default_format
+=head3 api_default_format
 
-Specifies default API format mode when formatter doesn't specified by API user.
-E.g. URI is asked without an extension (C<json>, C<yaml>) or C<Accept> header
-isn't specified.
+Specifies default API format mode when formatter isn't specified by API user.
+E.g. if URI is asked without an extension (C<json>, C<yaml>) or C<Accept> header
+isn't specified the default format will be used.
 
 Default value: C<YAML>.
 
-    default_format 'json';
+    api_default_format 'json';
 
 See also L<Raisin/API-FORMATS>.
 
@@ -552,7 +549,9 @@ See also L<Raisin/API-FORMATS>.
 
 Restricts API to use only specified formatter to serialize and deserialize data.
 
-Already exists L<Raisin::Plugin::Format::JSON> and L<Raisin::Plugin::Format::YAML>.
+Already exists L<Raisin::Encoder::JSON>, L<Raisin::Encoder::YAML>,
+and L<Raisin::Encoder::Text>, but you can always register your own
+using L</register_encoder>.
 
     api_format 'json';
 
@@ -569,7 +568,7 @@ Sets up an API version header.
 Loads a Raisin module. A module options may be specified after the module name.
 Compatible with L<Kelp> modules.
 
-    plugin 'Swagger', enable => 'CORS';
+    plugin 'Swagger';
 
 =head3 middleware
 
@@ -596,6 +595,22 @@ In C<RaisinApp.pm>:
     mount 'RaisinApp::Host';
 
     1;
+
+=head3 register_decoder
+
+Registers a third-party parser (decoder).
+
+    register_decoder(xml => 'My::Parser::XML');
+
+Also see L<Raisin::Decoder>.
+
+=head3 register_encoder
+
+Registers a third-party formatter (encoder).
+
+    register_encoder(xml => 'My::Formatter::XML');
+
+Also see L<Raisin::Encoder>.
 
 =head3 run
 
@@ -735,7 +750,7 @@ In the case of conflict between either of:
 
 =over
 
-=item * route string parameters;
+=item * path parameters;
 
 =item * GET, POST and PUT parameters;
 
@@ -743,7 +758,7 @@ In the case of conflict between either of:
 
 =back
 
-route string parameters will have precedence.
+Path parameters have precedence.
 
 Query string and body parameters will be merged (see L<Plack::Request/parameters>)
 
@@ -877,7 +892,6 @@ Use C<ArrayRef[*]> types from your compatible type library to define arrays.
 
     requires('list', type => ArrayRef[Int], desc => 'List of integers')
 
-
 =head2 Types
 
 Raisin supports Moo(se)-compatible type constraint so you can use any of the
@@ -935,7 +949,7 @@ C<encode_json> in each C<JSON> API implementation.
 Your API can declare to support only one serializator by using L<Raisin/api_format>.
 
 Custom formatters for existing and additional types can be defined with a
-L<Raisin::Plugin::Format>.
+L<Raisin::Encoder>/L<Raisin::Decoder>.
 
 =over
 
@@ -947,7 +961,7 @@ Call C<JSON::encode_json> and C<JSON::decode_json>.
 
 Call C<YAML::Dump> and C<YAML::Load>.
 
-=item TEXT
+=item Text
 
 Call C<Data::Dumper-E<gt>Dump> if output data is not a string.
 

@@ -3,11 +3,7 @@
 use strict;
 use warnings;
 
-use utf8;
-
-use FindBin;
-use lib "$FindBin::Bin/../../lib";
-
+use HTTP::Status qw(:constants);
 use List::Util qw(max);
 use Raisin::API;
 use Types::Standard qw(HashRef Any Int Str);
@@ -27,8 +23,12 @@ my %USERS = (
     },
 );
 
-plugin 'Swagger', enable => 'CORS';
-#api_format 'json';
+middleware 'CrossOrigin',
+    origins => '*',
+    methods => [qw/DELETE GET HEAD OPTIONS PATCH POST PUT/],
+    headers => [qw/accept authorization content-type api_key_token/];
+
+plugin 'Swagger';
 
 swagger_setup(
     title => 'A POD synopsis API',
@@ -96,6 +96,7 @@ resource users => sub {
         my $id = max(keys %USERS) + 1;
         $USERS{$id} = $params->{user};
 
+        res->status(HTTP_CREATED);
         { success => 1 }
     };
 
@@ -111,7 +112,9 @@ resource users => sub {
         summary 'Delete user';
         del sub {
             my $params = shift;
-            { success => delete $USERS{ $params->{id} } };
+            delete $USERS{ $params->{id} };
+            res->status(HTTP_NO_CONTENT);
+            undef;
         };
     };
 };

@@ -4,13 +4,13 @@ use strict;
 use warnings;
 
 use Plack::Util;
-use Plack::Util::Accessor qw(users);
+use Plack::Util::Accessor qw(registered);
 
-sub new { bless { users => {} }, shift }
+sub new { bless { registered => {} }, shift }
 
 sub register {
     my ($self, $format, $class) = @_;
-    $self->{users}{$format} = $class;
+    $self->{registered}{$format} = $class;
 }
 
 sub builtin {
@@ -25,7 +25,7 @@ sub all {
     my $self = shift;
     my %s = (
         %{ $self->builtin },
-        %{ $self->users },
+        %{ $self->registered },
     );
     \%s;
 }
@@ -88,7 +88,7 @@ Returns a list of encoders which are bundled with L<Raisin>.
 They are: L<Raisin::Encoder::JSON>, L<Raisin::Encoder::Text>,
 L<Raisin::Encoder::YAML>.
 
-=head2 users
+=head2 registered
 
 Returns a list of encoders which were registered by user.
 

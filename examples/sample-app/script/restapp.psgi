@@ -6,8 +6,7 @@ use warnings;
 use FindBin '$Bin';
 use Plack::Builder;
 
-# Include lib and Raisin/lib
-use lib ("$Bin/../lib", "$Bin/../../../lib");
+use lib "$Bin/../lib";
 
 use RESTApp;
 

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use FindBin '$Bin';
-use lib ("$Bin/../../../lib", "$Bin/../lib");
+use lib "$Bin/../lib";
 
 use Raisin::API;
 use Raisin::Entity;
@@ -18,7 +18,12 @@ use MusicApp::Schema;
 
 my $schema = MusicApp::Schema->connect("dbi:SQLite:$Bin/../db/music.db");
 
-plugin 'Swagger', enable => 'CORS';
+plugin 'Swagger';
+middleware 'CrossOrigin',
+    origins => '*',
+    methods => [qw/DELETE GET HEAD OPTIONS PATCH POST PUT/],
+    headers => [qw/accept authorization content-type api_key_token/];
+
 api_default_format 'yaml';
 
 desc 'Artist API';

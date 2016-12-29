@@ -10,13 +10,14 @@ use Carp;
 use Raisin;
 use Raisin::Entity;
 
-my @APP_CONF_METHODS = qw(api_default_format api_format api_version middleware mount plugin);
+my @APP_CONF_METHODS = qw(api_default_format api_format api_version middleware
+    mount plugin register_decoder register_encoder);
 my @APP_EXEC_METHODS = qw(new run);
 my @APP_METHODS = qw(req res param include_missing session present error);
 my @HOOKS_METHODS = qw(before before_validation after_validation after);
 my @HTTP_METHODS = qw(del get head options patch post put);
-my @ROUTES_METHODS = qw(resource namespace route_param params requires optional group);
-
+my @ROUTES_METHODS =
+    qw(resource namespace route_param params requires optional group);
 my @SWAGGER_MERTHODS = qw(desc entity summary tags);
 
 our @EXPORT = (
