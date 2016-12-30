@@ -28,7 +28,7 @@ subtest 'call' => sub {
             message => 'content: json, default_format: yaml',
         },
         {
-            req => POST('/', Content_Type => 'application/yaml', Content => 'key: val'),
+            req => POST('/', Content_Type => 'application/yaml', Content => "---\nkey: val\n"),
             params => { default_format => 'yaml', },
             expected => 'yaml',
             message => 'content: yaml, default_format: yaml',

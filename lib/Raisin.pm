@@ -25,7 +25,7 @@ use Plack::Util::Accessor qw(
     encoder
 );
 
-our $VERSION = '0.70';
+our $VERSION = '0.71';
 
 sub new {
     my ($class, %args) = @_;
@@ -602,7 +602,7 @@ Registers a third-party parser (decoder).
 
     register_decoder(xml => 'My::Parser::XML');
 
-Also see L<Raisin::Decoder>.
+See also L<Raisin::Decoder>.
 
 =head3 register_encoder
 
@@ -610,7 +610,7 @@ Registers a third-party formatter (encoder).
 
     register_encoder(xml => 'My::Formatter::XML');
 
-Also see L<Raisin::Encoder>.
+See also L<Raisin::Encoder>.
 
 =head3 run
 
@@ -1131,7 +1131,7 @@ application is deployed:
         mount '/api/rest' => RaisinApp->new;
     };
 
-Also see L<Plack::Builder>, L<Plack::App::URLMap>.
+See also L<Plack::Builder>, L<Plack::App::URLMap>.
 
 =head1 EXAMPLES
 
@@ -1159,8 +1159,6 @@ Shows an example of complex application.
 =over
 
 =item * Versioning support;
-
-=item * Nested params declaration;
 
 =item * Mount API's in any place of C<resource> block;
 
