@@ -291,7 +291,7 @@ Registers a third-party parser (decoder).
 
     register_decoder(xml => 'My::Parser::XML');
 
-Also see [Raisin::Decoder](https://metacpan.org/pod/Raisin::Decoder).
+See also [Raisin::Decoder](https://metacpan.org/pod/Raisin::Decoder).
 
 ### register\_encoder
 
@@ -299,7 +299,7 @@ Registers a third-party formatter (encoder).
 
     register_encoder(xml => 'My::Formatter::XML');
 
-Also see [Raisin::Encoder](https://metacpan.org/pod/Raisin::Encoder).
+See also [Raisin::Encoder](https://metacpan.org/pod/Raisin::Encoder).
 
 ### run
 
@@ -788,7 +788,7 @@ application is deployed:
         mount '/api/rest' => RaisinApp->new;
     };
 
-Also see [Plack::Builder](https://metacpan.org/pod/Plack::Builder), [Plack::App::URLMap](https://metacpan.org/pod/Plack::App::URLMap).
+See also [Plack::Builder](https://metacpan.org/pod/Plack::Builder), [Plack::App::URLMap](https://metacpan.org/pod/Plack::App::URLMap).
 
 # EXAMPLES
 
@@ -810,7 +810,6 @@ Raisin comes with three instance in _example_ directory:
 # ROADMAP
 
 - Versioning support;
-- Nested params declaration;
 - Mount API's in any place of `resource` block;
 
 # GITHUB

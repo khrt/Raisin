@@ -52,7 +52,7 @@ sub _build_regex {
     # Allows any extensions
     $regex .= "(?:\\\..+)?";
 
-    qr/^$regex$/i;
+    qr/^$regex$/;
 }
 
 sub _rep_regex {
