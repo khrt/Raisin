@@ -1,3 +1,8 @@
+0.72
+    * Makes tests use Test::More::note instead of printing to STDERR;
+
+0.71 identical to 0.70
+
 0.70 Formatters
     * Introduces a Formatters middleware and Encoder/Decoder modules;
     * Removes Raisin::Response;
