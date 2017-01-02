@@ -28,6 +28,12 @@ my $app = eval {
     run;
 };
 
+{
+    no strict 'refs';
+    no warnings qw(once redefine);
+    *Raisin::log = sub { note(sprintf $_[1], @_[2 .. $#_]) };
+}
+
 my %DATA = (
     name => 'Bruce Wayne',
     password => 'b47m4n',

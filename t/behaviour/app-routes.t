@@ -15,6 +15,12 @@ use lib ("$Bin/../../examples/sample-app/lib");
 
 my $app = Plack::Util::load_psgi("$Bin/../../examples/sample-app/script/restapp.psgi");
 
+{
+    no strict 'refs';
+    no warnings qw(once redefine);
+    *Raisin::log = sub { note(sprintf $_[1], @_[2 .. $#_]) };
+}
+
 my @CASES = (
     {
         namespace => 'users',

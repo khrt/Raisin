@@ -22,9 +22,14 @@ my $app = eval {
     resource api => sub {
         get sub { { params => \%DATA, } };
     };
-
     run;
 };
+
+{
+    no strict 'refs';
+    no warnings qw(once redefine);
+    *Raisin::log = sub { note(sprintf $_[1], @_[2 .. $#_]) };
+}
 
 BAIL_OUT $@ if $@;
 
