@@ -13,7 +13,7 @@ my %module_build_args = (
   "configure_requires" => {
     "Module::Build" => "0.28"
   },
-  "dist_abstract" => "a REST API micro framework for Perl.",
+  "dist_abstract" => "A REST API microframework for Perl.",
   "dist_author" => [
     "Artur Khabibullin - rtkh\@cpan.org"
   ],

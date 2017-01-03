@@ -306,7 +306,7 @@ __END__
 
 =head1 NAME
 
-Raisin - a REST API micro framework for Perl.
+Raisin - A REST API microframework for Perl.
 
 =head1 SYNOPSIS
 
@@ -426,8 +426,8 @@ Raisin - a REST API micro framework for Perl.
 
 =head1 DESCRIPTION
 
-Raisin is a REST API micro framework for Perl.
-It's designed to run on Plack, providing a simple DSL to easily develop RESTful APIs.
+Raisin is a REST API microframework for Perl.
+It's designed to run on Plack, providing a simple DSL to develop RESTful APIs easily.
 It was inspired by L<Grape|https://github.com/intridea/grape>.
 
 =for HTML

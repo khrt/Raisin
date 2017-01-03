@@ -1,6 +1,6 @@
 # NAME
 
-Raisin - a REST API micro framework for Perl.
+Raisin - A REST API microframework for Perl.
 
 # SYNOPSIS
 
@@ -120,8 +120,8 @@ Raisin - a REST API micro framework for Perl.
 
 # DESCRIPTION
 
-Raisin is a REST API micro framework for Perl.
-It's designed to run on Plack, providing a simple DSL to easily develop RESTful APIs.
+Raisin is a REST API microframework for Perl.
+It's designed to run on Plack, providing a simple DSL to develop RESTful APIs easily.
 It was inspired by [Grape](https://github.com/intridea/grape).
 
 # FUNCTIONS
