@@ -50,7 +50,7 @@ sub _build_regex {
     $regex =~ s/[{}]//g;
 
     # Allows any extensions
-    $regex .= "(?:\\\..+)?";
+    $regex .= "(?:\\\.[^.]+?)?";
 
     qr/^$regex$/;
 }

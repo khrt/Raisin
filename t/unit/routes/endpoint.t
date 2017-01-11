@@ -75,6 +75,7 @@ my @CASES = (
         input => { method => 'put', path => '/api/item/42' },
         expected => undef,
     },
+    # TODO: see GitHub issue #14
 );
 
 sub _make_object {

@@ -1,3 +1,6 @@
+
+    * Take only last part of URI after full stop (#14);
+
 0.72
     * Makes tests use Test::More::note instead of printing to STDERR;
 
