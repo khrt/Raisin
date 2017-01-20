@@ -62,8 +62,12 @@ sub call {
     });
 }
 
-sub _path_has_extension { scalar(split /\./, shift) > 1 }
-sub _accept_header_set { length(shift) }
+sub _accept_header_set { length(shift || '') }
+sub _path_has_extension {
+    my $path = shift;
+    my @chunks = split /\./, $path;
+    scalar(@chunks) > 1;
+}
 
 sub negotiate_format {
     my ($self, $req) = @_;
