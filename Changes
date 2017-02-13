@@ -1,7 +1,6 @@
 
-    * Take only last part of URI after full stop (#14);
-
-0.72
+0.73 Fixes
+    * Takes only last part of URI after full stop (#14);
     * Makes tests use Test::More::note instead of printing to STDERR;
 
 0.71 identical to 0.70
