@@ -232,27 +232,6 @@ my @CASES = (
     },
 );
 
-my @IN_CASES = (
-    {
-        test => {
-            required => 1,
-            data => { name => 'broken', type => Int, in => 'broken' },
-        },
-        input => 'dummy',
-        expected => undef,
-    },
-    map {
-        {
-            test => {
-                required => 1,
-                data => { name => $_, type => Int, in => $_ },
-            },
-            input => 'dummy',
-            expected => 1,
-        }
-    } qw/path formData body header query/,
-);
-
 {
     no strict 'refs';
     *Raisin::log = sub { note(sprintf $_[1], @_[2 .. $#_]) };
@@ -290,6 +269,27 @@ subtest 'parse, +accessors' => sub {
 };
 
 subtest 'parse, +in' => sub {
+    my @IN_CASES = (
+        {
+            test => {
+                required => 1,
+                data => { name => 'broken', type => Int, in => 'broken' },
+            },
+            input => 'dummy',
+            expected => undef,
+        },
+        map {
+            {
+                test => {
+                    required => 1,
+                    data => { name => $_, type => Int, in => $_ },
+                },
+                input => 'dummy',
+                expected => 1,
+            }
+        } qw/path formData body header query/,
+    );
+
     for my $case (@IN_CASES) {
         my $name = _make_name($case);
 

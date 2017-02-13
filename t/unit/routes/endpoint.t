@@ -75,7 +75,15 @@ my @CASES = (
         input => { method => 'put', path => '/api/item/42' },
         expected => undef,
     },
-    # TODO: see GitHub issue #14
+    # TODO: GitHub issue #14
+    {
+        object => {
+            method => 'GET',
+            path => '/api/user/:id',
+        },
+        input => { method => 'get', path => '/api/user/i.d'},
+        expected => 1,
+    },
 );
 
 sub _make_object {
@@ -109,6 +117,7 @@ subtest 'match' => sub {
             # named params
             if ($is_matched && @{ $e->params }) {
                 for my $p (@{ $e->params }) {
+                    # TODO: GitHub issue #14
                     ok $e->named->{$p->name}, 'named: ' . $p->name;
                 }
             }
