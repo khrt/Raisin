@@ -305,7 +305,7 @@ See also [Raisin::Encoder](https://metacpan.org/pod/Raisin::Encoder).
 
 Returns the `PSGI` application.
 
-## INSIDE ROUTE
+## CONTROLLER
 
 ### req
 
@@ -402,7 +402,7 @@ the supported methods.
     >
     * HTTP 1.0, assume close after body
     < HTTP/1.1 204 No Content
-    < Allow: GET, OPTOINS, PUT
+    < Allow: GET, OPTIONS, PUT
 
 If a request for a resource is made with an unsupported HTTP method, an HTTP 405
 (Method Not Allowed) response will be returned.

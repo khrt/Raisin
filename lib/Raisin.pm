@@ -616,7 +616,7 @@ See also L<Raisin::Encoder>.
 
 Returns the C<PSGI> application.
 
-=head2 INSIDE ROUTE
+=head2 CONTROLLER
 
 =head3 req
 
@@ -713,7 +713,7 @@ the supported methods.
     >
     * HTTP 1.0, assume close after body
     < HTTP/1.1 204 No Content
-    < Allow: GET, OPTOINS, PUT
+    < Allow: GET, OPTIONS, PUT
 
 If a request for a resource is made with an unsupported HTTP method, an HTTP 405
 (Method Not Allowed) response will be returned.

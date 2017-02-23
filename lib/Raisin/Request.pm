@@ -60,10 +60,6 @@ Extends L<Plack::Request>.
 
 =head1 METHODS
 
-=head3 accept_format
-
-=head3 deserialize
-
 =head3 declared_params
 
 =head3 prepare_params
