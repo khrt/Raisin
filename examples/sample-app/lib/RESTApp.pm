@@ -18,6 +18,8 @@ middleware 'CrossOrigin',
 
 plugin 'Logger', outputs => [['Screen', min_level => 'debug']];
 
+app->log(debug => 'Loading Raisin...');
+
 swagger_setup(
     title => 'Users & hosts API',
     description => 'An example of API documentation.',

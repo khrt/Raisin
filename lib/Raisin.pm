@@ -993,11 +993,15 @@ Or use L<Raisin::Logger> with a C<fallback> option:
 
     plugin 'Logger', fallback => 1;
 
-Exports C<log> subroutine.
+The plugin registers a C<log> subroutine to L<Raisin>. Below are examples of
+how to use it.
 
-    log(debug => 'Debug!');
-    log(warn => 'Warn!');
-    log(error => 'Error!');
+    app->log(debug => 'Debug!');
+    app->log(warn => 'Warn!');
+    app->log(error => 'Error!');
+
+C<app> is a L<Raisin> instance, so you can use C<$self> instead of C<app> where
+it is possible.
 
 See L<Raisin::Plugin::Logger>.
 

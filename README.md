@@ -650,11 +650,15 @@ Or use [Raisin::Logger](https://metacpan.org/pod/Raisin::Logger) with a `fallbac
 
     plugin 'Logger', fallback => 1;
 
-Exports `log` subroutine.
+The plugin registers a `log` subroutine to [Raisin](https://metacpan.org/pod/Raisin). Below are examples of
+how to use it.
 
-    log(debug => 'Debug!');
-    log(warn => 'Warn!');
-    log(error => 'Error!');
+    app->log(debug => 'Debug!');
+    app->log(warn => 'Warn!');
+    app->log(error => 'Error!');
+
+`app` is a [Raisin](https://metacpan.org/pod/Raisin) instance, so you can use `$self` instead of `app` where
+it is possible.
 
 See [Raisin::Plugin::Logger](https://metacpan.org/pod/Raisin::Plugin::Logger).
 

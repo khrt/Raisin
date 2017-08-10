@@ -10,8 +10,12 @@ use Carp;
 use Raisin;
 use Raisin::Entity;
 
-my @APP_CONF_METHODS = qw(api_default_format api_format api_version middleware
-    mount plugin register_decoder register_encoder);
+my @APP_CONF_METHODS = qw(
+    app
+    api_default_format api_format api_version
+    middleware mount plugin
+    register_decoder register_encoder
+);
 my @APP_EXEC_METHODS = qw(new run);
 my @APP_METHODS = qw(req res param include_missing session present error);
 my @HOOKS_METHODS = qw(before before_validation after_validation after);
