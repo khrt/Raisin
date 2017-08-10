@@ -579,10 +579,10 @@ See [Type::Tiny::Manual](https://metacpan.org/pod/Type::Tiny::Manual) and [Moose
 
 # HOOKS
 
-This blocks can be executed before or/and after every API call, using
+Those blocks can be executed before or/and after every API call, using
 `before`, `after`, `before_validation` and `after_validation`.
 
-Before and after callbacks execute in the following order:
+Callbacks execute in the following order:
 
 - before
 - before\_validation
@@ -601,7 +601,10 @@ The block applies to every API call
         say $self->res->body;
     };
 
-Steps 3 and 4 only happen if validation succeeds.
+Steps `after_validation` and `after` are executed only if validation succeeds.
+
+Every callback has only one argument as an input parameter which is [Raisin](https://metacpan.org/pod/Raisin)
+object. For more information of available methods see ["CONTROLLER" in Raisin](https://metacpan.org/pod/Raisin#CONTROLLER).
 
 # API FORMATS
 

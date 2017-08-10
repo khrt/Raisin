@@ -905,10 +905,10 @@ See L<Type::Tiny::Manual> and L<Moose::Manual::Types>.
 
 =head1 HOOKS
 
-This blocks can be executed before or/and after every API call, using
+Those blocks can be executed before or/and after every API call, using
 C<before>, C<after>, C<before_validation> and C<after_validation>.
 
-Before and after callbacks execute in the following order:
+Callbacks execute in the following order:
 
 =over
 
@@ -934,7 +934,10 @@ The block applies to every API call
         say $self->res->body;
     };
 
-Steps 3 and 4 only happen if validation succeeds.
+Steps C<after_validation> and C<after> are executed only if validation succeeds.
+
+Every callback has only one argument as an input parameter which is L<Raisin>
+object. For more information of available methods see L<Raisin/CONTROLLER>.
 
 =head1 API FORMATS
 
