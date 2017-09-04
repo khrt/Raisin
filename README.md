@@ -24,6 +24,9 @@ Raisin - A REST API microframework for Perl.
         },
     );
 
+    plugin 'Logger', fallback => 1;
+    app->log( debug = > 'Starting Raisin...' );
+
     middleware 'CrossOrigin',
         origins => '*',
         methods => [qw/DELETE GET HEAD OPTIONS PATCH POST PUT/],

@@ -1,5 +1,9 @@
 
 0.73 Fixes
+    * Fixes logging issue (#36);
+    * Number of POD fixes (#38, #35);
+
+0.72 Fixes
     * Takes only last part of URI after full stop (#14);
     * Makes tests use Test::More::note instead of printing to STDERR;
 
