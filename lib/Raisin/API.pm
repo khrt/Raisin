@@ -145,11 +145,9 @@ sub summary { $SETTINGS{summary} = shift }
 sub tags    { $SETTINGS{tags} = \@_ }
 
 sub _add_route {
-    my @params = @_;
+    my $code = pop;
 
-    my $code = pop @params;
-
-    my ($method, $path) = @params;
+    my ($method, $path) = @_;
     my $r = resource();
     if ($r eq '/' && $path) {
         $path = $r . $path;
