@@ -120,7 +120,12 @@ Raisin::Routes - A routing class for Raisin.
     my $params = { require => ['name', ], };
     my $code = sub { { name => $params{name} } }
 
-    $r->add('GET', '/user', params => $params, $code);
+    $r->add(
+        method => 'GET',
+        path   => '/user',
+        params => $params,
+        code   => $code
+    );
     my $route = $r->find('GET', '/user');
 
 =head1 DESCRIPTION
@@ -132,7 +137,7 @@ application code.
 
 =item B<Adding routes>
 
-    $r->add('GET', '/user', params => $params, $code);
+    $r->add(method => 'GET', path => '/user', params => $params, code => $code);
 
 =cut
 

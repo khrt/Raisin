@@ -172,7 +172,7 @@ sub _paths_object {
         next if lc($r->method) eq 'options';
 
         my $path = $r->path;
-        $path =~ s#:([^/]+)#{$1}#msix;
+        $path =~ s#:([^/]+)#{$1}#msixg;
 
         $obj{ $path }{ lc($r->method) } = _operation_object($r);
     }

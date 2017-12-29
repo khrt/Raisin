@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Getopt::Long;
-use JSON qw/to_json/;
+use JSON ();
 use Plack::Util;
 use Pod::Usage;
 use Term::ANSIColor;
@@ -36,8 +36,11 @@ elsif ($show_help) {
 elsif ($show_params) {
     print_routes(with_params => $show_params);
 }
-elsif ($show_openapi_spec) {
+elsif ($show_openapi_spec || $show_openapi_spec_format) {
     print_openapi_spec();
+}
+else {
+    print_routes();
 }
 
 exit 0;
@@ -67,7 +70,7 @@ sub print_openapi_spec {
                 SERVER_PROTOCOL => 'HTTP/1.1'
             );
 
-            $self->req(Raisin::Request->new($self, \%env));
+            $self->req(Raisin::Request->new(\%env));
 
             $self->load_plugin('Swagger');
             $spec = $self->swagger_build_spec;
@@ -75,8 +78,11 @@ sub print_openapi_spec {
     }
     Plack::Util::load_psgi($file);
 
-    if (lc($show_openapi_spec_format || '') eq 'json') {
-        print to_json($spec);
+    if (($show_openapi_spec_format || '') =~ /^json(pp)?$/i) {
+        my $pp = $1;
+        my $json = JSON->new->allow_nonref;
+        $json->pretty if $pp;
+        print $json->encode($spec);
     }
     else {
         print Dump($spec);
@@ -141,7 +147,7 @@ raisin - Raisin command script.
         --version       Prints version number
         --params        Prints params
         --openapi       Prints OpenAPI specification
-        --format        To use with `--openapi': json or yaml
+        --format        Implies `--openapi', select json, jsonpp or yaml
 
     Required params are marked with a star.
     Default values are showed in a curly brackets.
