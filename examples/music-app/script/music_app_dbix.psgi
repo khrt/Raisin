@@ -29,7 +29,7 @@ api_default_format 'yaml';
 desc 'Artist API';
 resource artists => sub {
     summary 'List';
-    entitty 'MusicApp::Entity::Artist';
+    entity 'MusicApp::Entity::Artist';
     get sub {
         my $params = shift;
         my $artists = $schema->resultset('Artist');
@@ -39,7 +39,7 @@ resource artists => sub {
     };
 
     params requires('id', type => Int);
-    entitty 'MusicApp::Entity::Artist';
+    entity 'MusicApp::Entity::Artist';
     route_param id => sub {
         get sub {
             my $params = shift;
