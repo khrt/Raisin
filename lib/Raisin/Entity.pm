@@ -97,13 +97,14 @@ sub _compile_column {
     my %result;
 
     for my $obj (@$settings) {
-        next if $obj->condition && !$obj->condition->($data);
 
-        my $column = $obj->name;
+        next if blessed($obj) && $obj->condition && !$obj->condition->($data);
 
-        my $key = $obj->display_name;
+        my $column = blessed($obj) ? $obj->name : $obj->{name};
+
+        my $key    = blessed($obj) ? $obj->display_name : $obj->{name};
         my $value = do {
-            if (my $runtime = $obj->runtime) {
+            if (blessed($obj) and my $runtime = $obj->runtime) {
 
                 push @SUBNAME, "${entity}::$column";
                 my $retval = $runtime->($data);
@@ -115,7 +116,7 @@ sub _compile_column {
 
                 $retval;
             }
-            elsif (my $e = $obj->using) {
+            elsif (blessed($obj) and my $e = $obj->using) {
                 my $in = blessed($data) ? $data->$column : $data->{$column};
                 __PACKAGE__->compile($e, $in);
             }
