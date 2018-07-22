@@ -331,7 +331,7 @@ Raisin - A REST API microframework for Perl.
     );
 
     plugin 'Logger', fallback => 1;
-    app->log( debug = > 'Starting Raisin...' );
+    app->log( debug => 'Starting Raisin...' );
 
     middleware 'CrossOrigin',
         origins => '*',
