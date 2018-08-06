@@ -75,6 +75,7 @@ sub add {
         entity => $params{entity},
         summary => $params{summary},
         tags => $params{tags},
+        produces => $params{produces},
     );
     push @{ $self->{routes} }, $ep;
 

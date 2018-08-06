@@ -193,7 +193,7 @@ sub _operation_object {
         description => $r->desc || '',
         #externalDocs => '',
         operationId => $operation_id,
-        produces => $DEFAULTS{produces},
+        produces => $r->produces || $DEFAULTS{produces},
         responses => {
             default => {
                 description => 'Unexpected error',
