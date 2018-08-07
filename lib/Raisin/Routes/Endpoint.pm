@@ -14,6 +14,7 @@ use Plack::Util::Accessor qw(
     path
     regex
     summary
+    produces
 );
 
 use Raisin::Util;

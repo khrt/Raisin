@@ -22,7 +22,7 @@ my @HOOKS_METHODS = qw(before before_validation after_validation after);
 my @HTTP_METHODS = qw(del get head options patch post put);
 my @ROUTES_METHODS =
     qw(resource namespace route_param params requires optional group);
-my @SWAGGER_MERTHODS = qw(desc entity summary tags);
+my @SWAGGER_MERTHODS = qw(desc entity summary tags produces);
 
 our @EXPORT = (
     @APP_CONF_METHODS,
@@ -143,6 +143,7 @@ sub desc    { $SETTINGS{desc} = shift }
 sub entity  { $SETTINGS{entity} = shift }
 sub summary { $SETTINGS{summary} = shift }
 sub tags    { $SETTINGS{tags} = \@_ }
+sub produces {$SETTINGS{produces} = shift }
 
 sub _add_route {
     my @params = @_;
@@ -168,6 +169,7 @@ sub _add_route {
         entity  => delete $SETTINGS{entity},
         summary => delete $SETTINGS{summary},
         tags    => delete $SETTINGS{tags},
+        produces   => delete $SETTINGS{produces},
 
         %SETTINGS,
     );

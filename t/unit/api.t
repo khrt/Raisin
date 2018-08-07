@@ -153,6 +153,27 @@ subtest 'desc' => sub {
     _clean_app();
 };
 
+subtest 'produces' => sub {
+   my $produces = ['image/png'];
+    desc 'for produce';
+    produces  $produces;
+    resource api => sub {
+        desc 'for route_param';
+        route_param id => sub {
+            desc 'for verb';
+            get sub { 'api' };
+        };
+    };
+
+    my $app = Raisin::API->app;
+
+
+    my $r = $app->routes->routes->[0];
+    is_deeply $r->produces, $produces, 'produces';
+
+    _clean_app();
+};
+
 subtest 'params' => sub {
     resource api => sub {
         params requires => { name => 'id', type => undef };
