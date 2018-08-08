@@ -1,4 +1,4 @@
-0.74 Swagger
+0.75 Swagger
     * Add support for producers to Swagger plugin (#43);
 
 0.73 Fixes
