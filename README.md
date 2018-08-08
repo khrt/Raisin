@@ -25,7 +25,7 @@ Raisin - A REST API microframework for Perl.
     );
 
     plugin 'Logger', fallback => 1;
-    app->log( debug = > 'Starting Raisin...' );
+    app->log( debug => 'Starting Raisin...' );
 
     middleware 'CrossOrigin',
         origins => '*',
@@ -195,18 +195,6 @@ or any other qualifier. Using in API description.
 
 By default tags are added automatically based on it's namespace but you always
 can overwrite it using the function.
-
-### produces
-
-produces can be used for resources producing output like 'image/pdf' or 'application/pdf'
-
-
-    produces ['image/png'];
-    route_param 'id' => sub {...};
-
-By default produces are added automatically and output json,yaml but you
-can overwrite it using the produces function.
-
 
 ### entity
 
