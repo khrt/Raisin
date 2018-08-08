@@ -18,6 +18,7 @@ requires 'Plack::Middleware::CrossOrigin' => '0.009';
 requires 'Scalar::Util' => '1.38';
 requires 'Type::Tiny' => '0.044';
 requires 'YAML' => '0.90';
+requires 'HTTP::Status' => '0';
 
 on test => sub {
     requires 'Test::More' => '0.88';
