@@ -14,7 +14,6 @@ use Plack::Util::Accessor qw(
     format
     encoder
     decoder
-    header_name
 );
 
 sub call {
