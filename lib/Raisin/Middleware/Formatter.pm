@@ -36,13 +36,16 @@ sub call {
         $env->{'raisinx.body_params'} = $d->deserialize($req->content);
     }
 
-    my $format = $self->negotiate_format($req);
+    my $res = $self->app->($env);
+    my $content_format  = Plack::Util::header_get($res->[1], 'Content-type');
+    my $format = $content_format || $self->negotiate_format($req);
+
     unless ($format) {
         return Plack::Response->new(HTTP_NOT_ACCEPTABLE)->finalize;
     }
     $env->{'raisinx.encoder'} = $format;
 
-    my $res = $self->app->($env);
+    $res = $self->app->($env);
     # Post-process
     Plack::Util::response_cb($res, sub {
         # TODO: delayed responses
