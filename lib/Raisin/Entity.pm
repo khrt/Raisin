@@ -69,6 +69,8 @@ sub compile {
         while (my $i = $data->next) {
             push @$result, _compile_column($entity, $i, \@expose);
         }
+
+        $result = [] unless $result;
     }
     # Array
     elsif (ref($data) eq 'ARRAY') {
