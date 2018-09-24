@@ -77,6 +77,8 @@ sub compile {
         for my $i (@$data) {
             push @$result, _compile_column($entity, $i, \@expose);
         }
+
+        $result = [] unless $result;
     }
     # Hash, Rose::DB::Object, DBIx::Class::Core
     elsif (ref($data) eq 'HASH'
