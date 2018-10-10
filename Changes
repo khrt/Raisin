@@ -1,3 +1,6 @@
+0.76 Content-type from `provides` annotations
+    * Respect content-type from `provides` route annotations (#50);
+
 0.75 Swagger
     * Add support for producers to Swagger plugin (#43);
 
