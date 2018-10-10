@@ -109,7 +109,8 @@ sub run {
         default_format => $self->default_format,
         format => $self->format,
         decoder => $self->decoder,
-        encoder => $self->encoder
+        encoder => $self->encoder,
+        raisin => $self,
     );
 
     # load fallback logger (Raisin::Logger)
