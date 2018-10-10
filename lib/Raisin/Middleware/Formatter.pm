@@ -14,6 +14,7 @@ use Plack::Util::Accessor qw(
     format
     encoder
     decoder
+    raisin
 );
 
 sub call {
@@ -72,28 +73,32 @@ sub _path_has_extension {
 sub negotiate_format {
     my ($self, $req) = @_;
 
+    my @allowed_formats = $self->allowed_formats_for_requested_route($req);
+
     # PRECEDENCE:
     #   - extension
     #   - headers
     #   - default
 
-    my @formats = do {
+    my @wanted_formats = do {
         if (_path_has_extension($req->path)) {
             $self->format_from_extension($req->path);
         }
         elsif (_accept_header_set($req->header('Accept'))) {
-            $self->format_from_header($req->header('Accept'));
+            # In case of wildcard matches, we default to first allowed format
+            $self->format_from_header($req->header('Accept'), $allowed_formats[0]);
         }
         else {
             $self->default_format;
         }
     };
 
-    if ($self->format && !scalar grep { $self->format eq $_ } @formats) {
-        return;
-    }
+    my @matching_formats = grep {
+        my $format = $_;
+        grep { $format eq $_ } @allowed_formats
+    } @wanted_formats;
 
-    shift @formats;
+    shift @matching_formats;
 }
 
 sub format_from_extension {
@@ -110,12 +115,12 @@ sub format_from_extension {
 }
 
 sub format_from_header {
-    my ($self, $accept) = @_;
+    my ($self, $accept, $assumed_wildcard_format) = @_;
     return unless $accept;
 
     my %media_types_map_flat_hash = $self->encoder->media_types_map_flat_hash;
     # Add a default format as a `*/*`
-    $media_types_map_flat_hash{'*/*'} = $self->default_format;
+    $media_types_map_flat_hash{'*/*'} = $assumed_wildcard_format;
 
     my @media_types;
     for my $type (split /\s*,\s*/, $accept) {
@@ -131,6 +136,23 @@ sub format_from_header {
     }
 
     map { $_->{format} } sort { $b->{q} <=> $a->{q} } @media_types;
+}
+
+sub allowed_formats_for_requested_route {
+    my ($self, $req) = @_;
+    # Global format has been forced upon entire app
+    return $self->format if $self->format;
+
+    # Route specific `produces` restrictions
+    if ( $self->raisin ) {
+        my $route = $self->raisin->routes->find($req->method, $req->path);
+        return @{$route->{produces}} if $route->{produces};
+    }
+
+    # Prefer Default, allow all others
+    my @allowed = keys %{ $self->encoder->all };
+    unshift @allowed, $self->default_format if $self->default_format;
+    return @allowed;
 }
 
 1;

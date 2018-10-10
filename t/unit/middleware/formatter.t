@@ -277,11 +277,10 @@ subtest 'format_from_header' => sub {
 
     for my $c (@CASES) {
         my $fmt = Raisin::Middleware::Formatter->new(
-            default_format => $DEFAULT_FORMAT,
             encoder => Raisin::Encoder->new
         );
 
-        my @h = $fmt->format_from_header($c->{header});
+        my @h = $fmt->format_from_header($c->{header}, $DEFAULT_FORMAT);
         is_deeply \@h, $c->{expected}, join('>', @{ $c->{expected} }) || 'NONE';
     }
 };
