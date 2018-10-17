@@ -328,7 +328,7 @@ sub _tags_object  {
     for my $t (keys %tags) {
         my $tag = {
             name => $t,
-            description => $app->resource_desc($t),
+            description => $app->resource_desc($t) || '',
             #externalDocs => {
             #    description => '',
             #    url => '', #R
