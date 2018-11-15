@@ -1,5 +1,6 @@
 0.77
     * Set tag's description to empty to comply with Swagger specification (#51);
+    * Support MooseX::Types (#52);
 
 0.76 Content-type from `provides` annotations
     * Respect content-type from `provides` route annotations (#50);
