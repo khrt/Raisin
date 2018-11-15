@@ -110,7 +110,15 @@ sub validate {
     }
 
     # Type check
-    eval { $$ref_value = $self->type->($$ref_value) };
+    eval {
+        if ($self->type->isa('Moose::Meta::TypeConstraint')) {
+            # this is a Moose type constraint
+            $self->type->assert_valid($$ref_value);
+        }
+        else {
+            $$ref_value = $self->type->($$ref_value);
+        }
+    };
     if (my $e = $@) {
         unless ($quiet) {
             Raisin::log(warn => 'Param `%s` didn\'t pass constraint `%s` with value "%s"',

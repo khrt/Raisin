@@ -300,9 +300,9 @@ sub _schema_object {
     my (@required, %properties);
 
     for my $pp (@{ $p->enclosed }) {
-        $properties{ $pp->display_name } = _param_type_object($pp);
+        $properties{ _type_name($pp) } = _param_type_object($pp);
 
-        push @required, $pp->display_name if $pp->required;
+        push @required, _type_name($pp) if $pp->required;
     }
 
     my %object = (
@@ -340,6 +340,19 @@ sub _tags_object  {
     \@tags;
 }
 
+# get the name of a type
+sub _type_name {
+    my $type = shift;
+
+    if ($type->can('display_name')) {
+        return $type->display_name;
+    }
+    else {
+        # fall back to name() (e.g. Moose types do not have display_name)
+        return $type->name;
+    }
+}
+
 sub _param_type_object {
     my $p = shift;
 
@@ -348,7 +361,7 @@ sub _param_type_object {
     if ($p->type->name eq 'HashRef') {
         $item{'$ref'} = sprintf('#/definitions/%s', _name_for_object($p));
     }
-    elsif ($p->type->display_name =~ /^ArrayRef/) {
+    elsif (_type_name($p->type) =~ /^ArrayRef/) {
         $item{type} = 'array';
 
         my ($type, $format) = _param_type($p->type->type_parameter);
@@ -391,7 +404,7 @@ sub _param_type {
     elsif ($t->name =~ /password/i)       { 'string',  'password' }
     elsif ($t->name =~ /hashref/i)        { 'object',  undef }
     else {
-        if   ($t->display_name =~ /ArrayRef/) { 'array',  undef }
+        if   (_type_name($t) =~ /ArrayRef/) { 'array',  undef }
         else                                  { 'string', undef }    # fallback
     }
 }
