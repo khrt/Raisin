@@ -39,6 +39,7 @@
       },
       "runtime" : {
          "requires" : {
+            "HTTP::Status" : "0",
             "JSON" : "2.90",
             "Plack" : "1.0030",
             "Plack::Middleware::CrossOrigin" : "0.009",
@@ -67,7 +68,7 @@
          "web" : "https://github.com/khrt/Raisin"
       }
    },
-   "version" : "0.75",
+   "version" : "0.77",
    "x_contributors" : [
       "Vladimir Lettiev <thecrux@gmail.com>",
       "Dan Burke <dburke@addictmud.org>",
