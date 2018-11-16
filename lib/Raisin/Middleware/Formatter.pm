@@ -26,7 +26,8 @@ sub call {
     if ($req->content) {
         my %media_types_map_flat_hash = $self->decoder->media_types_map_flat_hash;
 
-        my $format = $media_types_map_flat_hash{ $req->content_type };
+        my ($ctype) = split /;/, $req->content_type, 2;
+        my $format = $media_types_map_flat_hash{ $ctype};
         unless ($format) {
             Raisin::log(info => "unsupported media type: ${ \$req->content_type }");
             return Plack::Response->new(HTTP_UNSUPPORTED_MEDIA_TYPE)->finalize;

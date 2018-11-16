@@ -22,6 +22,12 @@ subtest 'call' => sub {
     my @CASES = (
         # text to data
         {
+            req => POST('/', Content_Type => 'application/json; charset=utf-8', Content => '{"json":true}'),
+            params => { default_format => 'yaml', },
+            expected => 'json',
+            message => 'content: json, default_format: yaml',
+        },
+        {
             req => POST('/', Content_Type => 'application/json', Content => '{"json":true}'),
             params => { default_format => 'yaml', },
             expected => 'json',
