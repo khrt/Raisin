@@ -5,11 +5,20 @@ use warnings;
 use Test::More;
 
 use Raisin::Param;
-use Types::Standard qw(ScalarRef HashRef Any Num Str Int);
+use Types::Standard qw(Split ArrayRef ScalarRef HashRef Any Num Str Int);
 
 my $QUIET = 1;
 
 my @CASES = (
+    {
+        test => {
+            required => 0,
+            data => { name => 'abc', type => ArrayRef->plus_coercions(Split[qr{,}]), coerce => 1 },
+        },
+        input => "a,b,c",
+        expected => 1,
+    },
+
     {
         test => {
             required => 0,
