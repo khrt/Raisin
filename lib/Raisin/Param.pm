@@ -14,11 +14,12 @@ use Plack::Util::Accessor qw(
     name
     regex
     type
+    coerce
 );
 
 use Raisin::Util;
 
-my @ATTRIBUTES = qw(name type default regex desc);
+my @ATTRIBUTES = qw(name type default regex desc coerce);
 my @LOCATIONS = qw(path formData body header query);
 
 sub new {
@@ -116,6 +117,14 @@ sub validate {
             $self->type->assert_valid($$ref_value);
         }
         else {
+            if ($self->type->has_coercion) {
+                eval { $$ref_value = $self->type->coerce($$ref_value) } or do {
+                    Raisin::log(warn => 'Param `%s` failed coercion with value "%s"',
+                        $self->name, $$ref_value);
+                    return;
+                };
+            }
+
             $$ref_value = $self->type->($$ref_value);
         }
     };
