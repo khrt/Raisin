@@ -53,7 +53,7 @@ coerce Foo,
 $param = Raisin::Param->new(
     named => int(rand(1)),
     type  => 'required',
-    spec  => { name => 'foo', type => Foo, coerce => 1 }
+    spec  => { name => 'foo', type => Foo }
 );
 
 isa_ok $param, 'Raisin::Param';
