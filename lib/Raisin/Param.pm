@@ -55,6 +55,8 @@ sub _parse {
         }
     }
 
+    $self->{coerce} = defined($spec->{coerce}) ? $spec->{coerce} : 1;
+
     return 1;
 }
 
@@ -112,23 +114,20 @@ sub validate {
 
     # Type check
     eval {
-        if ($self->type->isa('Moose::Meta::TypeConstraint')) {
-            # this is a Moose type constraint
-            if ($self->type->has_coercion) {
+        if ($self->type->has_coercion && $self->coerce) {
+            eval {
                 $$ref_value = $self->type->coerce($$ref_value);
-            }
+            } or do {
+                Raisin::log(warn => 'Param `%s` failed coercion with value "%s"',
+                    $self->name, $$ref_value);
+                return;
+            };
+        }
 
+        if ($self->type->isa('Moose::Meta::TypeConstraint')) {
             $self->type->assert_valid($$ref_value);
         }
         else {
-            if ($self->type->has_coercion) {
-                eval { $$ref_value = $self->type->coerce($$ref_value) } or do {
-                    Raisin::log(warn => 'Param `%s` failed coercion with value "%s"',
-                        $self->name, $$ref_value);
-                    return;
-                };
-            }
-
             $$ref_value = $self->type->($$ref_value);
         }
     };
@@ -179,6 +178,8 @@ Parameter class for L<Raisin>. Validates request paramters.
 =head3 coerce
 
 Returns coerce flag. If C<true> attempt to coerce a value will be made at validate stage.
+
+By default set to C<true>.
 
 =head3 default
 
