@@ -114,6 +114,10 @@ sub validate {
     eval {
         if ($self->type->isa('Moose::Meta::TypeConstraint')) {
             # this is a Moose type constraint
+            if ($self->type->has_coercion) {
+                $$ref_value = $self->type->coerce($$ref_value);
+            }
+
             $self->type->assert_valid($$ref_value);
         }
         else {
@@ -171,6 +175,10 @@ Raisin::Param - Parameter class for Raisin.
 =head1 DESCRIPTION
 
 Parameter class for L<Raisin>. Validates request paramters.
+
+=head3 coerce
+
+Returns coerce flag. If C<true> attempt to coerce a value will be made at validate stage.
 
 =head3 default
 
