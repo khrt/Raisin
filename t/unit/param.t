@@ -13,7 +13,7 @@ my @CASES = (
     {
         test => {
             required => 0,
-            data => { name => 'abc', type => ArrayRef->plus_coercions(Split[qr{,}]), coerce => 1 },
+            data => { name => 'abc', type => ArrayRef->plus_coercions(Split[qr{,}]) },
         },
         input => "a,b,c",
         expected => 1,

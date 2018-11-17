@@ -121,7 +121,7 @@ sub validate {
             $self->type->assert_valid($$ref_value);
         }
         else {
-            if ($self->coerce) {
+            if ($self->type->has_coercion) {
                 eval { $$ref_value = $self->type->coerce($$ref_value) } or do {
                     Raisin::log(warn => 'Param `%s` failed coercion with value "%s"',
                         $self->name, $$ref_value);
