@@ -114,6 +114,10 @@ sub validate {
     eval {
         if ($self->type->isa('Moose::Meta::TypeConstraint')) {
             # this is a Moose type constraint
+            if ($self->type->has_coercion) {
+                $$ref_value = $self->type->coerce($$ref_value);
+            }
+
             $self->type->assert_valid($$ref_value);
         }
         else {
