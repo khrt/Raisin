@@ -115,13 +115,7 @@ sub validate {
     # Type check
     eval {
         if ($self->type->has_coercion && $self->coerce) {
-            eval {
-                $$ref_value = $self->type->coerce($$ref_value);
-            } or do {
-                Raisin::log(warn => 'Param `%s` failed coercion with value "%s"',
-                    $self->name, $$ref_value);
-                return;
-            };
+            $$ref_value = $self->type->coerce($$ref_value);
         }
 
         if ($self->type->isa('Moose::Meta::TypeConstraint')) {
