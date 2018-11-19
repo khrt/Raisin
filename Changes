@@ -1,3 +1,7 @@
+0.79
+    * Do not eval inside eval to propagate error message correctly from
+      parameter validator (relates to #32);
+
 0.78
     * Ignore media type options when negotiating format (#15);
     * Type coercions (#32);
