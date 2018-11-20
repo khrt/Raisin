@@ -41,7 +41,7 @@ my $app;
 
 sub import {
     my $class = shift;
-    $class->export_to_level(1, @_);
+    $class->export_to_level(1, $class, @_);
 
     strict->import;
     warnings->import;
