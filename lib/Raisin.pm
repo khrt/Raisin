@@ -206,7 +206,7 @@ sub psgi {
 
         1;
     } or do {
-        my $e = longmess($@);
+        my ($e) = longmess($@);
         $self->log(error => $e);
 
         my $msg = $ENV{PLACK_ENV}
