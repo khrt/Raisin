@@ -1,3 +1,6 @@
+0.80
+    * Minor fixes;
+
 0.79
     * Do not eval inside eval to propagate error message correctly from
       parameter validator (relates to #32);
