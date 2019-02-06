@@ -95,7 +95,7 @@ sub find {
         ? $self->cache->{$cache_key}
         : $self->routes;
 
-    my @found = grep { $_->match($method, $path) } @$routes;
+    my @found = grep { $_->match($method, $path) } @$routes or return;
 
     if (scalar @found > 1) {
         Raisin::log(warn => "more then one route has been found: $method $path");
