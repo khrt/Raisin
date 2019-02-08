@@ -3,12 +3,17 @@ package Raisin::Encoder::JSON;
 use strict;
 use warnings;
 
-use JSON qw(encode_json decode_json);
+use JSON::MaybeXS qw();
+
+my $json = JSON::MaybeXS->new();
 
 sub detectable_by { [qw(application/json text/x-json text/json json)] }
+
 sub content_type { 'application/json' }
-sub serialize { encode_json($_[1]) }
-sub deserialize { decode_json($_[1]) }
+
+sub serialize { $json->allow_blessed->convert_blessed->encode($_[1]) }
+
+sub deserialize { $json->allow_blessed->convert_blessed->decode($_[1]) }
 
 1;
 
