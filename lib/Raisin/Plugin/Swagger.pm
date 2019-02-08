@@ -277,7 +277,6 @@ sub _definitions_object {
     my @objects;
 
     for my $r (@$routes) {
-        # --- results - entity ---
         if ($r->entity) {
             push @objects, $r->entity;
         }
@@ -317,8 +316,7 @@ sub _collect_nested_definitions {
 
 sub _schema_object {
     my $p = shift;
-#    return if $p->type->name ne 'HashRef';
-    return unless _type_name($p->type) =~ /^HashRef$/ ; 
+    return unless _type_name($p->type) =~ /^HashRef$/;
 
     my (@required, %properties);
     for my $pp (@{ $p->enclosed }) {
@@ -368,7 +366,7 @@ sub _type_name {
     if ($type->can('display_name')) {
         return $type->display_name;
     }
-    elsif($type->can('name')) {
+    elsif ($type->can('name')) {
         # fall back to name() (e.g. Moose types do not have display_name)
         return $type->name;
     }
@@ -405,7 +403,7 @@ sub _param_type_object {
 
         if ($type eq 'object') {
             my $ref = do {
-                if   ($p->can('using') && $p->using) { $p->using ; }
+                if   ($p->can('using') && $p->using) { $p->using }
                 else { $p }
             };
             $item{items}{'$ref'} = sprintf('#/definitions/%s', _name_for_object($ref));
