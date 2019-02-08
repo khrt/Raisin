@@ -3,7 +3,7 @@ package Raisin::Encoder::JSON;
 use strict;
 use warnings;
 
-use JSON::MaybeXS  qw(encode_json decode_json );
+use JSON::MaybeXS qw();
 my $json=JSON::MaybeXS->new();
 
 sub detectable_by { [qw(application/json text/x-json text/json json)] }
