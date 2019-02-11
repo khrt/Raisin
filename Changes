@@ -1,3 +1,7 @@
+0.82
+    * OpenAPI/Swagger fixes (#59, #63);
+    * JSON encoder improvements (#58, #62);
+
 0.81
     * Do not cache routes if nothing found (#61);
 

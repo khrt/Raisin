@@ -25,7 +25,7 @@ use Plack::Util::Accessor qw(
     encoder
 );
 
-our $VERSION = '0.81';
+our $VERSION = '0.82';
 
 sub new {
     my ($class, %args) = @_;
