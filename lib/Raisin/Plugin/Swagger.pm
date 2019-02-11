@@ -10,6 +10,7 @@ use Data::Dumper;
 use Digest::MD5 qw/md5_hex/;
 use JSON qw/encode_json/;
 use List::Util qw/pairmap/;
+use Scalar::Util qw(blessed);
 
 my %DEFAULTS;
 my %SETTINGS;
@@ -251,7 +252,7 @@ sub _parameters_object {
         };
 
         my $ptype = _param_type_object($p);
-        if ($p->type->name eq 'HashRef') {
+        if (_type_name($p->type) =~ /^HashRef$/ ) {
             $ptype->{schema}{'$ref'} = delete $ptype->{'$ref'};
         }
 
@@ -273,8 +274,8 @@ sub _parameters_object {
 
 sub _definitions_object {
     my $routes = shift;
-
     my @objects;
+
     for my $r (@$routes) {
         if ($r->entity) {
             push @objects, $r->entity;
@@ -282,23 +283,42 @@ sub _definitions_object {
 
         my @pp = @{ $r->params };
         while (my $p = pop @pp) {
-            next if $p->type->name ne 'HashRef';
-
+            next unless _type_name($p->type) =~ /^HashRef$/;
             push @pp, @{ $p->enclosed };
             push @objects, $p;
         }
     }
 
-    my %definitions = map { %{ _schema_object($_) } } @objects;
+    my %definitions = map { %{ _schema_object($_) } }
+                        _collect_nested_definitions(@objects);
     \%definitions;
 }
 
+sub _collect_nested_definitions {
+    my @objects = @_;
+    return () unless scalar @objects;
+
+    my @nested;
+    for my $obj (@objects) {
+        if( $obj->can('enclosed') ) {
+            for my $expose ( @{$obj->enclosed} ) {
+                if (exists $expose->{'using'} ){
+                    push @nested, $expose->{using};
+                }
+            }
+        }
+    }
+    push @objects, _collect_nested_definitions(@nested);
+
+    return @objects;
+}
+
+
 sub _schema_object {
     my $p = shift;
-    return if $p->type->name ne 'HashRef';
+    return unless _type_name($p->type) =~ /^HashRef$/;
 
     my (@required, %properties);
-
     for my $pp (@{ $p->enclosed }) {
         $properties{ _type_name($pp) } = _param_type_object($pp);
 
@@ -312,7 +332,6 @@ sub _schema_object {
             properties => \%properties,
         }
     );
-
     \%object;
 }
 
@@ -347,35 +366,51 @@ sub _type_name {
     if ($type->can('display_name')) {
         return $type->display_name;
     }
-    else {
+    elsif ($type->can('name')) {
         # fall back to name() (e.g. Moose types do not have display_name)
         return $type->name;
+    }
+    else {
+        return "$type";
     }
 }
 
 sub _param_type_object {
     my $p = shift;
-
     my %item;
 
-    if ($p->type->name eq 'HashRef') {
-        $item{'$ref'} = sprintf('#/definitions/%s', _name_for_object($p));
+    if (_type_name($p->type) =~ /^HashRef$/ ) {
+        $item{'$ref'} = sprintf('#/definitions/%s', _name_for_object($p->can('using')?$p->using:$p));
+    }
+    elsif (_type_name($p->type) =~ /^HashRef\[.*\]$/) {
+        $item{'type'} = 'object';
+        $item{'additionalProperties'} = {
+                            '$ref' => sprintf('#/definitions/%s', _name_for_object($p->using))
+                            };
     }
     elsif (_type_name($p->type) =~ /^ArrayRef/) {
         $item{type} = 'array';
 
-        my ($type, $format) = _param_type($p->type->type_parameter);
+        my $type;
+        my $format;
+
+        if($p->type->can('type_parameter')) {
+            ($type, $format) = _param_type($p->type->type_parameter);
+        }
+        else {
+            ($type, $format) = ('object', '' );
+        }
+
         if ($type eq 'object') {
             my $ref = do {
                 if   ($p->can('using') && $p->using) { $p->using }
                 else { $p }
             };
-
             $item{items}{'$ref'} = sprintf('#/definitions/%s', _name_for_object($ref));
         }
         else {
-            $item{type} = $type;
-            $item{format} = $format if $format;
+            $item{items}->{type} = $type;
+            $item{items}->{format} = $format if $format;
             $item{description} = $p->desc if $p->desc;
         }
     }
@@ -385,27 +420,30 @@ sub _param_type_object {
         $item{format} = $format if $format;
         $item{description} = $p->desc if $p->desc;
     }
-
     \%item;
 }
 
 sub _param_type {
     my $t = shift;
-
-    if    ($t->name =~ /int/i)            { 'integer', 'int32' }
-    elsif ($t->name =~ /long/i)           { 'integer', 'int64' }
-    elsif ($t->name =~ /num|float|real/i) { 'number',  'float' }
-    elsif ($t->name =~ /double/i)         { 'number',  'double' }
-    elsif ($t->name =~ /str/i)            { 'string',  undef }
-    elsif ($t->name =~ /byte/i)           { 'string',  'byte' }
-    elsif ($t->name =~ /bool/i)           { 'boolean', undef }
-    elsif ($t->name =~ /datetime/i)       { 'string',  'date-time' }
-    elsif ($t->name =~ /date/i)           { 'string',  'date' }
-    elsif ($t->name =~ /password/i)       { 'string',  'password' }
-    elsif ($t->name =~ /hashref/i)        { 'object',  undef }
+    if ( $t->can('name') ) {  # allow nested types as Str in ArrayRef[Str]
+        if    ($t->name =~ /int/i)            { 'integer', 'int32' }
+        elsif ($t->name =~ /long/i)           { 'integer', 'int64' }
+        elsif ($t->name =~ /num|float|real/i) { 'number',  'float' }
+        elsif ($t->name =~ /double/i)         { 'number',  'double' }
+        elsif ($t->name =~ /str/i)            { 'string',  undef }
+        elsif ($t->name =~ /byte/i)           { 'string',  'byte' }
+        elsif ($t->name =~ /bool/i)           { 'boolean', undef }
+        elsif ($t->name =~ /datetime/i)       { 'string',  'date-time' }
+        elsif ($t->name =~ /date/i)           { 'string',  'date' }
+        elsif ($t->name =~ /password/i)       { 'string',  'password' }
+        elsif ($t->name =~ /hashref/i)        { 'object',  undef }
+        else {
+            if   (_type_name($t) =~ /ArrayRef/) { 'array',  undef }
+            else                                  { 'object', undef }    # fallback
+        }
+   }
     else {
-        if   (_type_name($t) =~ /ArrayRef/) { 'array',  undef }
-        else                                  { 'string', undef }    # fallback
+         { $t, undef }
     }
 }
 
@@ -420,8 +458,10 @@ sub _name_for_object {
     local $Data::Dumper::Terse = 1;
 
     my $fingerprint = md5_hex(Data::Dumper->Dump([$obj], [qw/obj/]));
-
-    sprintf '%s-%s', ucfirst($obj->name), uc(substr($fingerprint, 0, 10));
+    my $objname = ucfirst($obj->name);
+    #--- $ref values must be RFC3986 compliant URIs ---
+    $objname =~ s/::/-/g;
+    sprintf '%s-%s', $objname, uc(substr($fingerprint, 0, 10));
 }
 
 1;
