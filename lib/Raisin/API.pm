@@ -77,7 +77,11 @@ sub after { app->add_hook('after', shift) }
 # Resource
 #
 sub resource {
-    my ($name, $code, %args) = @_;
+    my ($name, $code, @args) = @_;
+    if (scalar(@args) % 2) {
+        croak "Odd-sized hash supplied to resource(). Is the previous resource missing a semicolon?";
+    }
+    my %args = @args;
 
     if ($name) {
         $name =~ s{^/}{}msx;

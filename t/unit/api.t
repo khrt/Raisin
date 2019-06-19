@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::Exception;
 
 use Raisin::API;
 use Raisin::Entity::Object;
@@ -285,6 +286,16 @@ subtest 'error' => sub {
     is $res->status, 501, 'status';
     is $res->body, 'Unit test!', 'body';
 
+    _clean_app();
+};
+
+subtest 'resource_bad' => sub {
+    throws_ok {
+         resource l0 => sub {
+              resource l1a => sub {}, # should be semicolon, not comma!
+              resource l1b => sub {};
+         };
+    } qr/missing a semicolon/, "Bad comma caught";
     _clean_app();
 };
 
