@@ -1,3 +1,6 @@
+0.83
+    * Detect missing comma and give clearer error. (#65);
+
 0.82
     * OpenAPI/Swagger fixes (#59, #63);
     * JSON encoder improvements (#58, #62);
