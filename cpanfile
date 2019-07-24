@@ -23,11 +23,11 @@ requires 'HTTP::Status' => '0';
 on test => sub {
     requires 'Test::More' => '0.88';
     requires 'List::Util' => '1.29';
-    requires 'Test::Exception => '0';
+    requires 'Test::Exception' => '0';
 };
 
 on develop => sub {
     requires 'Data::Printer' => '0.35';
     requires 'List::Util' => '1.29';
-    requires 'Test::Exception => '0';
+    requires 'Test::Exception' => '0';
 };
