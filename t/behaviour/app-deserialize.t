@@ -4,7 +4,7 @@ use warnings;
 
 use HTTP::Request::Common qw(POST);
 use HTTP::Status qw(:constants);
-use JSON;
+use JSON::MaybeXS;
 use Plack::Test;
 use Test::More;
 use Types::Standard qw(Int Str);

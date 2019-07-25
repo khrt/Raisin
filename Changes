@@ -1,3 +1,6 @@
+0.84, 0.85
+    * Update dependencies (#70);
+
 0.83
     * Detect missing comma and give clearer error. (#65);
 

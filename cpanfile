@@ -10,12 +10,14 @@ requires 'Type::Tiny' => '0.044';
 requires 'YAML' => '0.90';
 
 on test => sub {
+    requires 'Test::Pod' => '0';
     requires 'Test::More' => '0.88';
     requires 'List::Util' => '1.29';
     requires 'Test::Exception' => '0';
 };
 
 on develop => sub {
+    requires 'Test::Pod' => '0';
     requires 'Data::Printer' => '0.35';
     requires 'List::Util' => '1.29';
     requires 'Test::Exception' => '0';

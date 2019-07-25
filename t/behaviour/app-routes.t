@@ -5,7 +5,7 @@ use warnings;
 use FindBin '$Bin';
 use HTTP::Request::Common qw(GET POST PUT DELETE);
 use HTTP::Status qw(:constants);
-use JSON 'decode_json';
+use JSON::MaybeXS 'decode_json';
 use Plack::Test;
 use Plack::Util;
 use Test::More;

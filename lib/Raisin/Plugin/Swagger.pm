@@ -8,7 +8,7 @@ use parent 'Raisin::Plugin';
 use Carp 'croak';
 use Data::Dumper;
 use Digest::MD5 qw/md5_hex/;
-use JSON qw/encode_json/;
+use JSON::MaybeXS qw/encode_json/;
 use List::Util qw/pairmap/;
 use Scalar::Util qw(blessed);
 
@@ -260,7 +260,7 @@ sub _parameters_object {
             description => $p->desc || '',
             in          => $location,
             name        => $p->name,
-            required    => $p->required ? JSON::true : JSON::false,
+            required    => $p->required ? JSON::MaybeXS::true : JSON::MaybeXS::false,
             %$ptype,
         );
         $param{default} = $p->default if defined $p->default;

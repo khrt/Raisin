@@ -7,7 +7,7 @@ use HTTP::Request::Common qw(GET);
 use Plack::Test;
 use Test::More;
 use YAML;
-use JSON;
+use JSON::MaybeXS;
 
 use Raisin::API;
 use Types::Standard qw(Int Str);

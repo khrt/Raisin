@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use JSON;
+use JSON::MaybeXS;
 use Test::More;
 use Types::Standard qw/HashRef ArrayRef Str/;
 
@@ -70,7 +70,7 @@ my @PARAMETERS_CASES = (
                 description => '',
                 in => 'path',
                 name => 'str',
-                required => JSON::true,
+                required => JSON::MaybeXS::true,
                 type => 'string',
             }
         ]
@@ -90,7 +90,7 @@ my @PARAMETERS_CASES = (
                 description => '',
                 in => 'query',
                 name => 'str',
-                required => JSON::true,
+                required => JSON::MaybeXS::true,
                 type => 'string',
             }
         ]
@@ -110,7 +110,7 @@ my @PARAMETERS_CASES = (
                 description => '',
                 in => 'formData',
                 name => 'str',
-                required => JSON::true,
+                required => JSON::MaybeXS::true,
                 type => 'string',
             }
         ]
@@ -130,7 +130,7 @@ my @PARAMETERS_CASES = (
                 description => '',
                 in => 'header',
                 name => 'str',
-                required => JSON::true,
+                required => JSON::MaybeXS::true,
                 type => 'string',
             }
         ]
@@ -164,7 +164,7 @@ my @PARAMETERS_CASES = (
                 description => '',
                 in => 'body',
                 name => 'person',
-                required => JSON::true,
+                required => JSON::MaybeXS::true,
                 schema => {
                     '$ref' => '#/definitions/Person',
                 },
