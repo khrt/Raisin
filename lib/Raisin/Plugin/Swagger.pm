@@ -106,9 +106,14 @@ sub _spec_20 {
         #responses => undef,
         securityDefinitions => _security_definitions_object(),
         security => _security_object(),
-        tags => _tags_object($self->app),
+        #tags => undef,
         #externalDocs => undef,
     );
+
+    my $tags = _tags_object($self->app);
+    if (scalar @$tags) {
+        $spec{tags} = $tags;
+    }
 
     # routes
     $self->app->add_route(
@@ -284,7 +289,7 @@ sub _definitions_object {
         my @pp = @{ $r->params };
         while (my $p = pop @pp) {
             next unless _type_name($p->type) =~ /^HashRef$/;
-            push @pp, @{ $p->enclosed };
+            push @pp, @{ $p->enclosed || [] };
             push @objects, $p;
         }
     }
@@ -301,7 +306,7 @@ sub _collect_nested_definitions {
     my @nested;
     for my $obj (@objects) {
         if( $obj->can('enclosed') ) {
-            for my $expose ( @{$obj->enclosed} ) {
+            for my $expose ( @{ $obj->enclosed || [] } ) {
                 if (exists $expose->{'using'} ){
                     push @nested, $expose->{using};
                 }
@@ -319,7 +324,7 @@ sub _schema_object {
     return unless _type_name($p->type) =~ /^HashRef$/;
 
     my (@required, %properties);
-    for my $pp (@{ $p->enclosed }) {
+    for my $pp (@{ $p->enclosed || [] }) {
         $properties{ _type_name($pp) } = _param_type_object($pp);
 
         push @required, _type_name($pp) if $pp->required;
@@ -340,6 +345,7 @@ sub _tags_object  {
 
     my %tags;
     for my $r (@{ $app->routes->routes }) {
+        next unless $_;
         $tags{ $_ }++ for @{ $r->tags };
     }
 
@@ -402,11 +408,12 @@ sub _param_type_object {
         }
 
         if ($type eq 'object') {
-            my $ref = do {
-                if   ($p->can('using') && $p->using) { $p->using }
-                else { $p }
-            };
-            $item{items}{'$ref'} = sprintf('#/definitions/%s', _name_for_object($ref));
+            if ($p->can('using') && $p->using) {
+                $item{items}{'$ref'} = sprintf('#/definitions/%s', _name_for_object($p->using));
+            }
+            else {
+                $item{items} = {}; # {} is the "any-type" schema.
+            }
         }
         else {
             $item{items}->{type} = $type;

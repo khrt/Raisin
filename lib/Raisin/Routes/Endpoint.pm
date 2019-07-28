@@ -79,7 +79,7 @@ sub _rep_regex {
 sub tags {
     my $self = shift;
 
-    unless (scalar @{ $self->{tags} || [] }) {
+    unless ($self->{tags}) {
         return [Raisin::Util::make_tag_from_path($self->path)];
     }
 
