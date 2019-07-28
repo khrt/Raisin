@@ -9,7 +9,7 @@ use Raisin::Util;
 subtest 'make_tag_from_path' => sub {
     is Raisin::Util::make_tag_from_path('/tank/dev/web'), 'dev';
     is Raisin::Util::make_tag_from_path('/str'), 'str';
-    is Raisin::Util::make_tag_from_path('/'), undef;
+    is Raisin::Util::make_tag_from_path('/'), 'none';
 };
 
 subtest 'iterate_params' => sub {
