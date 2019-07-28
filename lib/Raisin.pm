@@ -435,7 +435,7 @@ It's designed to run on Plack, providing a simple DSL to develop RESTful APIs ea
 It was inspired by L<Grape|https://github.com/intridea/grape>.
 
 =for HTML
-<a href="https://travis-ci.org/khrt/Raisin"><img src="https://travis-ci.org/khrt/Raisin.svg?branch=master"></a>
+<a href="https://cloud.drone.io/khrt/Raisin"><img src="https://cloud.drone.io/api/badges/khrt/Raisin/status.svg" /></a>
 <a href="http://badge.fury.io/pl/Raisin"><img src="https://badge.fury.io/pl/Raisin.svg" alt="CPAN version" height="18"></a>
 
 =head1 FUNCTIONS

@@ -1,0 +1,49 @@
+kind: pipeline
+name: 5.10
+
+steps:
+- name: test
+  image: perl:5.10
+  commands:
+  - cpanm --quiet --installdeps --notest .
+  - perl Build.PL
+  - ./Build test
+
+---
+
+kind: pipeline
+name: 5.16
+
+steps:
+- name: test
+  image: perl:5.16
+  commands:
+  - cpanm --quiet --installdeps --notest .
+  - perl Build.PL
+  - ./Build test
+
+---
+
+kind: pipeline
+name: 5.24
+
+steps:
+- name: test
+  image: perl:5.24
+  commands:
+  - cpanm --quiet --installdeps --notest .
+  - perl Build.PL
+  - ./Build test
+
+---
+
+kind: pipeline
+name: 5.30
+
+steps:
+- name: test
+  image: perl:5.30
+  commands:
+  - cpanm --quiet --installdeps --notest .
+  - perl Build.PL
+  - ./Build test
