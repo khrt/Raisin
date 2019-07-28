@@ -1,3 +1,8 @@
+0.86
+    * Generate valid OpenAPI/Swagger spec:
+        - omit `tags` if none;
+        - set array of any type if `using` is not specified;
+
 0.84, 0.85
     * Update dependencies (#70);
 
