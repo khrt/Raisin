@@ -18,7 +18,7 @@ my @APP_CONF_METHODS = qw(
 );
 my @APP_EXEC_METHODS = qw(new run);
 my @APP_METHODS = qw(req res param include_missing session present error);
-my @HOOKS_METHODS = qw(before before_validation after_validation after);
+my @HOOKS_METHODS = qw(before before_validation failed_validation after_validation after);
 my @HTTP_METHODS = qw(del get head options patch post put);
 my @ROUTES_METHODS =
     qw(resource namespace route_param params requires optional group);
@@ -69,6 +69,8 @@ sub middleware { app->add_middleware(@_) }
 #
 sub before { app->add_hook('before', shift) }
 sub before_validation { app->add_hook('before_validation', shift) }
+
+sub failed_validation { app->add_hook('failed_validation', shift) }
 
 sub after_validation { app->add_hook('after_validation', shift) }
 sub after { app->add_hook('after', shift) }

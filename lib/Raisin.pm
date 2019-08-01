@@ -188,6 +188,7 @@ sub psgi {
         if (!$req->prepare_params($route->params, $route->named)) {
             $res->status(HTTP_BAD_REQUEST);
             $res->body('Invalid Parameters');
+            $self->hook('failed_validation')->($self);
             return $res->finalize;
         }
 
