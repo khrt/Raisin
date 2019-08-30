@@ -22,7 +22,6 @@ sub iterate_params {
     };
 }
 
-
 1;
 
 __END__

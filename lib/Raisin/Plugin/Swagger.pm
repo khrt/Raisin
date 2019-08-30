@@ -368,11 +368,10 @@ sub _tags_object  {
 # get the name of a type
 sub _type_name {
     my $type = shift;
-
-    if ($type->can('display_name')) {
+    if ($type && $type->can('display_name')) {
         return $type->display_name;
     }
-    elsif ($type->can('name')) {
+    elsif ($type && $type->can('name')) {
         # fall back to name() (e.g. Moose types do not have display_name)
         return $type->name;
     }
@@ -432,7 +431,7 @@ sub _param_type_object {
 
 sub _param_type {
     my $t = shift;
-    if ( $t->can('name') ) {  # allow nested types as Str in ArrayRef[Str]
+    if ($t && $t->can('name')) {  # allow nested types as Str in ArrayRef[Str]
         if    ($t->name =~ /int/i)            { 'integer', 'int32' }
         elsif ($t->name =~ /long/i)           { 'integer', 'int64' }
         elsif ($t->name =~ /num|float|real/i) { 'number',  'float' }
@@ -448,9 +447,9 @@ sub _param_type {
             if   (_type_name($t) =~ /ArrayRef/) { 'array',  undef }
             else                                  { 'object', undef }    # fallback
         }
-   }
+    }
     else {
-         { $t, undef }
+        { $t, undef }
     }
 }
 
