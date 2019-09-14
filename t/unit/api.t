@@ -299,4 +299,33 @@ subtest 'resource_bad' => sub {
     _clean_app();
 };
 
+subtest 'params nested route_param' => sub {
+    resource api => sub {
+        params requires => { name => 'id', type => undef };
+        route_param id => sub {
+            get sub { param };
+
+            params requires => { name => 'sub_id', type => undef };
+            route_param sub_id => sub {
+                get sub { param };
+            };
+        }
+    };
+
+    my $app = Raisin::API->app;
+    my $e = $app->routes->routes->[1];
+
+    my %params = map { $_->name => $_ } @{ $e->params };
+
+    ok $params{id}, 'id';
+    is $params{id}->named, 1, 'named';
+    is $params{id}->required, 1, 'required';
+
+    ok $params{sub_id}, 'sub_id';
+    is $params{sub_id}->named, 1, 'named';
+    is $params{sub_id}->required, 1, 'required';
+
+    _clean_app();
+};
+
 done_testing;

@@ -2,6 +2,7 @@ requires 'perl', '5.010000';
 
 requires 'HTTP::Request::Common' => '0';
 requires 'HTTP::Status' => '0';
+requires 'Hash::Merge' => '0.300';
 requires 'JSON::MaybeXS' => '1.004000';
 requires 'Plack' => '1.0030';
 requires 'Plack::Middleware::CrossOrigin' => '0.009';

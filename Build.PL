@@ -18,13 +18,14 @@ my %module_build_args = (
     "Artur Khabibullin - rtkh\@cpan.org"
   ],
   "dist_name" => "Raisin",
-  "dist_version" => "0.86",
+  "dist_version" => "0.87",
   "license" => "perl",
   "module_name" => "Raisin",
   "recursive_test_files" => 1,
   "requires" => {
     "HTTP::Request::Common" => 0,
     "HTTP::Status" => 0,
+    "Hash::Merge" => "0.300",
     "JSON::MaybeXS" => "1.004000",
     "Plack" => "1.0030",
     "Plack::Middleware::CrossOrigin" => "0.009",
