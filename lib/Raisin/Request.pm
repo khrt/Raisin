@@ -22,11 +22,14 @@ sub prepare_params {
 
     $self->{'raisin.parameters'} = \%params;
 
+    my $retval = 1;
+
     foreach my $p (@$declared) {
         my $name = $p->name;
         my $value = $params{$name};
 
         if (not $p->validate(\$value)) {
+            $retval = 0;
             $p->required ? return : next;
         }
 
@@ -36,7 +39,7 @@ sub prepare_params {
         $self->{'raisin.declared_params'}{$name} = $value;
     }
 
-    1;
+    $retval;
 }
 
 sub declared_params { shift->{'raisin.declared_params'} }
