@@ -5,7 +5,7 @@ use warnings;
 use HTTP::Message::PSGI;
 use HTTP::Request::Common qw(GET);
 use Test::More;
-use Types::Standard qw(Int);
+use Types::Standard qw(Int Enum);
 
 use Raisin;
 use Raisin::Param;
@@ -94,6 +94,10 @@ subtest 'validation' => sub {
                 type => 'optional',
                 spec => { name => 'opt2', type => Int, default => 42 },
             ),
+            Raisin::Param->new(
+                type => 'optional',
+                spec => { name => 'opt3', type => Enum[qw(one two)] },
+            ),
         ],
         code => sub {},
     );
@@ -136,6 +140,14 @@ subtest 'validation' => sub {
             expected => {
                 ret => 1,
                 pp => { req => 1, opt2 => 2 },
+            },
+        },
+        # Optional Enum with bad enum value
+        {
+            env => GET('/user/?req=1&opt3=bad')->to_psgi,
+            expected => {
+                ret => 0,
+                pp => { req => 1 }
             },
         },
     );
