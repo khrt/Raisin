@@ -146,13 +146,13 @@ my @PARAMETERS_CASES = (
         ],
         expected => [
             {
-                default => 'foo',
+                default     => 'foo',
                 description => '',
-                in => 'body',
-                name => 'enum',
-                required => JSON::MaybeXS::true,
-                type => 'string',
-                enum => [ qw( bar foo ) ],
+                in          => 'body',
+                name        => 'enum',
+                required    => JSON::MaybeXS::true,
+                type        => 'string',
+                enum        => [ qw( bar foo ) ],
             }
         ]
     },
