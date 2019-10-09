@@ -261,6 +261,12 @@ sub _parameters_object {
             $ptype->{schema}{'$ref'} = delete $ptype->{'$ref'};
         }
 
+        # If the type is an Enum, set type to string and give the enum values.
+        if (_type_is_enum($p->type)) {
+            $ptype->{type} = 'string';
+            $ptype->{enum} = $p->type->values;
+        }
+
         my %param = (
             description => $p->desc || '',
             in          => $location,
@@ -468,6 +474,15 @@ sub _name_for_object {
     #--- $ref values must be RFC3986 compliant URIs ---
     $objname =~ s/::/-/g;
     sprintf '%s-%s', $objname, uc(substr($fingerprint, 0, 10));
+}
+
+sub _type_is_enum {
+    my $type = shift;
+
+    return 1 if $type->isa('Moose::Meta::TypeConstraint::Enum')
+             or $type->isa('Type::Tiny::Enum');
+
+    return 0;
 }
 
 1;

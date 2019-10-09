@@ -4,7 +4,7 @@ use warnings;
 
 use JSON::MaybeXS;
 use Test::More;
-use Types::Standard qw/HashRef ArrayRef Str/;
+use Types::Standard qw/HashRef ArrayRef Str Enum/;
 
 use Raisin;
 use Raisin::Param;
@@ -132,6 +132,27 @@ my @PARAMETERS_CASES = (
                 name => 'str',
                 required => JSON::MaybeXS::true,
                 type => 'string',
+            }
+        ]
+    },
+    {
+        method => 'POST',
+        params => [
+            Raisin::Param->new(
+                named => 0,
+                type  => 'required',
+                spec  => { name => 'enum', type => Enum[qw(foo bar)], default => 'foo', in => 'body' },
+            )
+        ],
+        expected => [
+            {
+                default => 'foo',
+                description => '',
+                in => 'body',
+                name => 'enum',
+                required => JSON::MaybeXS::true,
+                type => 'string',
+                enum => [ qw( bar foo ) ],
             }
         ]
     },
