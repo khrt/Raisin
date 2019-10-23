@@ -1,14 +1,16 @@
 
+use utf8;
 use strict;
 use warnings;
 
+use Encode qw(decode_utf8 encode_utf8);
 use HTTP::Request::Common qw(POST);
 use HTTP::Status qw(:constants);
 use JSON::MaybeXS;
 use Plack::Test;
 use Test::More;
 use Types::Standard qw(Int Str);
-use YAML;
+use YAML qw(Dump Load);
 
 use Raisin::API;
 
@@ -18,6 +20,7 @@ my $app = eval {
             requires('name', type => Str, desc => 'User name'),
             requires('password', type => Str, desc => 'User password'),
             optional('email', type => Str, default => undef, regex => qr/.+\@.+/, desc => 'User email'),
+            optional('enemy', type => Str, default => undef, desc => 'Enemy'),
         );
         post sub {
             my $params = shift;
@@ -35,9 +38,10 @@ my $app = eval {
 }
 
 my %DATA = (
-    name => 'Bruce Wayne',
+    name     => 'Bruce Wayne',
     password => 'b47m4n',
-    email => 'bruce@wayne.name',
+    email    => 'bruce@wayne.name',
+    enemy    => "Mr \x{2603}",
 );
 
 BAIL_OUT $@ if $@;
@@ -47,10 +51,11 @@ test_psgi $app, sub {
 
     subtest 'application/yaml' => sub {
         my $res = $cb->(POST '/api', 'Content-Type' => 'application/yaml',
-            Content => Dump(\%DATA));
+            Content => encode_utf8(Dump(\%DATA))
+        );
 
         is $res->header('Content-Type'), 'application/x-yaml', 'content-type';
-        my $pp = Load($res->content);
+        my $pp = Load( decode_utf8($res->content) );
         is_deeply $pp->{params}, \%DATA, 'parameters match';
     };
 
@@ -59,7 +64,7 @@ test_psgi $app, sub {
             Content => encode_json(\%DATA));
 
         is $res->header('Content-Type'), 'application/x-yaml', 'content-type';
-        my $pp = Load($res->content);
+        my $pp = Load( decode_utf8($res->content) );
         is_deeply $pp->{params}, \%DATA, 'parameters match';
     };
 
