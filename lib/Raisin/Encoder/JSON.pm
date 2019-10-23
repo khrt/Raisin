@@ -5,7 +5,7 @@ use warnings;
 
 use JSON::MaybeXS qw();
 
-my $json = JSON::MaybeXS->new();
+my $json = JSON::MaybeXS->new(utf8 => 1);
 
 sub detectable_by { [qw(application/json text/x-json text/json json)] }
 
