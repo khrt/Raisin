@@ -1,21 +1,24 @@
 
+use utf8;
 use strict;
 use warnings;
 
 use Data::Dumper;
+use Encode qw(decode_utf8);
 use HTTP::Request::Common qw(GET);
 use Plack::Test;
 use Test::More;
-use YAML;
+use YAML qw(Load);
 use JSON::MaybeXS;
 
 use Raisin::API;
 use Types::Standard qw(Int Str);
 
 my %DATA = (
-    name => 'Bruce Wayne',
+    name     => 'Bruce Wayne',
     password => 'b47m4n',
-    email => 'bruce@wayne.name',
+    email    => 'bruce@wayne.name',
+    enemy    => "Mr \x{2603}",
 );
 
 my $app = eval {
@@ -42,14 +45,14 @@ test_psgi $app, sub {
 
         is $res->header('Content-Type'), 'application/x-yaml',
           'content-type';
-        ok $pp = Load( $res->content ), 'decode';
+        ok $pp = Load( decode_utf8($res->content) ), 'decode';
         is_deeply $pp->{params}, \%DATA, 'match';
 
         $res = $cb->( GET '/api.yaml' );
 
         is $res->header('Content-Type'), 'application/x-yaml',
           'content-type';
-        ok $pp = Load( $res->content ), 'decode';
+        ok $pp = Load( decode_utf8($res->content) ), 'decode';
         is_deeply $pp->{params}, \%DATA, 'match';
     };
 

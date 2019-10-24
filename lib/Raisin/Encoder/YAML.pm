@@ -3,12 +3,13 @@ package Raisin::Encoder::YAML;
 use strict;
 use warnings;
 
+use Encode qw(encode_utf8 decode_utf8);
 use YAML qw(Dump Load);
 
 sub detectable_by { [qw(application/x-yaml application/yaml text/x-yaml text/yaml yaml)] }
 sub content_type { 'application/x-yaml' }
-sub serialize { Dump($_[1]) }
-sub deserialize { Load($_[1]) }
+sub serialize { encode_utf8( Dump($_[1]) ) }
+sub deserialize { Load( decode_utf8($_[1]) ) }
 
 1;
 
