@@ -9,6 +9,7 @@ requires 'Plack::Middleware::CrossOrigin' => '0.009';
 requires 'Scalar::Util' => '1.38';
 requires 'Type::Tiny' => '0.044';
 requires 'YAML' => '0.90';
+requires 'parent' => '0';
 
 on test => sub {
     requires 'List::Util' => '1.29';
