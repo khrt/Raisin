@@ -414,6 +414,7 @@ sub _param_type_object {
         my $type;
         my $format;
 
+        # Loop down to find type beneath coercion.
         while (!defined $type) {
             if($tt->can('type_parameter')) {
                 ($type, $format) = _param_type($tt->type_parameter);
@@ -421,15 +422,20 @@ sub _param_type_object {
             else {
                 ($type, $format) = ('object', '' );
             }
-            $tt = $tt->parent;
+            $tt = $tt->parent if !defined $type;
         }
 
         if ($type eq 'object') {
+            $item{items} = {}; # {} is the "any-type" schema.
             if ($p->can('using') && $p->using) {
                 $item{items}{'$ref'} = sprintf('#/definitions/%s', _name_for_object($p->using));
             }
-            else {
-                $item{items} = {}; # {} is the "any-type" schema.
+            elsif ($tt->can("type_parameter")) {
+               my ($subscript_type, $subscript_format) = _param_type($tt->type_parameter);
+               if (defined $subscript_type) {
+                  $item{items}->{type}   = $subscript_type;
+                  $item{items}->{format} = $subscript_format if defined $subscript_format;
+               }
             }
         }
         else {

@@ -178,6 +178,27 @@ my @PARAMETERS_CASES = (
             }
         ]
     },
+    {
+        method => 'GET',
+        params => [
+            Raisin::Param->new(
+                named => 1,
+                type  => 'required',
+                spec  => { name => 'str', type => ArrayRef[HashRef], default => 'def' },
+            )
+        ],
+        expected => [
+            {
+                default => 'def',
+                description => '',
+                in => 'path',
+                name => 'str',
+                required => JSON::MaybeXS::true,
+                type => 'array',
+                items => { type => 'object' },
+            }
+        ]
+    },
 
     # Nested -- entry is special and is cooked below.
     {
