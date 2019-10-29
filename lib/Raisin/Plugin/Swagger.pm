@@ -405,12 +405,16 @@ sub _param_type_object {
 
         my $type;
         my $format;
+        my $tt = $p->type;
 
-        if($p->type->can('type_parameter')) {
-            ($type, $format) = _param_type($p->type->type_parameter);
-        }
-        else {
-            ($type, $format) = ('object', '' );
+        while (!defined $type) {
+            if($p->type->can('type_parameter')) {
+                ($type, $format) = _param_type($tt->type_parameter);
+            }
+            else {
+                ($type, $format) = ('object', '' );
+            }
+            $tt = $tt->parent;
         }
 
         if ($type eq 'object') {
