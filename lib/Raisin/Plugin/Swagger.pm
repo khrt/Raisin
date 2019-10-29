@@ -1,4 +1,5 @@
 package Raisin::Plugin::Swagger;
+# vim:ts=4:shiftwidth=4:expandtab:syntax=perl
 
 use strict;
 use warnings;
