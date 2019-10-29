@@ -391,24 +391,31 @@ sub _param_type_object {
     my $p = shift;
     my %item;
 
-    if (_type_name($p->type) =~ /^HashRef$/ ) {
+    my $tt = $p->type;
+
+
+    if (_type_name($tt) =~ /^Maybe\[/) {
+    $item{nullable} = JSON::MaybeXS::true;
+        $tt = $tt->type_parameter;
+    }
+
+    if (_type_name($tt) =~ /^HashRef$/ ) {
         $item{'$ref'} = sprintf('#/definitions/%s', _name_for_object($p->can('using')?$p->using:$p));
     }
-    elsif (_type_name($p->type) =~ /^HashRef\[.*\]$/) {
+    elsif (_type_name($tt) =~ /^HashRef\[.*\]$/) {
         $item{'type'} = 'object';
         $item{'additionalProperties'} = {
                             '$ref' => sprintf('#/definitions/%s', _name_for_object($p->using))
                             };
     }
-    elsif (_type_name($p->type) =~ /^ArrayRef/) {
+    elsif (_type_name($tt) =~ /^ArrayRef/) {
         $item{type} = 'array';
 
         my $type;
         my $format;
-        my $tt = $p->type;
 
         while (!defined $type) {
-            if($p->type->can('type_parameter')) {
+            if($tt->can('type_parameter')) {
                 ($type, $format) = _param_type($tt->type_parameter);
             }
             else {
@@ -432,7 +439,7 @@ sub _param_type_object {
         }
     }
     else {
-        my ($type, $format) = _param_type($p->type);
+        my ($type, $format) = _param_type($tt);
         $item{type} = $type;
         $item{format} = $format if $format;
         $item{description} = $p->desc if $p->desc;

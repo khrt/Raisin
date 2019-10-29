@@ -5,7 +5,7 @@ use warnings;
 
 use JSON::MaybeXS;
 use Test::More;
-use Types::Standard qw/HashRef ArrayRef Str Enum Split/;
+use Types::Standard qw/HashRef ArrayRef Str Enum Split Maybe /;
 
 use Raisin;
 use Raisin::Param;
@@ -199,6 +199,7 @@ my @PARAMETERS_CASES = (
                             ],
                         },
                         optional => { name => 'city', type => Str },
+                        optional => { name => 'postcode', type => Maybe[Str] },
                     ],
                 },
             )
@@ -318,6 +319,7 @@ subtest '_definitions_object' => sub {
                         ],
                     },
                     optional => { name => 'city', type => Str },
+                    optional => { name => 'postcode', type => Maybe[Str] },
                 ],
             },
         ],
@@ -339,6 +341,7 @@ subtest '_definitions_object' => sub {
         'Person' => {
             'properties' => {
                 'city' => { 'type' => 'string' },
+                'postcode' => { 'type' => 'string', nullable => JSON::MaybeXS::true },
                 'name' => {
                     '$ref' => "#/definitions/$names_map{Name}"
                 }
@@ -389,6 +392,7 @@ subtest '_schema_object' => sub {
             properties => {
                 name => { '$ref' => "#/definitions/${ \[keys(%$schema1)]->[0] }" },
                 city => { type  => 'string' },
+                postcode => { type  => 'string', nullable => JSON::MaybeXS::true },
             },
         },
     };
