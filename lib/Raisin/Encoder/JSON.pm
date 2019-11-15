@@ -9,7 +9,7 @@ my $json = JSON::MaybeXS->new(utf8 => 1);
 
 sub detectable_by { [qw(application/json text/x-json text/json json)] }
 
-sub content_type { 'application/json' }
+sub content_type { 'application/json; charset=utf-8' }
 
 sub serialize { $json->allow_blessed->convert_blessed->encode($_[1]) }
 
