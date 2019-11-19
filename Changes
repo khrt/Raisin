@@ -1,3 +1,7 @@
+0.88
+    * UTF-8 in JSON content-type (#87);
+    * Support Enum in Swagger (#89);
+
 0.87
     * Fix route SETTING hash merging (#77);
 

@@ -18,7 +18,7 @@ my %module_build_args = (
     "Artur Khabibullin - rtkh\@cpan.org"
   ],
   "dist_name" => "Raisin",
-  "dist_version" => "0.87",
+  "dist_version" => "0.88",
   "license" => "perl",
   "module_name" => "Raisin",
   "recursive_test_files" => 1,
@@ -32,6 +32,7 @@ my %module_build_args = (
     "Scalar::Util" => "1.38",
     "Type::Tiny" => "0.044",
     "YAML" => "0.90",
+    "parent" => 0,
     "perl" => "5.010000"
   },
   "script_files" => [

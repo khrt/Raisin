@@ -49,6 +49,7 @@
             "Scalar::Util" : "1.38",
             "Type::Tiny" : "0.044",
             "YAML" : "0.90",
+            "parent" : "0",
             "perl" : "5.010000"
          }
       },
@@ -73,7 +74,7 @@
          "web" : "https://github.com/khrt/Raisin"
       }
    },
-   "version" : "0.87",
+   "version" : "0.88",
    "x_contributors" : [
       "Vladimir Lettiev <thecrux@gmail.com>",
       "Dan Burke <dburke@addictmud.org>",
