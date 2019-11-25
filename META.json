@@ -4,7 +4,7 @@
       "Artur Khabibullin - rtkh@cpan.org"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 6.011, CPAN::Meta::Converter version 2.150010",
+   "generated_by" : "Dist::Zilla version 6.012, CPAN::Meta::Converter version 2.150010",
    "license" : [
       "perl_5"
    ],
@@ -80,6 +80,7 @@
       "Dan Burke <dburke@addictmud.org>",
       "kimcognito"
    ],
+   "x_generated_by_perl" : "v5.26.1",
    "x_serialization_backend" : "Cpanel::JSON::XS version 4.02"
 }
 

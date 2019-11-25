@@ -152,7 +152,7 @@ my @PARAMETERS_CASES = (
                 name        => 'enum',
                 required    => JSON::MaybeXS::true,
                 type        => 'string',
-                enum        => [ qw( bar foo ) ],
+                enum        => [qw(foo bar)],
             }
         ]
     },
