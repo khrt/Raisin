@@ -372,9 +372,9 @@ __END__
 
             my $max_count = scalar(@users) - 1;
             my $start = $params->{start} > $max_count ? $max_count : $params->{start};
-            my $count = $params->{count} > $max_count ? $max_count : $params->{count};
+            my $end = $params->{count} > $max_count ? $max_count : $params->{count};
 
-            my @slice = @users[$start .. $count];
+            my @slice = @users[$start .. $end];
             { data => \@slice }
         };
 
