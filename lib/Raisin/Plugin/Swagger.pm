@@ -1,7 +1,11 @@
-package Raisin::Plugin::Swagger;
+#!perl
+#PODNAME: Raisin::Plugin::Swagger
+#ABSTRACT: Generates API description in Swagger 2/OpenAPI compatible format
 
 use strict;
 use warnings;
+
+package Raisin::Plugin::Swagger;
 
 use parent 'Raisin::Plugin';
 
@@ -489,10 +493,6 @@ sub _type_is_enum {
 
 __END__
 
-=head1 NAME
-
-Raisin::Plugin::Swagger - Generates API description in Swagger 2/OpenAPI compatible format.
-
 =head1 SYNOPSIS
 
     plugin 'Swagger';
@@ -628,14 +628,5 @@ Configures OpenAPI security options.
 Allowed types are B<basic>, B<api_key> and B<oauth2>.
 
 For more information please check OpenAPI specification and L<Raisin::Plugin::Swagger/SECURITY>.
-
-=head1 AUTHOR
-
-Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
-
-=head1 LICENSE
-
-This module and all the modules in this package are governed by the same license
-as Perl itself.
 
 =cut

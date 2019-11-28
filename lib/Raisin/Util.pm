@@ -1,7 +1,11 @@
-package Raisin::Util;
+#!perl
+#PODNAME: Raisin::Util
+#ABSTRACT: Utility subroutine for Raisin.
 
 use strict;
 use warnings;
+
+package Raisin::Util;
 
 use Plack::Util;
 
@@ -26,9 +30,6 @@ sub iterate_params {
 
 __END__
 
-=head1 NAME
-
-Raisin::Util - Utility subroutine for Raisin.
 
 =head1 FUNCTIONS
 
@@ -39,14 +40,5 @@ Splits a path and returns the first part of it.
 =head2 iterate_params
 
 Iterates over route parameters.
-
-=head1 AUTHOR
-
-Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
-
-=head1 LICENSE
-
-This module and all the modules in this package are governed by the same license
-as Perl itself.
 
 =cut

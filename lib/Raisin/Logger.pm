@@ -1,7 +1,11 @@
-package Raisin::Logger;
+#!perl
+#PODNAME: Raisin::Logger
+#ABSTRACT: Default logger for Raisin.
 
 use strict;
 use warnings;
+
+package Raisin::Logger;
 
 my $FH = *STDERR;
 
@@ -15,10 +19,6 @@ sub log {
 1;
 
 __END__
-
-=head1 NAME
-
-Raisin::Logger - Default logger for Raisin.
 
 =head1 SYNOPSIS
 
@@ -34,14 +34,5 @@ Simple logger for Raisin.
 =head2 log
 
 Accept's two parameters: C<level> and C<message>.
-
-=head1 AUTHOR
-
-Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
-
-=head1 LICENSE
-
-This module and all the modules in this package are governed by the same license
-as Perl itself.
 
 =cut

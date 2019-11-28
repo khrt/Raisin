@@ -1,7 +1,11 @@
-package Raisin::Routes;
+#!perl
+#PODNAME: Raisin::Routes
+#ABSTRACT: A routing class for Raisin.
 
 use strict;
 use warnings;
+
+package Raisin::Routes;
 
 use Carp;
 use Plack::Util::Accessor qw(
@@ -109,10 +113,6 @@ sub find {
 
 __END__
 
-=head1 NAME
-
-Raisin::Routes - A routing class for Raisin.
-
 =head1 SYNOPSIS
 
     use Raisin::Routes;
@@ -177,14 +177,5 @@ Looking for a route
 =head1 ACKNOWLEDGEMENTS
 
 This module was inspired by L<Kelp::Routes>.
-
-=head1 AUTHOR
-
-Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
-
-=head1 LICENSE
-
-This module and all the modules in this package are governed by the same license
-as Perl itself.
 
 =cut

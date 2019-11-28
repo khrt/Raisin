@@ -1,7 +1,11 @@
-package Raisin::Request;
+#!perl
+#PODNAME: Raisin::Request
+#ABSTRACT: Request class for Raisin.
 
 use strict;
 use warnings;
+
+package Raisin::Request;
 
 use parent 'Plack::Request';
 
@@ -49,10 +53,6 @@ sub raisin_parameters { shift->{'raisin.parameters'} }
 
 __END__
 
-=head1 NAME
-
-Raisin::Request - Request class for Raisin.
-
 =head1 SYNOPSIS
 
     Raisin::Request->new($self, $env);
@@ -68,14 +68,5 @@ Extends L<Plack::Request>.
 =head3 prepare_params
 
 =head3 raisin_parameters
-
-=head1 AUTHOR
-
-Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
-
-=head1 LICENSE
-
-This module and all the modules in this package are governed by the same license
-as Perl itself.
 
 =cut

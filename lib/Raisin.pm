@@ -1,7 +1,11 @@
-package Raisin;
+#!perl
+#PODNAME: Raisin
+#ABSTRACT: A REST API microframework for Perl.
 
 use strict;
 use warnings;
+
+package Raisin;
 
 use Carp qw(croak carp longmess);
 use HTTP::Status qw(:constants);
@@ -24,8 +28,6 @@ use Plack::Util::Accessor qw(
     decoder
     encoder
 );
-
-our $VERSION = '0.90';
 
 sub new {
     my ($class, %args) = @_;
@@ -228,7 +230,7 @@ sub before_finalize {
     my $self = shift;
 
     $self->res->status(HTTP_OK) unless $self->res->status;
-    $self->res->header('X-Framework' => "Raisin $VERSION");
+    $self->res->header('X-Framework' => 'Raisin ' . __PACKAGE__->VERSION);
 
     if ($self->api_version) {
         $self->res->header('X-API-Version' => $self->api_version);
@@ -304,10 +306,6 @@ sub session {
 __END__
 
 =encoding utf8
-
-=head1 NAME
-
-Raisin - A REST API microframework for Perl.
 
 =head1 SYNOPSIS
 
@@ -1195,14 +1193,5 @@ L<https://github.com/khrt/Raisin|https://github.com/khrt/Raisin>
 
 This module was inspired both by Grape and L<Kelp>,
 which was inspired by L<Dancer>, which in its turn was inspired by Sinatra.
-
-=head1 AUTHOR
-
-Artur Khabibullin - rtkh@cpan.org
-
-=head1 LICENSE
-
-This module and all the modules in this package are governed by the same license
-as Perl itself.
 
 =cut
