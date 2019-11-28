@@ -1,7 +1,11 @@
-package Raisin::Entity::Object;
+#!perl
+#PODNAME: Raisin::Entity::Object
+#ABSTRACT: An expose object.
 
 use strict;
 use warnings;
+
+package Raisin::Entity::Object;
 
 use Plack::Util::Accessor qw(
     desc
@@ -52,10 +56,6 @@ sub display_name {
 
 __END__
 
-=head1 NAME
-
-Raisin::Entity::Object - An expose object.
-
 =head1 DESCRIPTION
 
 An internal object used in L<Raisin::Plugin::Swagger> and L<Raisin::Entity>.
@@ -94,14 +94,5 @@ A parameter's type.
 
 Displays a parameter's L<Raisin::Entity::Object/alias> if set
 or L<Raisin::Entity::Object/name> otherwise.
-
-=head1 AUTHOR
-
-Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
-
-=head1 LICENSE
-
-This module and all the modules in this package are governed by the same license
-as Perl itself.
 
 =cut

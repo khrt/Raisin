@@ -1,7 +1,11 @@
-package Raisin::Routes::Endpoint;
+#!perl
+#PODNAME: Raisin::Routes::Endpoint
+#ABSTRACT: Endpoint class for Raisin::Routes.
 
 use strict;
 use warnings;
+
+package Raisin::Routes::Endpoint;
 
 use Plack::Util::Accessor qw(
     check
@@ -111,21 +115,8 @@ sub match {
 
 __END__
 
-=head1 NAME
-
-Raisin::Routes::Endpoint - Endpoint class for Raisin::Routes.
-
 =head1 ACKNOWLEDGEMENTS
 
 This module was inspired by L<Kelp::Routes::Pattern>.
-
-=head1 AUTHOR
-
-Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
-
-=head1 LICENSE
-
-This module and all the modules in this package are governed by the same license
-as Perl itself.
 
 =cut

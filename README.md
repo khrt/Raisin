@@ -127,9 +127,6 @@ Raisin is a REST API microframework for Perl.
 It's designed to run on Plack, providing a simple DSL to develop RESTful APIs easily.
 It was inspired by [Grape](https://github.com/intridea/grape).
 
-[![Build Status](https://cloud.drone.io/api/badges/khrt/Raisin/status.svg)](https://cloud.drone.io/khrt/Raisin)
-[![CPAN version](https://badge.fury.io/pl/Raisin.svg)](https://badge.fury.io/pl/Raisin)
-
 # FUNCTIONS
 
 ## API DESCRIPTION
@@ -146,6 +143,18 @@ Defines a route parameter as a resource `id` which can be anything if type
 isn't specified for it.
 
     route_param id => sub { ... };
+
+Raisin allows you to nest `route_param`:
+
+    params requires => { name => 'id', type => Int };
+    route_param id => sub {
+        get sub { ... };
+
+        params requires => { name => 'sub_id', type => Int };
+        route_param sub_id => sub {
+            ...
+        };
+    };
 
 ### del, get, patch, post, put
 

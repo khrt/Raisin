@@ -1,7 +1,11 @@
-package Raisin::API;
+#!perl
+#PODNAME: Raisin::API
+#ABSTACT: Provides Raisin DSL.
 
 use strict;
 use warnings;
+
+package Raisin::API;
 
 use parent 'Exporter';
 
@@ -243,21 +247,8 @@ sub error {
 
 __END__
 
-=head1 NAME
-
-Raisin::API - Provides Raisin DSL.
-
 =head1 DESCRIPTION
 
 See L<Raisin>.
-
-=head1 AUTHOR
-
-Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
-
-=head1 LICENSE
-
-This module and all the modules in this package are governed by the same license
-as Perl itself.
 
 =cut

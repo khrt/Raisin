@@ -141,7 +141,7 @@ my @PARAMETERS_CASES = (
             Raisin::Param->new(
                 named => 0,
                 type  => 'required',
-                spec  => { name => 'enum', type => Enum[qw(foo bar)], default => 'foo', in => 'body' },
+                spec  => { name => 'enum', type => Enum[qw(bar foo)], default => 'foo', in => 'body' },
             )
         ],
         expected => [
@@ -152,7 +152,7 @@ my @PARAMETERS_CASES = (
                 name        => 'enum',
                 required    => JSON::MaybeXS::true,
                 type        => 'string',
-                enum        => [ qw( bar foo ) ],
+                enum        => [qw(bar foo)],
             }
         ]
     },

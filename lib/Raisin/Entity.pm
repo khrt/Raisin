@@ -1,7 +1,11 @@
-package Raisin::Entity;
+#!perl
+#PODNAME: Raisin::Entity
+#ABSTRACT: A simple facade to use with your API
 
 use strict;
 use warnings;
+
+package Raisin::Entity;
 
 use parent 'Exporter';
 
@@ -174,10 +178,6 @@ sub _make_exposition {
 
 __END__
 
-=head1 NAME
-
-Raisin::Entity - A simple facade to use with your API.
-
 =head1 SYNOPSIS
 
     package MusicApp::Entity::Artist;
@@ -284,14 +284,5 @@ Expose under an alias with C<as>.
 
 OpenAPI compatible specification generates automatically if OpenAPI/Swagger
 plugin enabled.
-
-=head1 AUTHOR
-
-Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
-
-=head1 LICENSE
-
-This module and all the modules in this package are governed by the same license
-as Perl itself.
 
 =cut

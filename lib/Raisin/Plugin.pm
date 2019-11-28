@@ -1,7 +1,11 @@
-package Raisin::Plugin;
+#!perl
+#PODNAME: Raisin::Plugin
+#ABSTRACT: Base class for Raisin plugins
 
 use strict;
 use warnings;
+
+package Raisin::Plugin;
 
 use Carp;
 
@@ -50,10 +54,6 @@ sub register {
 
 __END__
 
-=head1 NAME
-
-Raisin::Plugin - Base class for Raisin plugins.
-
 =head1 SYNOPSIS
 
     package Raisin::Plugin::Hello;
@@ -79,14 +79,5 @@ Main method for each plugin.
 Registers one or many methods into the application.
 
     $self->register(hello => sub { print 'Hello!' });
-
-=head1 AUTHOR
-
-Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
-
-=head1 LICENSE
-
-This module and all the modules in this package are governed by the same license
-as Perl itself.
 
 =cut
