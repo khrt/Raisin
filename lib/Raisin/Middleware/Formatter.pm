@@ -1,7 +1,11 @@
-package Raisin::Middleware::Formatter;
+#!perl
+#PODNAME: Raisin::Middleware::Formatter
+#ABSTRACT: A parser/formatter middleware for L<Raisin>.
 
 use strict;
 use warnings;
+
+package Raisin::Middleware::Formatter;
 
 use parent 'Plack::Middleware';
 
@@ -159,10 +163,6 @@ sub allowed_formats_for_requested_route {
 1;
 __END__
 
-=head1 NAME
-
-Raisin::Middleware::Formatter - A parser/formatter middleware for L<Raisin>.
-
 =head1 DESCRIPTION
 
 Parses and formats the data it gets from requests and responses if it's needed.
@@ -195,14 +195,5 @@ Extracts an extension from a path, and if exists looks for a formatter.
 =head2 format_from_header
 
 Parses C<Accept> header for known formatters.
-
-=head1 AUTHOR
-
-Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
-
-=head1 LICENSE
-
-This module and all the modules in this package are governed by the same license
-as Perl itself.
 
 =cut

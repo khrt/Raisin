@@ -1,7 +1,11 @@
-package Raisin::Param;
+#!perl
+#PODNAME: Raisin::Param
+#ABSTRACT: Parameter class for Raisin
 
 use strict;
 use warnings;
+
+package Raisin::Param;
 
 use Carp;
 use Plack::Util::Accessor qw(
@@ -161,10 +165,6 @@ sub validate {
 
 __END__
 
-=head1 NAME
-
-Raisin::Param - Parameter class for Raisin.
-
 =head1 DESCRIPTION
 
 Parameter class for L<Raisin>. Validates request paramters.
@@ -216,14 +216,5 @@ Returns the location of the parameter: B<query, header, path, formData, body>.
 Process and validate parameter. Takes B<reference> as the input paramter.
 
     $p->validate(\$value);
-
-=head1 AUTHOR
-
-Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
-
-=head1 LICENSE
-
-This module and all the modules in this package are governed by the same license
-as Perl itself.
 
 =cut

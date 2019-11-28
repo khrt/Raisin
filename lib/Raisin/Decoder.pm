@@ -1,7 +1,11 @@
-package Raisin::Decoder;
+#!perl
+#PODNAME: Raisin::Decoder
+#ABSTRACT: A helper for L<Raisin::Middleware::Formatter> over decoder modules
 
 use strict;
 use warnings;
+
+package Raisin::Decoder;
 
 use parent 'Raisin::Encoder';
 
@@ -15,10 +19,6 @@ sub builtin {
 1;
 
 __END__
-
-=head1 NAME
-
-Raisin::Decoder - A helper for L<Raisin::Middleware::Formatter> over decoder modules.
 
 =head1 SYNOPSIS
 
@@ -39,14 +39,5 @@ The interface is identical to L<Raisin::Encoder>.
 
 Returns a list of encoders which are bundled with L<Raisin>.
 They are: L<Raisin::Encoder::JSON>, L<Raisin::Encoder::YAML>.
-
-=head1 AUTHOR
-
-Artur Khabibullin - rtkh E<lt>atE<gt> cpan.org
-
-=head1 LICENSE
-
-This module and all the modules in this package are governed by the same license
-as Perl itself.
 
 =cut
