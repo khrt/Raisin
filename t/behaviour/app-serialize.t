@@ -59,13 +59,13 @@ test_psgi $app, sub {
     subtest 'application/json' => sub {
         $res = $cb->( GET '/api', Accept => 'application/json' );
 
-        is $res->header('Content-Type'), 'application/json', 'content-type';
+        is $res->header('Content-Type'), 'application/json; charset=utf-8', 'content-type';
         ok $pp = decode_json( $res->content ), 'decode';
         is_deeply $pp->{params}, \%DATA, 'match';
 
         $res = $cb->( GET '/api.json' );
 
-        is $res->header('Content-Type'), 'application/json', 'content-type';
+        is $res->header('Content-Type'), 'application/json; charset=utf-8', 'content-type';
         ok $pp = decode_json( $res->content ), 'decode';
         is_deeply $pp->{params}, \%DATA, 'match';
     };
