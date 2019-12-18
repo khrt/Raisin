@@ -1,10 +1,11 @@
+# vim:ts=4:shiftwidth=4:expandtab:syntax=perl
 
 use strict;
 use warnings;
 
 use JSON::MaybeXS;
 use Test::More;
-use Types::Standard qw/HashRef ArrayRef Str Enum/;
+use Types::Standard qw/HashRef ArrayRef Str Enum Split Maybe /;
 
 use Raisin;
 use Raisin::Param;
@@ -156,7 +157,50 @@ my @PARAMETERS_CASES = (
             }
         ]
     },
-    # Nested
+    {
+        method => 'GET',
+        params => [
+            Raisin::Param->new(
+                named => 1,
+                type  => 'required',
+                spec  => { name => 'str', type => (ArrayRef[Str])->plus_coercions(Split[qr/,\s*/]), default => 'def' },
+            )
+        ],
+        expected => [
+            {
+                default => 'def',
+                description => '',
+                in => 'path',
+                name => 'str',
+                required => JSON::MaybeXS::true,
+                type => 'array',
+                items => { type => 'string' },
+            }
+        ]
+    },
+    {
+        method => 'GET',
+        params => [
+            Raisin::Param->new(
+                named => 1,
+                type  => 'required',
+                spec  => { name => 'str', type => ArrayRef[HashRef], default => 'def' },
+            )
+        ],
+        expected => [
+            {
+                default => 'def',
+                description => '',
+                in => 'path',
+                name => 'str',
+                required => JSON::MaybeXS::true,
+                type => 'array',
+                items => { type => 'object' },
+            }
+        ]
+    },
+
+    # Nested -- entry is special and is cooked below.
     {
         method => 'POST',
         params => [
@@ -176,6 +220,7 @@ my @PARAMETERS_CASES = (
                             ],
                         },
                         optional => { name => 'city', type => Str },
+                        optional => { name => 'postcode', type => Maybe[Str] },
                     ],
                 },
             )
@@ -295,6 +340,7 @@ subtest '_definitions_object' => sub {
                         ],
                     },
                     optional => { name => 'city', type => Str },
+                    optional => { name => 'postcode', type => Maybe[Str] },
                 ],
             },
         ],
@@ -316,6 +362,7 @@ subtest '_definitions_object' => sub {
         'Person' => {
             'properties' => {
                 'city' => { 'type' => 'string' },
+                'postcode' => { 'type' => 'string', nullable => JSON::MaybeXS::true },
                 'name' => {
                     '$ref' => "#/definitions/$names_map{Name}"
                 }
@@ -366,6 +413,7 @@ subtest '_schema_object' => sub {
             properties => {
                 name => { '$ref' => "#/definitions/${ \[keys(%$schema1)]->[0] }" },
                 city => { type  => 'string' },
+                postcode => { type  => 'string', nullable => JSON::MaybeXS::true },
             },
         },
     };

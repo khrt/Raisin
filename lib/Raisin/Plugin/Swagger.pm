@@ -1,6 +1,7 @@
 #!perl
 #PODNAME: Raisin::Plugin::Swagger
 #ABSTRACT: Generates API description in Swagger 2/OpenAPI compatible format
+# vim:ts=4:shiftwidth=4:expandtab:syntax=perl
 
 use strict;
 use warnings;
@@ -394,34 +395,51 @@ sub _param_type_object {
     my $p = shift;
     my %item;
 
-    if (_type_name($p->type) =~ /^HashRef$/ ) {
+    my $tt = $p->type;
+
+
+    if (_type_name($tt) =~ /^Maybe\[/) {
+    $item{nullable} = JSON::MaybeXS::true;
+        $tt = $tt->type_parameter;
+    }
+
+    if (_type_name($tt) =~ /^HashRef$/ ) {
         $item{'$ref'} = sprintf('#/definitions/%s', _name_for_object($p->can('using')?$p->using:$p));
     }
-    elsif (_type_name($p->type) =~ /^HashRef\[.*\]$/) {
+    elsif (_type_name($tt) =~ /^HashRef\[.*\]$/) {
         $item{'type'} = 'object';
         $item{'additionalProperties'} = {
                             '$ref' => sprintf('#/definitions/%s', _name_for_object($p->using))
                             };
     }
-    elsif (_type_name($p->type) =~ /^ArrayRef/) {
+    elsif (_type_name($tt) =~ /^ArrayRef/) {
         $item{type} = 'array';
 
         my $type;
         my $format;
 
-        if($p->type->can('type_parameter')) {
-            ($type, $format) = _param_type($p->type->type_parameter);
-        }
-        else {
-            ($type, $format) = ('object', '' );
+        # Loop down to find type beneath coercion.
+        while (!defined $type) {
+            if($tt->can('type_parameter')) {
+                ($type, $format) = _param_type($tt->type_parameter);
+            }
+            else {
+                ($type, $format) = ('object', '' );
+            }
+            $tt = $tt->parent if !defined $type;
         }
 
         if ($type eq 'object') {
+            $item{items} = {}; # {} is the "any-type" schema.
             if ($p->can('using') && $p->using) {
                 $item{items}{'$ref'} = sprintf('#/definitions/%s', _name_for_object($p->using));
             }
-            else {
-                $item{items} = {}; # {} is the "any-type" schema.
+            elsif ($tt->can("type_parameter")) {
+               my ($subscript_type, $subscript_format) = _param_type($tt->type_parameter);
+               if (defined $subscript_type) {
+                  $item{items}->{type}   = $subscript_type;
+                  $item{items}->{format} = $subscript_format if defined $subscript_format;
+               }
             }
         }
         else {
@@ -431,7 +449,7 @@ sub _param_type_object {
         }
     }
     else {
-        my ($type, $format) = _param_type($p->type);
+        my ($type, $format) = _param_type($tt);
         $item{type} = $type;
         $item{format} = $format if $format;
         $item{description} = $p->desc if $p->desc;
