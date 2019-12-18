@@ -4,7 +4,7 @@
       "Artur Khabibullin - rtkh@cpan.org"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 6.011, CPAN::Meta::Converter version 2.150010",
+   "generated_by" : "Dist::Zilla version 6.012, CPAN::Meta::Converter version 2.150010",
    "license" : [
       "perl_5"
    ],
@@ -49,6 +49,7 @@
             "Scalar::Util" : "1.38",
             "Type::Tiny" : "0.044",
             "YAML" : "0.90",
+            "parent" : "0",
             "perl" : "5.010000"
          }
       },
@@ -73,12 +74,13 @@
          "web" : "https://github.com/khrt/Raisin"
       }
    },
-   "version" : "0.87",
+   "version" : "0.89",
    "x_contributors" : [
       "Vladimir Lettiev <thecrux@gmail.com>",
       "Dan Burke <dburke@addictmud.org>",
       "kimcognito"
    ],
+   "x_generated_by_perl" : "v5.26.1",
    "x_serialization_backend" : "Cpanel::JSON::XS version 4.02"
 }
 
