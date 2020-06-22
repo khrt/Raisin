@@ -92,7 +92,10 @@ sub _spec_20 {
         : qw(application/x-yaml application/json);
 
     my $base_path = $req->base->as_string;
-    $base_path =~ s#http(?:s?)://[^/]+##msix;
+    ### Respect proxied requests
+    #   A proxy map is used to fill the "basePath" attribute.
+    my $_base = $req->env->{HTTP_X_FORWARDED_SCRIPT_NAME} || q(/);
+    $base_path =~ s#http(?:s?)://[^/]+/#$_base#msix;
 
     $DEFAULTS{consumes} = \@content_types;
     $DEFAULTS{produces} = \@content_types;
@@ -100,7 +103,11 @@ sub _spec_20 {
     my %spec = (
         swagger => '2.0',
         info => _info_object($app),
-        host => $req->env->{SERVER_NAME} || $req->env->{HTTP_HOST},
+        ### Respect proxied requests
+        #   The frontend hostname is used if set.
+        host => $req->env->{HTTP_X_FORWARDED_HOST}
+            || $req->env->{SERVER_NAME}
+            || $req->env->{HTTP_HOST},
         basePath => $base_path,
         schemes => [$req->scheme],
         consumes => \@content_types,
