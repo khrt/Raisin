@@ -2,6 +2,10 @@
 
 Raisin - A REST API microframework for Perl.
 
+# VERSION
+
+version 0.90
+
 # SYNOPSIS
 
     use HTTP::Status qw(:constants);
@@ -67,9 +71,9 @@ Raisin - A REST API microframework for Perl.
 
             my $max_count = scalar(@users) - 1;
             my $start = $params->{start} > $max_count ? $max_count : $params->{start};
-            my $count = $params->{count} > $max_count ? $max_count : $params->{count};
+            my $end = $params->{count} > $max_count ? $max_count : $params->{count};
 
-            my @slice = @users[$start .. $count];
+            my @slice = @users[$start .. $end];
             { data => \@slice }
         };
 
@@ -845,9 +849,11 @@ which was inspired by [Dancer](https://metacpan.org/pod/Dancer), which in its tu
 
 # AUTHOR
 
-Artur Khabibullin - rtkh@cpan.org
+Artur Khabibullin <rtkh@cpan.org>
 
-# LICENSE
+# COPYRIGHT AND LICENSE
 
-This module and all the modules in this package are governed by the same license
-as Perl itself.
+This software is copyright (c) 2019 by Artur Khabibullin.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.

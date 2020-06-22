@@ -1,5 +1,6 @@
 0.90
     * Replace `$count` with `$end` in SYNOPOSIS example (#95);
+    * Allow swagger to reside behind a reverse proxy (#102);
 
 0.89
     * Change arguments ordering in Enum of swagger test (#93);

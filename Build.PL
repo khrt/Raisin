@@ -15,10 +15,10 @@ my %module_build_args = (
   },
   "dist_abstract" => "A REST API microframework for Perl.",
   "dist_author" => [
-    "Artur Khabibullin - rtkh\@cpan.org"
+    "Artur Khabibullin <rtkh\@cpan.org>"
   ],
   "dist_name" => "Raisin",
-  "dist_version" => "0.89",
+  "dist_version" => "0.90",
   "license" => "perl",
   "module_name" => "Raisin",
   "recursive_test_files" => 1,
@@ -39,8 +39,13 @@ my %module_build_args = (
     "script/raisin"
   ],
   "test_requires" => {
+    "ExtUtils::MakeMaker" => 0,
+    "File::Spec" => 0,
+    "IO::Handle" => 0,
+    "IPC::Open3" => 0,
     "List::Util" => "1.29",
     "Test::Exception" => 0,
+    "Test::More" => 0,
     "Test::Pod" => 0,
     "Test::Simple" => "1.001014"
   }
@@ -48,9 +53,14 @@ my %module_build_args = (
 
 
 my %fallback_build_requires = (
+  "ExtUtils::MakeMaker" => 0,
+  "File::Spec" => 0,
+  "IO::Handle" => 0,
+  "IPC::Open3" => 0,
   "List::Util" => "1.29",
   "Module::Build" => "0.28",
   "Test::Exception" => 0,
+  "Test::More" => 0,
   "Test::Pod" => 0,
   "Test::Simple" => "1.001014"
 );
