@@ -52,10 +52,11 @@ sub _parse {
             $self->{enclosed} = _compile_enclosed($spec->{encloses});
         }
         else {
-            Raisin::log(
-                warn => 'Ignoring enclosed parameters for `%s`, type should be `HashRef` not `%s`',
-                $self->name, $self->type->name
-            );
+            # FIXME: Undefined sub
+            # Raisin::log(
+            #     warn => 'Ignoring enclosed parameters for `%s`, type should be `HashRef` not `%s`',
+            #     $self->name, $self->type->name
+            # );
         }
     }
 
@@ -89,8 +90,9 @@ sub in {
 
     if (defined $value) {
         unless (grep { $value eq $_ } @LOCATIONS) {
-            Raisin::log(warn => '`%s` should be one of: %s',
-                $self->name, join ', ', @LOCATIONS);
+            # FIXME: Undefined sub
+            # Raisin::log(warn => '`%s` should be one of: %s',
+            #     $self->name, join ', ', @LOCATIONS);
             return;
         }
 
@@ -106,39 +108,44 @@ sub validate {
     # Required and empty
     # Only optional parameters can have default value
     if ($self->required && !defined($$ref_value)) {
-        Raisin::log(warn => '`%s` is required', $self->name) unless $quiet;
+        # FIXME: Undefined sub
+        # Raisin::log(warn => '`%s` is required', $self->name) unless $quiet;
         return;
     }
 
     # Optional and empty
     if (!$self->required && !defined($$ref_value)) {
-        Raisin::log(info => '`%s` optional and empty', $self->name);
+        # FIXME: Undefined sub
+        # Raisin::log(info => '`%s` optional and empty', $self->name);
         return 1;
     }
 
     # Type check
-    eval {
-        if ($self->type->has_coercion && $self->coerce) {
-            $$ref_value = $self->type->coerce($$ref_value);
-        }
+    if (defined $self->type) {
+        eval {
+            if ($self->type->has_coercion && $self->coerce) {
+                $$ref_value = $self->type->coerce($$ref_value);
+            }
 
-        if ($self->type->isa('Moose::Meta::TypeConstraint')) {
-            $self->type->assert_valid($$ref_value);
+            if ($self->type->isa('Moose::Meta::TypeConstraint')) {
+                $self->type->assert_valid($$ref_value);
+            }
+            else {
+                $$ref_value = $self->type->($$ref_value);
+            }
+        };
+        if ($@) {
+            unless ($quiet) {
+                # FIXME: Undefined sub
+                # Raisin::log(warn => 'Param `%s` didn\'t pass constraint `%s` with value "%s"',
+                #     $self->name, $self->type->name, $$ref_value);
+            }
+            return;
         }
-        else {
-            $$ref_value = $self->type->($$ref_value);
-        }
-    };
-    if (my $e = $@) {
-        unless ($quiet) {
-            Raisin::log(warn => 'Param `%s` didn\'t pass constraint `%s` with value "%s"',
-                $self->name, $self->type->name, $$ref_value);
-        }
-        return;
     }
 
     # Nested
-    if ($self->type->name eq 'HashRef' && $self->enclosed) {
+    if (defined $self->type && $self->type->name eq 'HashRef' && $self->enclosed) {
         for my $p (@{ $self->enclosed }) {
             my $v = $$ref_value;
 
@@ -152,8 +159,9 @@ sub validate {
     # Regex
     elsif ($self->regex && $$ref_value !~ $self->regex) {
         unless ($quiet) {
-            Raisin::log(warn => 'Param `%s` didn\'t match regex `%s` with value "%s"',
-                $self->name, $self->regex, $$ref_value);
+            # FIXME:Undefined sub
+            # Raisin::log(warn => 'Param `%s` didn\'t match regex `%s` with value "%s"',
+            #     $self->name, $self->regex, $$ref_value);
         }
         return;
     }
