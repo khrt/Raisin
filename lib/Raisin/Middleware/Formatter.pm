@@ -71,6 +71,8 @@ sub call {
 sub _accept_header_set { length(shift || '') }
 sub _path_has_extension {
     my $path = shift;
+    my $idx_last_slash = rindex $path, '/';
+    $path = $idx_last_slash >= 0 ? substr $path, $idx_last_slash : $path;
     my @chunks = split /\./, $path;
     scalar(@chunks) > 1;
 }
