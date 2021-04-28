@@ -9,6 +9,7 @@ package Raisin::Middleware::Formatter;
 
 use parent 'Plack::Middleware';
 
+use File::Basename qw(fileparse);
 use HTTP::Status qw(:constants);
 use Plack::Request;
 use Plack::Response;
@@ -71,8 +72,8 @@ sub call {
 sub _accept_header_set { length(shift || '') }
 sub _path_has_extension {
     my $path = shift;
-    my @chunks = split /\./, $path;
-    scalar(@chunks) > 1;
+    my (undef, undef, $suffix) = fileparse($path, qr/\..[^.]*$/);
+    $suffix;
 }
 
 sub negotiate_format {
