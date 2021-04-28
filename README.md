@@ -4,7 +4,7 @@ Raisin - A REST API microframework for Perl.
 
 # VERSION
 
-version 0.90
+version 0.91
 
 # SYNOPSIS
 
@@ -257,8 +257,8 @@ See also ["API-FORMATS" in Raisin](https://metacpan.org/pod/Raisin#API-FORMATS).
 
 Restricts API to use only specified formatter to serialize and deserialize data.
 
-Already exists [Raisin::Encoder::JSON](https://metacpan.org/pod/Raisin::Encoder::JSON), [Raisin::Encoder::YAML](https://metacpan.org/pod/Raisin::Encoder::YAML),
-and [Raisin::Encoder::Text](https://metacpan.org/pod/Raisin::Encoder::Text), but you can always register your own
+Already exists [Raisin::Encoder::JSON](https://metacpan.org/pod/Raisin%3A%3AEncoder%3A%3AJSON), [Raisin::Encoder::YAML](https://metacpan.org/pod/Raisin%3A%3AEncoder%3A%3AYAML),
+and [Raisin::Encoder::Text](https://metacpan.org/pod/Raisin%3A%3AEncoder%3A%3AText), but you can always register your own
 using ["register\_encoder"](#register_encoder).
 
     api_format 'json';
@@ -310,7 +310,7 @@ Registers a third-party parser (decoder).
 
     register_decoder(xml => 'My::Parser::XML');
 
-See also [Raisin::Decoder](https://metacpan.org/pod/Raisin::Decoder).
+See also [Raisin::Decoder](https://metacpan.org/pod/Raisin%3A%3ADecoder).
 
 ### register\_encoder
 
@@ -318,7 +318,7 @@ Registers a third-party formatter (encoder).
 
     register_encoder(xml => 'My::Formatter::XML');
 
-See also [Raisin::Encoder](https://metacpan.org/pod/Raisin::Encoder).
+See also [Raisin::Encoder](https://metacpan.org/pod/Raisin%3A%3AEncoder).
 
 ### run
 
@@ -328,7 +328,7 @@ Returns the `PSGI` application.
 
 ### req
 
-Provides quick access to the [Raisin::Request](https://metacpan.org/pod/Raisin::Request) object for the current route.
+Provides quick access to the [Raisin::Request](https://metacpan.org/pod/Raisin%3A%3ARequest) object for the current route.
 
 Use `req` to get access to request headers, params, etc.
 
@@ -338,18 +338,18 @@ Use `req` to get access to request headers, params, etc.
 
     say req->header('X-Header');
 
-See also [Plack::Request](https://metacpan.org/pod/Plack::Request).
+See also [Plack::Request](https://metacpan.org/pod/Plack%3A%3ARequest).
 
 ### res
 
-Provides quick access to the [Raisin::Response](https://metacpan.org/pod/Raisin::Response) object for the current route.
+Provides quick access to the [Raisin::Response](https://metacpan.org/pod/Raisin%3A%3AResponse) object for the current route.
 
 Use `res` to set up response parameters.
 
     res->status(403);
     res->headers(['X-Application' => 'Raisin Application']);
 
-See also [Plack::Response](https://metacpan.org/pod/Plack::Response).
+See also [Plack::Response](https://metacpan.org/pod/Plack%3A%3AResponse).
 
 ### param
 
@@ -357,7 +357,7 @@ Returns request parameters.
 Without an argument will return an array of all input parameters.
 Otherwise it will return the value of the requested parameter.
 
-Returns [Hash::MultiValue](https://metacpan.org/pod/Hash::MultiValue) object.
+Returns [Hash::MultiValue](https://metacpan.org/pod/Hash%3A%3AMultiValue) object.
 
     say param('key'); # -> value
     say param(); # -> { key => 'value', foo => 'bar' }
@@ -383,16 +383,16 @@ per-session data.
 
 Raisin hash a built-in `present` method, which accepts two arguments: an
 object to be presented and an options associated with it. The options hash may
-include `with` key, which is defined the entity to expose. See [Raisin::Entity](https://metacpan.org/pod/Raisin::Entity).
+include `with` key, which is defined the entity to expose. See [Raisin::Entity](https://metacpan.org/pod/Raisin%3A%3AEntity).
 
     my $artists = $schema->resultset('Artist');
 
     present data => $artists, with => 'MusicApp::Entity::Artist';
     present count => $artists->count;
 
-[Raisin::Entity](https://metacpan.org/pod/Raisin::Entity) supports [DBIx::Class](https://metacpan.org/pod/DBIx::Class) and [Rose::DB::Object](https://metacpan.org/pod/Rose::DB::Object).
+[Raisin::Entity](https://metacpan.org/pod/Raisin%3A%3AEntity) supports [DBIx::Class](https://metacpan.org/pod/DBIx%3A%3AClass) and [Rose::DB::Object](https://metacpan.org/pod/Rose%3A%3ADB%3A%3AObject).
 
-For details see examples in _examples/music-app_ and [Raisin::Entity](https://metacpan.org/pod/Raisin::Entity).
+For details see examples in _examples/music-app_ and [Raisin::Entity](https://metacpan.org/pod/Raisin%3A%3AEntity).
 
 # ALLOWED METHODS
 
@@ -462,7 +462,7 @@ In the case of conflict between either of:
 
 Path parameters have precedence.
 
-Query string and body parameters will be merged (see ["parameters" in Plack::Request](https://metacpan.org/pod/Plack::Request#parameters))
+Query string and body parameters will be merged (see ["parameters" in Plack::Request](https://metacpan.org/pod/Plack%3A%3ARequest#parameters))
 
 ## Declared parameters
 
@@ -588,13 +588,13 @@ Use `ArrayRef[*]` types from your compatible type library to define arrays.
 ## Types
 
 Raisin supports Moo(se)-compatible type constraint so you can use any of the
-[Moose](https://metacpan.org/pod/Moose), [Moo](https://metacpan.org/pod/Moo) or [Type::Tiny](https://metacpan.org/pod/Type::Tiny) type constraints.
+[Moose](https://metacpan.org/pod/Moose), [Moo](https://metacpan.org/pod/Moo) or [Type::Tiny](https://metacpan.org/pod/Type%3A%3ATiny) type constraints.
 
-By default [Raisin](https://metacpan.org/pod/Raisin) depends on [Type::Tiny](https://metacpan.org/pod/Type::Tiny) and it's [Types::Standard](https://metacpan.org/pod/Types::Standard) type
+By default [Raisin](https://metacpan.org/pod/Raisin) depends on [Type::Tiny](https://metacpan.org/pod/Type%3A%3ATiny) and it's [Types::Standard](https://metacpan.org/pod/Types%3A%3AStandard) type
 contraint library.
 
 You can create your own types as well.
-See [Type::Tiny::Manual](https://metacpan.org/pod/Type::Tiny::Manual) and [Moose::Manual::Types](https://metacpan.org/pod/Moose::Manual::Types).
+See [Type::Tiny::Manual](https://metacpan.org/pod/Type%3A%3ATiny%3A%3AManual) and [Moose::Manual::Types](https://metacpan.org/pod/Moose%3A%3AManual%3A%3ATypes).
 
 # HOOKS
 
@@ -638,7 +638,7 @@ Serialization takes place automatically. So, you do not have to call
 Your API can declare to support only one serializator by using ["api\_format" in Raisin](https://metacpan.org/pod/Raisin#api_format).
 
 Custom formatters for existing and additional types can be defined with a
-[Raisin::Encoder](https://metacpan.org/pod/Raisin::Encoder)/[Raisin::Decoder](https://metacpan.org/pod/Raisin::Decoder).
+[Raisin::Encoder](https://metacpan.org/pod/Raisin%3A%3AEncoder)/[Raisin::Decoder](https://metacpan.org/pod/Raisin%3A%3ADecoder).
 
 - JSON
 
@@ -665,7 +665,7 @@ You can enable it by:
 
     plugin 'Logger', outputs => [['Screen', min_level => 'debug']];
 
-Or use [Raisin::Logger](https://metacpan.org/pod/Raisin::Logger) with a `fallback` option:
+Or use [Raisin::Logger](https://metacpan.org/pod/Raisin%3A%3ALogger) with a `fallback` option:
 
     plugin 'Logger', fallback => 1;
 
@@ -679,7 +679,7 @@ how to use it.
 `app` is a [Raisin](https://metacpan.org/pod/Raisin) instance, so you can use `$self` instead of `app` where
 it is possible.
 
-See [Raisin::Plugin::Logger](https://metacpan.org/pod/Raisin::Plugin::Logger).
+See [Raisin::Plugin::Logger](https://metacpan.org/pod/Raisin%3A%3APlugin%3A%3ALogger).
 
 # API DOCUMENTATION
 
@@ -725,7 +725,7 @@ Including parameters:
 Documentation will be available on `http://<url>/swagger.json` URL.
 So you can use this URL in Swagger UI.
 
-See [Raisin::Plugin::Swagger](https://metacpan.org/pod/Raisin::Plugin::Swagger).
+See [Raisin::Plugin::Swagger](https://metacpan.org/pod/Raisin%3A%3APlugin%3A%3ASwagger).
 
 # MIDDLEWARE
 
@@ -738,11 +738,11 @@ Raisin can be extended using custom _modules_. Each new module must be a subclas
 of the `Raisin::Plugin` namespace. Modules' job is to initialize and register new
 methods into the web application class.
 
-For more see ["plugin" in Raisin](https://metacpan.org/pod/Raisin#plugin) and [Raisin::Plugin](https://metacpan.org/pod/Raisin::Plugin).
+For more see ["plugin" in Raisin](https://metacpan.org/pod/Raisin#plugin) and [Raisin::Plugin](https://metacpan.org/pod/Raisin%3A%3APlugin).
 
 # TESTING
 
-See [Plack::Test](https://metacpan.org/pod/Plack::Test), [Test::More](https://metacpan.org/pod/Test::More) and etc.
+See [Plack::Test](https://metacpan.org/pod/Plack%3A%3ATest), [Test::More](https://metacpan.org/pod/Test%3A%3AMore) and etc.
 
     my $app = Plack::Util::load_psgi("$Bin/../script/raisinapp.pl");
 
@@ -814,7 +814,7 @@ application is deployed:
         mount '/api/rest' => RaisinApp->new;
     };
 
-See also [Plack::Builder](https://metacpan.org/pod/Plack::Builder), [Plack::App::URLMap](https://metacpan.org/pod/Plack::App::URLMap).
+See also [Plack::Builder](https://metacpan.org/pod/Plack%3A%3ABuilder), [Plack::App::URLMap](https://metacpan.org/pod/Plack%3A%3AApp%3A%3AURLMap).
 
 # EXAMPLES
 
@@ -826,8 +826,8 @@ Raisin comes with three instance in _example_ directory:
 
 - music-app
 
-    Shows the possibility of using ["present" in Raisin](https://metacpan.org/pod/Raisin#present) with [DBIx::Class](https://metacpan.org/pod/DBIx::Class)
-    and [Rose::DB::Object](https://metacpan.org/pod/Rose::DB::Object).
+    Shows the possibility of using ["present" in Raisin](https://metacpan.org/pod/Raisin#present) with [DBIx::Class](https://metacpan.org/pod/DBIx%3A%3AClass)
+    and [Rose::DB::Object](https://metacpan.org/pod/Rose%3A%3ADB%3A%3AObject).
 
 - sample-app
 
@@ -849,7 +849,7 @@ which was inspired by [Dancer](https://metacpan.org/pod/Dancer), which in its tu
 
 # AUTHOR
 
-Artur Khabibullin <rtkh@cpan.org>
+Artur Khabibullin
 
 # COPYRIGHT AND LICENSE
 

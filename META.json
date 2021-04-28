@@ -1,10 +1,10 @@
 {
    "abstract" : "A REST API microframework for Perl.",
    "author" : [
-      "Artur Khabibullin <rtkh@cpan.org>"
+      "Artur Khabibullin"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 6.012, CPAN::Meta::Converter version 2.150010",
+   "generated_by" : "Dist::Zilla version 6.017, CPAN::Meta::Converter version 2.150010",
    "license" : [
       "perl_5"
    ],
@@ -89,13 +89,14 @@
          "web" : "https://github.com/khrt/Raisin"
       }
    },
-   "version" : "0.90",
+   "version" : "0.91",
    "x_contributors" : [
       "Vladimir Lettiev <thecrux@gmail.com>",
       "Dan Burke <dburke@addictmud.org>",
       "kimcognito"
    ],
-   "x_generated_by_perl" : "v5.26.1",
-   "x_serialization_backend" : "Cpanel::JSON::XS version 4.02"
+   "x_generated_by_perl" : "v5.32.1",
+   "x_serialization_backend" : "Cpanel::JSON::XS version 4.25",
+   "x_spdx_expression" : "Artistic-1.0-Perl OR GPL-1.0-or-later"
 }
 
