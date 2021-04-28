@@ -210,15 +210,14 @@ subtest 'negotiate_format' => sub {
 
 subtest 'format_from_extension' => sub {
     my @CASES = (
-        { ext => '/some/pa.th.yaml', expected => 'yaml' },
-        { ext => '/swagger.json',    expected => 'json' },
-        { ext => '/swagger.txt',     expected => 'text' },
+        { ext => '.yaml', expected => 'yaml' },
+        { ext => '.json', expected => 'json' },
+        { ext => '.txt',  expected => 'text' },
 
-        { ext => '/swagger.text', expected => undef },
-        { ext => '/swagger.xml',  expected => undef },
+        { ext => '.text', expected => undef },
+        { ext => '.xml',  expected => undef },
 
-        { ext => '/endpoint', expected => undef },
-        { ext => '/',         expected => undef },
+        { ext => '', expected => undef },
     );
 
     for my $c (@CASES) {
