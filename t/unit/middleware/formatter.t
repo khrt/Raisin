@@ -291,4 +291,33 @@ subtest 'format_from_header' => sub {
     }
 };
 
+subtest '_path_has_extension' => sub {
+    my @CASES = (
+        {
+            path => '/a/b/c.exe',
+            expected => '.exe',
+            message => 'extension',
+        },
+        {
+            path => '/a/b.at/c',
+            expected => '',
+            message => 'no extension',
+        },
+        {
+            path => '/',
+            expected => '',
+            message => 'slash',
+        },
+        {
+            path => '',
+            expected => '',
+            message => 'empty',
+        },
+    );
+
+    for my $c (@CASES) {
+        is Raisin::Middleware::Formatter::_path_has_extension($c->{path}), $c->{expected}, $c->{message};
+    }
+};
+
 done_testing;
