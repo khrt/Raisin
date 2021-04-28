@@ -1,3 +1,5 @@
+0.91
+    * Fix a bug where a first dot in the middle of a path was treated as a separator for the extension;
 0.90
     * Replace `$count` with `$end` in SYNOPOSIS example (#95);
     * Allow swagger to reside behind a reverse proxy (#102);
