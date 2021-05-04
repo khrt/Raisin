@@ -18,7 +18,7 @@ my %module_build_args = (
     "Artur Khabibullin"
   ],
   "dist_name" => "Raisin",
-  "dist_version" => "0.91",
+  "dist_version" => "0.92",
   "license" => "perl",
   "module_name" => "Raisin",
   "recursive_test_files" => 1,

@@ -4,7 +4,7 @@ Raisin - A REST API microframework for Perl.
 
 # VERSION
 
-version 0.91
+version 0.92
 
 # SYNOPSIS
 
