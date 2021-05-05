@@ -13,7 +13,7 @@ use YAML qw(Dump Load);
 sub detectable_by { [qw(application/x-yaml application/yaml text/x-yaml text/yaml yaml)] }
 sub content_type { 'application/x-yaml' }
 sub serialize { encode_utf8( Dump($_[1]) ) }
-sub deserialize { Load( decode_utf8($_[1]) ) }
+sub deserialize { Load( decode_utf8($_[1]->content) ) }
 
 1;
 

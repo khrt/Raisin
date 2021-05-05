@@ -89,7 +89,17 @@ test_psgi $app, sub {
 
         subtest "POST /api/$case->{namespace}" => sub {
             my $res = $cb->(POST "/api/$case->{namespace}", [%NEW]);
-            is $res->code, HTTP_UNSUPPORTED_MEDIA_TYPE;
+
+            if (!is $res->code, 200) {
+                diag $res->content;
+                BAIL_OUT 'FAILED!';
+            }
+
+            ok my $c = $res->content, 'content';
+            ok my $o = Load($c), 'decode';
+            is $o->{success}, $IDS[-1] + 1, 'success';
+
+            push @IDS, $o->{success};
         };
 
         subtest "POST /api/$case->{namespace}" => sub {

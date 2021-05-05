@@ -17,7 +17,7 @@ sub content_type { 'application/json; charset=utf-8' }
 
 sub serialize { $json->allow_blessed->convert_blessed->encode($_[1]) }
 
-sub deserialize { $json->allow_blessed->convert_blessed->decode($_[1]) }
+sub deserialize { $json->allow_blessed->convert_blessed->decode($_[1]->content) }
 
 1;
 

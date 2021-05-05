@@ -50,9 +50,7 @@ test_psgi $app, sub {
     my $cb = shift;
 
     subtest 'application/yaml' => sub {
-        my $res = $cb->(POST '/api', 'Content-Type' => 'application/yaml',
-            Content => encode_utf8(Dump(\%DATA))
-        );
+        my $res = $cb->(POST '/api', 'Content-Type' => 'application/yaml', Content => encode_utf8(Dump(\%DATA)));
 
         is $res->header('Content-Type'), 'application/x-yaml', 'content-type';
         my $pp = Load( decode_utf8($res->content) );
@@ -60,8 +58,7 @@ test_psgi $app, sub {
     };
 
     subtest 'application/json' => sub {
-        my $res = $cb->(POST '/api', 'Content-Type' => 'application/json',
-            Content => encode_json(\%DATA));
+        my $res = $cb->(POST '/api', 'Content-Type' => 'application/json', Content => encode_json(\%DATA));
 
         is $res->header('Content-Type'), 'application/x-yaml', 'content-type';
         my $pp = Load( decode_utf8($res->content) );
@@ -69,8 +66,13 @@ test_psgi $app, sub {
     };
 
     subtest 'x-www-form-urlencoded' => sub {
+        plan skip_all => 'HTTP::Message UTF8 encode/decode';
+
         my $res = $cb->(POST '/api', [%DATA]);
-        is $res->code, HTTP_UNSUPPORTED_MEDIA_TYPE, 'unsupported';
+
+        is $res->header('Content-Type'), 'application/x-yaml', 'content-type';
+        my $pp = Load( decode_utf8($res->content) );
+        is_deeply $pp->{params}, \%DATA, 'parameters match';
     };
 };
 

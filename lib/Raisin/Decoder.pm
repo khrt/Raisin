@@ -13,6 +13,7 @@ sub builtin {
     {
         json => 'Raisin::Encoder::JSON',
         yaml => 'Raisin::Encoder::YAML',
+        form => 'Raisin::Encoder::Form',
     };
 }
 

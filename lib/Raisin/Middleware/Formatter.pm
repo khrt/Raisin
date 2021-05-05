@@ -40,7 +40,7 @@ sub call {
         $env->{'raisinx.decoder'} = $format;
 
         my $d = Plack::Util::load_class($self->decoder->for($format));
-        $env->{'raisinx.body_params'} = $d->deserialize($req->content);
+        $env->{'raisinx.body_params'} = $d->deserialize($req);
     }
 
     my $format = $self->negotiate_format($req);
