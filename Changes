@@ -1,3 +1,6 @@
+0.93
+    * Take `result_class` of `DBIx::Class::ResultSet` instead of asking for columns info on the actual data row (#110);
+
 0.92
     * Reset result set's cursor after getting `columns_info` (#110)
 

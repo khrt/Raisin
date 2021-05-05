@@ -145,9 +145,7 @@ sub _make_exposition {
     my @columns = do {
         if (blessed($data)) {
             if ($data->isa('DBIx::Class::ResultSet')) {
-                my %columns = keys %{ $data->first->columns_info };
-                $data->reset;
-                %columns;
+                keys %{ $data->result_class->columns_info };
             }
             elsif ($data->isa('DBIx::Class::Core')) {
                 keys %{ $data->columns_info };
