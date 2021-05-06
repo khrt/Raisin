@@ -1,0 +1,29 @@
+name: linux
+
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - '*'
+  pull_request:
+
+jobs:
+  perl:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        perl-version:
+          - '5.10'
+          - '5.16'
+          - 'latest'
+    container:
+      image: perl:${{ matrix.perl-version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: perl -V
+        run: perl -V
+      - name: Dependencies
+        run: cpanm --quiet --installdeps --notest .
+      - name: Tests
+        run: prove -lr ./t
