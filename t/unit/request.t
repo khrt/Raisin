@@ -71,7 +71,7 @@ subtest 'precedence' => sub {
         my $req = Raisin::Request->new($case->{env});
 
         $r->match($case->{env}{REQUEST_METHOD}, $case->{env}{PATH_INFO});
-        $req->prepare_params($r->params, $r->named);
+        $req->build_params($r);
 
         is $req->raisin_parameters->{id}, $case->{expected};
     }
@@ -156,7 +156,7 @@ subtest 'validation' => sub {
         my $req = Raisin::Request->new($case->{env});
 
         $r->match($case->{env}{REQUEST_METHOD}, $case->{env}{PATH_INFO});
-        is $req->prepare_params($r->params, $r->named), $case->{expected}{ret};
+        is $req->build_params($r), $case->{expected}{ret};
 
         next unless $case->{expected}{ret};
 

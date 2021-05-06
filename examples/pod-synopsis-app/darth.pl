@@ -119,4 +119,18 @@ resource users => sub {
     };
 };
 
+
+resource 'domain' => sub {
+    params requires('name', type => Str, regex => qr/[^.]+\.[^.]+/); # ^/domain/(?<name>(?:[.]+.[.]+))(?:\.[^.]+?)?$
+    # params requires('name', type => Str, regex => qr/google.com/); # ^/domain/(?<name>(?:google.com))(?:\.[^.]+?)?$
+    # params requires('name', type => Str); # ^/domain/(?<name>[^/]+?)(?:\.[^.]+?)?$
+    route_param 'name' => sub {
+        get sub {
+            my $params = shift;
+            $params;
+        };
+    };
+};
+
+
 run;

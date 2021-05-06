@@ -36,8 +36,7 @@ sub new {
     # Populate params index
     for my $p (@{ $self->params }) {
         if ($p->named && (my $re = $p->regex)) {
-            $re =~ s/[\$^]//g;
-            $self->{check}{ $p->name } = $re;
+            $self->{check}{$p->name} = $re;
         }
     }
 
@@ -99,17 +98,14 @@ sub match {
     return if $path !~ $self->regex;
 
     my %captured = %+;
-
-    foreach my $p (@{ $self->params }) {
-        next unless $p->named;
-        my $copy = $captured{ $p->name };
-        return unless $p->validate(\$copy, 'quite');
-    }
-
     $self->named(\%captured);
 
     1;
 }
+
+# TODO Rename methods:
+#   named -> captured
+#   path -> pattern
 
 1;
 
