@@ -1,5 +1,6 @@
 0.94
     * Add support for form input;
+    * Add support for URIs with a dot in route pattern;
 
 0.93
     * Take `result_class` of `DBIx::Class::ResultSet` instead of asking for columns info on the actual data row (#110);

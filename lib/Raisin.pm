@@ -187,7 +187,7 @@ sub psgi {
         $self->hook('before_validation')->($self);
 
         # Validation and coercion of declared params
-        if (!$req->prepare_params($route->params, $route->named)) {
+        if (!$req->build_params($route)) {
             $res->status(HTTP_BAD_REQUEST);
             $res->body('Invalid Parameters');
             return $res->finalize;
@@ -230,7 +230,7 @@ sub before_finalize {
     my $self = shift;
 
     $self->res->status(HTTP_OK) unless $self->res->status;
-    $self->res->header('X-Framework' => 'Raisin ' . __PACKAGE__->VERSION);
+    $self->res->header('X-Framework' => 'Raisin ' . (__PACKAGE__->VERSION || 'dev'));
 
     if ($self->api_version) {
         $self->res->header('X-API-Version' => $self->api_version);

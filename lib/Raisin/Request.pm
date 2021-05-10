@@ -9,31 +9,26 @@ package Raisin::Request;
 
 use parent 'Plack::Request';
 
-sub prepare_params {
-    my ($self, $declared, $named) = @_;
+sub build_params {
+    my ($self, $endpoint) = @_;
 
-    $self->{'raisin.declared'} = $declared;
-
-    # PRECEDENCE:
-    #   - path
-    #   - query
-    #   - body
     my %params = (
-        %{ $self->env->{'raisinx.body_params'} || {} },
-        %{ $self->query_parameters->as_hashref_mixed || {} },
-        %{ $named || {} },
+        %{ $self->env->{'raisinx.body_params'} || {} },         # 3. Body
+        %{ $self->query_parameters->as_hashref_mixed || {} },   # 2. Query
+        %{ $endpoint->named || {} },                            # 1. Path
     );
 
     $self->{'raisin.parameters'} = \%params;
+    $self->{'raisin.declared'} = $endpoint->params;
 
-    my $retval = 1;
+    my $success = 1;
 
-    foreach my $p (@$declared) {
+    foreach my $p (@{ $endpoint->params }) {
         my $name = $p->name;
         my $value = $params{$name};
 
         if (not $p->validate(\$value)) {
-            $retval = 0;
+            $success = 0;
             $p->required ? return : next;
         }
 
@@ -43,7 +38,7 @@ sub prepare_params {
         $self->{'raisin.declared_params'}{$name} = $value;
     }
 
-    $retval;
+    $success;
 }
 
 sub declared_params { shift->{'raisin.declared_params'} }
@@ -65,7 +60,7 @@ Extends L<Plack::Request>.
 
 =head3 declared_params
 
-=head3 prepare_params
+=head3 build_params
 
 =head3 raisin_parameters
 
