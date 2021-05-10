@@ -32,7 +32,7 @@ sub call {
         my %media_types_map_flat_hash = $self->decoder->media_types_map_flat_hash;
 
         my ($ctype) = split /;/, $req->content_type, 2;
-        my $format = $media_types_map_flat_hash{ $ctype};
+        my $format = $media_types_map_flat_hash{$ctype};
         unless ($format) {
             Raisin::log(info => "unsupported media type: ${ \$req->content_type }");
             return Plack::Response->new(HTTP_UNSUPPORTED_MEDIA_TYPE)->finalize;
@@ -82,14 +82,13 @@ sub negotiate_format {
     my @allowed_formats = $self->allowed_formats_for_requested_route($req);
 
     # PRECEDENCE:
-    #   - extension
+    #   - known extension
     #   - headers
     #   - default
-
     my @wanted_formats = do {
-        my $ext = _path_has_extension($req->path);
-        if ($ext) {
-            $self->format_from_extension($ext);
+        my $ext_format = $self->format_from_extension($req->path);
+        if ($ext_format) {
+            $ext_format;
         }
         elsif (_accept_header_set($req->header('Accept'))) {
             # In case of wildcard matches, we default to first allowed format
@@ -102,21 +101,24 @@ sub negotiate_format {
 
     my @matching_formats = grep {
         my $format = $_;
-        grep { $format eq $_ } @allowed_formats
+        grep { $format && $format eq $_ } @allowed_formats
     } @wanted_formats;
 
     shift @matching_formats;
 }
 
 sub format_from_extension {
-    my ($self, $ext) = @_;
+    my ($self, $path) = @_;
+    return unless $path;
+
+    my $ext = _path_has_extension($path);
     return unless $ext;
 
     # Trim leading dot in the extension.
     $ext = substr($ext, 1);
 
     my %media_types_map_flat_hash = $self->encoder->media_types_map_flat_hash;
-    my $format = $media_types_map_flat_hash{ $ext };
+    my $format = $media_types_map_flat_hash{$ext};
     return unless $format;
 
     $format;

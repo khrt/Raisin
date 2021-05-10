@@ -963,6 +963,20 @@ Response format can be determined by C<Accept header> or C<route extension>.
 Serialization takes place automatically. So, you do not have to call
 C<encode_json> in each C<JSON> API implementation.
 
+The response format (and thus the automatic serialization) is determined in the following order:
+
+=over
+
+=item * Use the file extension, if specified. If the file is .json, choose the JSON format.
+
+=item * Attempt to find an acceptable format from the Accept header.
+
+=item * Use the default format, if specified by the C<default_format> option.
+
+=item * Default to C<YAML>.
+
+=back
+
 Your API can declare to support only one serializator by using L<Raisin/api_format>.
 
 Custom formatters for existing and additional types can be defined with a
