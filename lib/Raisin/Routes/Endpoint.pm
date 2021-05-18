@@ -36,7 +36,6 @@ sub new {
     # Populate params index
     for my $p (@{ $self->params }) {
         if ($p->named && (my $re = $p->regex)) {
-            $re =~ s/[\$^]//g;
             $self->{check}{ $p->name } = $re;
         }
     }
