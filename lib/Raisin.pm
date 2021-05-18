@@ -230,7 +230,7 @@ sub before_finalize {
     my $self = shift;
 
     $self->res->status(HTTP_OK) unless $self->res->status;
-    $self->res->header('X-Framework' => 'Raisin ' . __PACKAGE__->VERSION);
+    $self->res->header('X-Framework' => 'Raisin ' . (__PACKAGE__->VERSION || 'dev'));
 
     if ($self->api_version) {
         $self->res->header('X-API-Version' => $self->api_version);
