@@ -11,6 +11,7 @@ use parent 'Plack::Middleware';
 
 use File::Basename qw(fileparse);
 use HTTP::Status qw(:constants);
+use Scalar::Util qw{ blessed reftype };
 use Plack::Request;
 use Plack::Response;
 use Plack::Util;
@@ -52,12 +53,12 @@ sub call {
     my $res = $self->app->($env);
     # Post-process
     Plack::Util::response_cb($res, sub {
-        # TODO: delayed responses
 
         my $res = shift;
         my $r = Plack::Response->new(@$res);
 
-        if (ref $r->body) {
+        # If the body is an array reference, finalize it now.
+        if (_is_an_arrayref($r->body)) {
             my $s = Plack::Util::load_class($self->encoder->for($format));
 
             $r->content_type($s->content_type) unless $r->content_type;
@@ -67,6 +68,17 @@ sub call {
         @$res = @{ $r->finalize };
         return;
     });
+}
+
+# Test whether the argument is a logical arrayref
+sub _is_an_arrayref {
+    my ($var) = @_;
+
+    return
+        ( reftype $var // '' ) eq 'ARRAY'
+        ||
+        ( blessed $var && defined $var->overload::Method('@{}') )
+        ;
 }
 
 sub _accept_header_set { length(shift || '') }
