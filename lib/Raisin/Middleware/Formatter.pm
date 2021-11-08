@@ -11,7 +11,7 @@ use parent 'Plack::Middleware';
 
 use File::Basename qw(fileparse);
 use HTTP::Status qw(:constants);
-use Scalar::Util qw{ blessed reftype };
+use Scalar::Util qw{ blessed reftype openhandle };
 use Plack::Request;
 use Plack::Response;
 use Plack::Util;
@@ -57,8 +57,10 @@ sub call {
         my $res = shift;
         my $r = Plack::Response->new(@$res);
 
-        # If the body is an array reference, finalize it now.
-        if (_is_an_arrayref($r->body)) {
+        # If the body is a data structure of some sort, finalize it now,
+        # BUT NOT if it's a file handle (broadly construed). In that case
+        # treat it as a deferred response.
+        if (ref $r->body && !_is_a_handle($r->body)) {
             my $s = Plack::Util::load_class($self->encoder->for($format));
 
             $r->content_type($s->content_type) unless $r->content_type;
@@ -70,14 +72,17 @@ sub call {
     });
 }
 
-# Test whether the argument is a logical arrayref
-sub _is_an_arrayref {
+# Test whether the argument is a "handle," meaning that it's either
+# a built-in handle or an IO::Handle-like object.  It's a file handle
+# if fileno or Scalar::Util::openhandle think it is, or if it supports
+# a "getline" and a "close" method.
+sub _is_a_handle {
     my ($var) = @_;
 
     return
-        ( reftype $var // '' ) eq 'ARRAY'
+        ( ( reftype $var // '' ) eq 'GLOB' && ( defined fileno($var) || defined openhandle($var) ) )
         ||
-        ( blessed $var && defined $var->overload::Method('@{}') )
+        ( blessed $var && $var->can('getline') && $var->can('close') )
         ;
 }
 
