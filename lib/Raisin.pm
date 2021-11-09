@@ -440,9 +440,14 @@ It was inspired by L<Grape|https://github.com/intridea/grape>.
 
 =head2 API DESCRIPTION
 
+=head3 app
+
+Returns the C<Raisin> app. Seldom needed, because most C<Raisin::API> methods
+invoke the app directly.
+
 =head3 resource
 
-Adds a route to an application.
+Adds a route to an application. C<namespace> is a synonym for C<resource>.
 
     resource user => sub { ... };
 
@@ -465,7 +470,18 @@ Raisin allows you to nest C<route_param>:
         };
     };
 
-=head3 del, get, patch, post, put
+=head3 produces
+
+Specifies the content types produced by C<resource>.
+
+    produces ['text', 'json'];
+
+The argument is an array reference of strings corresponding to the
+keys used by C<register_encoder>. This array is compared with the
+Accept header of the request to decide what content-type will
+actually be returned from a given invocation of C<resource>.
+
+=head3 del, get, patch, post, put, head, options
 
 Shortcuts to add a C<route> restricted to the corresponding HTTP method.
 
@@ -636,11 +652,12 @@ Returns the C<PSGI> application.
 
 Provides quick access to the L<Raisin::Request> object for the current route.
 
-Use C<req> to get access to request headers, params, etc.
+Use C<req> to get access to request headers, params, env, etc.
 
     use DDP;
     p req->headers;
     p req->params;
+    p req->env;
 
     say req->header('X-Header');
 
