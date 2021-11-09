@@ -57,6 +57,12 @@ sub call {
         my $res = shift;
         my $r = Plack::Response->new(@$res);
 
+        # The application may decide on the fly to return a different
+        # content type than we negotiated above. In that case it becomes
+        # responsible for updating $env appropriately, and also
+        # specifying the encoder to use.
+        my $format = $env->{'raisinx.encoder'};
+
         # If the body is a data structure of some sort, finalize it now,
         # BUT NOT if it's a file handle (broadly construed). In that case
         # treat it as a deferred response.
