@@ -197,6 +197,19 @@ Parses and formats the data it gets from requests and responses if it's needed.
 
 =head1 METHODS
 
+=head2 call
+
+Invokes an application route. Before doing so, it decodes the request content,
+if any, and negotiates an output format based on the C<Accept> header of the
+request and the C<produces> list for the target route. It post-processes
+the response from the endpoint using the appropriate C<Decoder>, ensuring
+that it will be a valid PSGI response.
+
+C<call> supports deferred responses by passing the body through unmodified if
+it's a file handle -- i.e., the result of calling C<open()>, an C<IO::Handle>
+object, or any blessed reference that supports both C<getline()> and
+C<close()> methods.
+
 =head2 negotiate_format
 
 Negotiates a format from path extension, C<Accept> header or using default format.
@@ -214,7 +227,16 @@ A precedence is following:
 In other words if an extension exists the framework doesn't look for C<Accept>
 header. If the extension is not supported the framework throws an error,
 the same is for C<Accept> header. Only if both extension and C<Accept> header
-are not specified it fallback to default format.
+are not specified does it fallback to default format.
+
+Having picked a format, the correct encoder is set in
+C<< env->{'rasinx.encoder'} >>. Occasionally the application will want to
+change the format, for example to return a JSON error response from a
+route that normally returns plain text. To do that, change
+C<< env->{'rasinx.encoder'} >> to the correct encoder, and make sure that
+the response C<Content-Type> header matches it. It's the application's
+responsibility in that case to know what it's doing, and not return
+content that the client can't accept.
 
 =head2 format_from_extension
 
