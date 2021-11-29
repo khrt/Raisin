@@ -7,6 +7,7 @@ use HTTP::Request::Common;
 use Plack::Builder;
 use Plack::Request;
 use Plack::Test;
+use Plack::Util;
 use Test::More;
 
 use Raisin::Encoder;
@@ -316,6 +317,80 @@ subtest '_path_has_extension' => sub {
 
     for my $c (@CASES) {
         is Raisin::Middleware::Formatter::_path_has_extension($c->{path}), $c->{expected}, $c->{message};
+    }
+};
+
+subtest 'override_format' => sub {
+    my @CASES = (
+        {
+            req => GET('/', Content_Type => 'application/json; charset=utf-8', Accept => 'application/json', Content => '{"json":true}'),
+            params => { default_format => 'json', },
+            expected => qr'text/plain',
+            encoder => 'text',
+            message => 'accept: json, default_format: json, override_format: text',
+        },
+        {
+            req => GET('/', Content_Type => 'application/json; charset=utf-8', Accept => 'application/yaml', Content => '{"json":true}'),
+            params => { default_format => 'yaml', },
+            expected => qr'text/plain',
+            encoder => 'text',
+            message => 'accept: yaml, default_format: yaml, override_format: text',
+        },
+        {
+            req => GET('/', Content_Type => 'application/json; charset=utf-8', Accept => 'application/yaml', Content => '{"json":true}'),
+            params => { default_format => 'yaml', },
+            expected => qr'application/json',
+            encoder => 'json',
+            message => 'accept: yaml, default_format: yaml, override_format: json',
+        },
+        {
+            req => GET('/', Content_Type => 'application/json; charset=utf-8', Accept => 'text/plain', Content => '{"json":true}'),
+            params => { default_format => 'text', },
+            expected => qr'application/json',
+            encoder => 'json',
+            message => 'accept: text, default_format: text, override_format: json',
+        },
+        {
+            req => GET('/', Content_Type => 'application/json; charset=utf-8', Accept => 'application/json', Content => '{"json":true}'),
+            params => { default_format => 'json', },
+            expected => qr'application/x-yaml',
+            encoder => 'yaml',
+            message => 'accept: json, default_format: json, override_format: yaml',
+        },
+        {
+            req => GET('/', Content_Type => 'application/json; charset=utf-8', Accept => 'text/plain', Content => '{"json":true}'),
+            params => { default_format => 'text', },
+            expected => qr'application/x-yaml',
+            encoder => 'yaml',
+            message => 'accept: text, default_format: text, override_format: yaml',
+        },
+    );
+
+    for my $c (@CASES) {
+        my $app = builder {
+            enable '+Raisin::Middleware::Formatter',
+                encoder => Raisin::Encoder->new,
+                decoder => Raisin::Decoder->new,
+                %{ $c->{params} || {} };
+
+            sub {
+                my ($env) = @_;
+                return Plack::Util::response_cb(
+                    [200, [], []],
+                    sub {
+                        $env->{'raisinx.encoder'} = $c->{encoder};
+                        return @_;
+                    }
+                );
+            };
+        };
+
+        test_psgi $app, sub {
+            my $cb = shift;
+
+            my $res = $cb->($c->{req});
+            like $res->header('content-type'), $c->{expected}, $c->{message};
+        };
     }
 };
 
