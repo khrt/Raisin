@@ -4,7 +4,7 @@ Raisin - A REST API microframework for Perl.
 
 # VERSION
 
-version 0.93
+version 0.94
 
 # SYNOPSIS
 
@@ -135,9 +135,14 @@ It was inspired by [Grape](https://github.com/intridea/grape).
 
 ## API DESCRIPTION
 
+### app
+
+Returns the `Raisin` app. Seldom needed, because most `Raisin::API` methods
+invoke the app directly.
+
 ### resource
 
-Adds a route to an application.
+Adds a route to an application. `namespace` is a synonym for `resource`.
 
     resource user => sub { ... };
 
@@ -160,7 +165,18 @@ Raisin allows you to nest `route_param`:
         };
     };
 
-### del, get, patch, post, put
+### produces
+
+Specifies the content types produced by `resource`.
+
+    produces ['text', 'json'];
+
+The argument is an array reference of strings corresponding to the
+keys used by `register_encoder`. This array is compared with the
+Accept header of the request to decide what content-type will
+actually be returned from a given invocation of `resource`.
+
+### del, get, patch, post, put, head, options
 
 Shortcuts to add a `route` restricted to the corresponding HTTP method.
 
@@ -330,11 +346,12 @@ Returns the `PSGI` application.
 
 Provides quick access to the [Raisin::Request](https://metacpan.org/pod/Raisin%3A%3ARequest) object for the current route.
 
-Use `req` to get access to request headers, params, etc.
+Use `req` to get access to request headers, params, env, etc.
 
     use DDP;
     p req->headers;
     p req->params;
+    p req->env;
 
     say req->header('X-Header');
 
@@ -634,6 +651,13 @@ Response format can be determined by `Accept header` or `route extension`.
 
 Serialization takes place automatically. So, you do not have to call
 `encode_json` in each `JSON` API implementation.
+
+The response format (and thus the automatic serialization) is determined in the following order:
+
+- Use the file extension, if specified. If the file is .json, choose the JSON format.
+- Attempt to find an acceptable format from the Accept header.
+- Use the default format, if specified by the `default_format` option.
+- Default to `YAML`.
 
 Your API can declare to support only one serializator by using ["api\_format" in Raisin](https://metacpan.org/pod/Raisin#api_format).
 
