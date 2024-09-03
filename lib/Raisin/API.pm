@@ -15,6 +15,7 @@ use Hash::Merge qw(merge);
 use Raisin;
 use Raisin::Entity;
 # use Raisin::Util qw(merge);
+use Data::Dumper qw(Dumper);
 
 my @APP_CONF_METHODS = qw(
     app
@@ -142,7 +143,20 @@ sub patch   { _add_route('patch', @_) }
 sub post    { _add_route('post', @_) }
 sub put     { _add_route('put', @_) }
 
-sub params { $SETTINGS{params} = \@_ }
+sub _check_params {
+    my $p = shift;
+    return if scalar(@$p) == 0;
+    if ( scalar(@$p) % 2 ) {
+        Carp::confess "Odd-sized hash supplied to params(). Does the block have a misplaced semicolon or closing bracket?";
+    }
+    my %h = @$p;
+    for my $k ( keys %h ) {
+        next if $k eq 'requires' || $k eq 'optional';
+        Carp::confess "Incorrect array supplied to params(). Expected requires/optional as the key for each param, found key: $k\n"
+            . "params dump: ", Dumper($p);
+    }
+}
+sub params { _check_params(\@_); $SETTINGS{params} = \@_ }
 
 sub requires { (requires => { name => @_ }) }
 sub optional { (optional => { name => @_ }) }
