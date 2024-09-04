@@ -158,8 +158,19 @@ sub _check_params {
 }
 sub params { _check_params(\@_); $SETTINGS{params} = \@_ }
 
-sub requires { (requires => { name => @_ }) }
-sub optional { (optional => { name => @_ }) }
+sub requires {
+    if ( scalar(@_) % 2 != 1 ) {
+        Carp::confess "Even-sized list supplied to requires(). Does the block have a misplaced semicolon or closing bracket? "
+        . "params dump: ", Dumper(\@_);
+    }
+    (requires => { name => @_ }) }
+
+sub optional {
+    if ( scalar(@_) % 2 != 1 ) {
+        Carp::confess "Even-sized list supplied to optional(). Does the block have a misplaced semicolon or closing bracket? "
+        . "params dump: ", Dumper(\@_);
+    }
+    (optional => { name => @_ }) }
 
 sub group(&) { (encloses => [shift->()]) }
 
